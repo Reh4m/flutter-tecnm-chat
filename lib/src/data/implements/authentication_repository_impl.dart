@@ -6,7 +6,9 @@ import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/password_reset_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/sign_in_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/sign_up_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/sign_in_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/sign_up_entity.dart';
@@ -14,10 +16,12 @@ import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_rep
 
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
   final FirebaseAuthenticationService firebaseAuthentication;
+  final FirebaseUserService firebaseUserService;
   final NetworkInfo networkInfo;
 
   AuthenticationRepositoryImpl({
     required this.firebaseAuthentication,
+    required this.firebaseUserService,
     required this.networkInfo,
   });
 
@@ -60,15 +64,29 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      final signUpModel = SignUpModel(
-        name: signUpData.name,
-        email: signUpData.email,
-        password: signUpData.password,
-        confirmPassword: signUpData.confirmPassword,
+      final userCredential = await firebaseAuthentication
+          .signUpWithEmailAndPassword(
+            SignUpModel(
+              name: signUpData.name,
+              email: signUpData.email,
+              password: signUpData.password,
+              confirmPassword: signUpData.confirmPassword,
+            ),
+          );
+
+      final currentUser = userCredential.user;
+
+      await firebaseUserService.createUser(
+        UserModel(
+          id: currentUser!.uid,
+          name: signUpData.name,
+          email: signUpData.email,
+          createdAt: DateTime.now(),
+          isVerified: currentUser.emailVerified,
+        ),
       );
 
-      final userCredential = await firebaseAuthentication
-          .signUpWithEmailAndPassword(signUpModel);
+      await firebaseAuthentication.sendEmailVerification();
 
       return Right(userCredential);
     } on WeakPasswordException {
