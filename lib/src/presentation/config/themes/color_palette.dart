@@ -14,8 +14,12 @@ class ColorPalette {
   static const Color greyDarken4 = Color(0xFF212121);
 
   // Status colors
-  static const Color success = Color(0xFF3DD67B);
-  static const Color info = Color(0xFF64C7EB);
-  static const Color warning = Color(0xFFFFCB77);
+  static const Color success = Color(0xFF3dd67b);
+  static const Color successLight = Color(0xFFf5fff9);
+  static const Color info = Color(0xFF64c7eb);
+  static const Color infoLight = Color(0xFFf6fbfe);
+  static const Color warning = Color(0xFFffd400);
+  static const Color warningLight = Color(0xFFfffae5);
   static const Color error = Color(0xFFEF5350);
+  static const Color errorLight = Color(0xFFFFCDD2);
 }
