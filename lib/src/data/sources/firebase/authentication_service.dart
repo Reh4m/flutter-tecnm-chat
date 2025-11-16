@@ -81,6 +81,23 @@ class FirebaseAuthenticationService {
     return Future.value(unit);
   }
 
+  Future<bool> isEmailVerified() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        throw UserNotFoundException();
+      }
+
+      await user.reload();
+
+      return user.emailVerified;
+    } catch (e) {
+      if (e is UserNotFoundException) rethrow;
+      throw ServerException();
+    }
+  }
+
   Future<Unit> resetPassword(PasswordResetModel passwordResetData) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(
