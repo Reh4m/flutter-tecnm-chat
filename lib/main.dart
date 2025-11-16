@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/firebase_options.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/presentation/providers/authentication_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/onboarding_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/theme_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +22,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider(prefs)),
+        ChangeNotifierProvider(create: (_) => OnboardingProvider(prefs)),
         ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
