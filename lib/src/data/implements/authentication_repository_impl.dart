@@ -83,13 +83,13 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> verifyEmail() async {
+  Future<Either<Failure, Unit>> sendEmailVerification() async {
     if (!await networkInfo.isConnected) {
       return Future.value(Left(NetworkFailure()));
     }
 
     try {
-      await firebaseAuthentication.verifyEmail();
+      await firebaseAuthentication.sendEmailVerification();
 
       return const Right(unit);
     } on TooManyRequestsException {

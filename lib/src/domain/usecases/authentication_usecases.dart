@@ -26,13 +26,13 @@ class SignUpUseCase {
   }
 }
 
-class VerifyEmailUseCase {
+class SendEmailVerificationUseCase {
   final AuthenticationRepository repository;
 
-  VerifyEmailUseCase(this.repository);
+  SendEmailVerificationUseCase(this.repository);
 
   Future<Either<Failure, Unit>> call() async {
-    return await repository.verifyEmail();
+    return await repository.sendEmailVerification();
   }
 }
 
