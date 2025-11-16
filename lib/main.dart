@@ -4,6 +4,7 @@ import 'package:flutter_whatsapp_clon/firebase_options.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/presentation/providers/authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/theme_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,6 +22,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider(prefs)),
         ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: const WhatsAppClone(),
     ),
