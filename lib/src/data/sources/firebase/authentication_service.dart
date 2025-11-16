@@ -44,7 +44,7 @@ class FirebaseAuthenticationService {
         password: signUpData.password,
       );
 
-      result.user?.sendEmailVerification();
+      await result.user?.updateDisplayName(signUpData.name);
 
       return result;
     } on FirebaseAuthException catch (e) {
