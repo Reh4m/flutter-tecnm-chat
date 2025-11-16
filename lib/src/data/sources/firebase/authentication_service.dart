@@ -59,26 +59,26 @@ class FirebaseAuthenticationService {
   }
 
   Future<Unit> sendEmailVerification() async {
-    final user = FirebaseAuth.instance.currentUser;
+    try {
+      final user = FirebaseAuth.instance.currentUser;
 
-    if (user != null && !user.emailVerified) {
-      try {
-        await user.reload();
-        await user.sendEmailVerification();
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'too-many-requests') {
-          throw TooManyRequestsException();
-        } else {
-          throw ServerException();
-        }
-      } catch (e) {
+      if (user == null) {
+        throw UserNotFoundException();
+      }
+
+      await user.reload();
+      await user.sendEmailVerification();
+
+      return Future.value(unit);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'too-many-requests') {
+        throw TooManyRequestsException();
+      } else {
         throw ServerException();
       }
-    } else {
-      throw UserNotFoundException();
+    } catch (e) {
+      throw ServerException();
     }
-
-    return Future.value(unit);
   }
 
   Future<bool> isEmailVerified() async {
