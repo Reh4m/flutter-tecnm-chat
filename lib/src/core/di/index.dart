@@ -52,16 +52,18 @@ Future<void> init() async {
 
   /* Repositories */
   // Authentication Repository
-  sl.registerLazySingleton<AuthenticationRepository>(
-    () => AuthenticationRepositoryImpl(
-      firebaseAuthentication: sl<FirebaseAuthenticationService>(),
+  // User Repository
+  sl.registerLazySingleton<UserRepository>(
+    () => UserRepositoryImpl(
+      firebaseUserService: sl<FirebaseUserService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
 
-  // User Repository
-  sl.registerLazySingleton<UserRepository>(
-    () => UserRepositoryImpl(
+  // Authentication Repository
+  sl.registerLazySingleton<AuthenticationRepository>(
+    () => AuthenticationRepositoryImpl(
+      firebaseAuthentication: sl<FirebaseAuthenticationService>(),
       firebaseUserService: sl<FirebaseUserService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
