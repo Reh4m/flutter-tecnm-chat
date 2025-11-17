@@ -56,11 +56,11 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     SignUpEntity signUpData,
   ) async {
     if (!await networkInfo.isConnected) {
-      return Future.value(Left(NetworkFailure()));
+      return Left(NetworkFailure());
     }
 
     if (signUpData.password != signUpData.confirmPassword) {
-      return Future.value(Left(PasswordMismatchFailure()));
+      return Left(PasswordMismatchFailure());
     }
 
     try {
@@ -103,7 +103,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   @override
   Future<Either<Failure, Unit>> sendEmailVerification() async {
     if (!await networkInfo.isConnected) {
-      return Future.value(Left(NetworkFailure()));
+      return Left(NetworkFailure());
     }
 
     try {
@@ -122,7 +122,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   @override
   Future<Either<Failure, Unit>> waitForEmailVerification() async {
     if (!await networkInfo.isConnected) {
-      return Future.value(Left(NetworkFailure()));
+      return Left(NetworkFailure());
     }
 
     try {
@@ -147,14 +147,14 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   @override
   Future<Either<Failure, bool>> checkEmailVerification() async {
     if (!await networkInfo.isConnected) {
-      return Future.value(Left(NetworkFailure()));
+      return Left(NetworkFailure());
     }
 
     try {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
-        return Future.value(Left(UserNotFoundFailure()));
+        return Left(UserNotFoundFailure());
       }
 
       await user.reload();
@@ -165,9 +165,9 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         await firebaseUserService.markUserAsVerified(user.uid);
       }
 
-      return Future.value(Right(isVerified));
+      return Right(isVerified);
     } catch (e) {
-      return Future.value(Left(ServerFailure()));
+      return Left(ServerFailure());
     }
   }
 
@@ -176,7 +176,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     PasswordResetEntity passwordResetData,
   ) async {
     if (!await networkInfo.isConnected) {
-      return Future.value(Left(NetworkFailure()));
+      return Left(NetworkFailure());
     }
 
     try {
@@ -184,15 +184,15 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         email: passwordResetData.email,
       );
       await firebaseAuthentication.resetPassword(passwordResetModel);
-      return Future.value(const Right(unit));
+      return const Right(unit);
     } on UserNotFoundException {
-      return Future.value(Left(UserNotFoundFailure()));
+      return Left(UserNotFoundFailure());
     } on TooManyRequestsException {
-      return Future.value(Left(TooManyRequestsFailure()));
+      return Left(TooManyRequestsFailure());
     } on ServerException {
-      return Future.value(Left(ServerFailure()));
+      return Left(ServerFailure());
     } catch (e) {
-      return Future.value(Left(ServerFailure()));
+      return Left(ServerFailure());
     }
   }
 

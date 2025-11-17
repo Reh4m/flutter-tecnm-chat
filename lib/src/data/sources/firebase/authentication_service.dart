@@ -62,7 +62,7 @@ class FirebaseAuthenticationService {
       await user.reload();
       await user.sendEmailVerification();
 
-      return Future.value(unit);
+      return unit;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'too-many-requests') {
         throw TooManyRequestsException();
@@ -96,6 +96,8 @@ class FirebaseAuthenticationService {
       await FirebaseAuth.instance.sendPasswordResetEmail(
         email: passwordResetData.email,
       );
+
+      return unit;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         throw UserNotFoundException();
@@ -107,7 +109,5 @@ class FirebaseAuthenticationService {
     } catch (e) {
       throw ServerException();
     }
-
-    return Future.value(unit);
   }
 }
