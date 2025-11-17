@@ -119,6 +119,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
   }
 
+  @override
   Future<Either<Failure, Unit>> waitForEmailVerification() async {
     if (!await networkInfo.isConnected) {
       return Future.value(Left(NetworkFailure()));

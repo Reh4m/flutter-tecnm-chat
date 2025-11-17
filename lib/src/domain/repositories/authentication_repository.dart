@@ -13,6 +13,7 @@ abstract class AuthenticationRepository {
     SignUpEntity signUpData,
   );
   Future<Either<Failure, Unit>> sendEmailVerification();
+  Future<Either<Failure, Unit>> waitForEmailVerification();
   Future<Either<Failure, bool>> checkEmailVerification();
   Future<Either<Failure, Unit>> resetPassword(
     PasswordResetEntity passwordResetData,
