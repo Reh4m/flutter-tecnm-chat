@@ -4,7 +4,7 @@ import 'package:flutter_whatsapp_clon/src/presentation/screens/auth/forgot_passw
 import 'package:flutter_whatsapp_clon/src/presentation/screens/auth/sign_in_screen.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/auth/sign_up_screen.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/onboarding/index.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/screens/user/profile/index.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/home_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
@@ -32,10 +32,7 @@ class AppRouter {
         path: '/email-verification',
         builder: (context, state) => const EmailVerificationScreen(),
       ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const CurrentUserProfileScreen(),
-      ),
+      GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
     ],
   );
 }
