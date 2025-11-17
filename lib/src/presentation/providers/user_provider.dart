@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/user_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/user_auth_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
 
 enum UserState { initial, loading, success, error }
@@ -19,10 +17,6 @@ class UserProvider extends ChangeNotifier {
   final UpdateUserUseCase _updateUserUseCase = sl<UpdateUserUseCase>();
   final UpdateNotificationSettingsUseCase _updateNotificationSettingsUseCase =
       sl<UpdateNotificationSettingsUseCase>();
-  final CreateOrUpdateUserFromAuthUseCase _createOrUpdateUserFromAuthUseCase =
-      sl<CreateOrUpdateUserFromAuthUseCase>();
-  final SyncUserWithAuthUseCase _syncUserWithAuthUseCase =
-      sl<SyncUserWithAuthUseCase>();
 
   UserState _currentUserState = UserState.initial;
   UserEntity? _currentUser;
@@ -70,38 +64,6 @@ class UserProvider extends ChangeNotifier {
   void stopCurrentUserListener() {
     _currentUserSubscription?.cancel();
     _currentUserSubscription = null;
-  }
-
-  Future<void> syncWithAuth() async {
-    _setCurrentUserState(UserState.loading);
-
-    final result = await _syncUserWithAuthUseCase();
-
-    result.fold(
-      (failure) => _setCurrentUserError(_mapFailureToMessage(failure)),
-      (user) {
-        _currentUser = user;
-        _setCurrentUserState(UserState.success);
-      },
-    );
-  }
-
-  Future<bool> createOrUpdateFromAuth(User firebaseUser) async {
-    _setCurrentUserState(UserState.loading);
-
-    final result = await _createOrUpdateUserFromAuthUseCase(firebaseUser);
-
-    return result.fold(
-      (failure) {
-        _setCurrentUserError(_mapFailureToMessage(failure));
-        return false;
-      },
-      (user) {
-        _currentUser = user;
-        _setCurrentUserState(UserState.success);
-        return true;
-      },
-    );
   }
 
   Future<void> loadCurrentUser() async {

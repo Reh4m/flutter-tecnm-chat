@@ -238,24 +238,4 @@ class UserRepositoryImpl implements UserRepository {
       return Left(ServerFailure());
     }
   }
-
-  @override
-  Future<Either<Failure, UserEntity>> createOrUpdateUserFromAuth(
-    dynamic firebaseUser,
-  ) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      final user = await firebaseUserService.createOrUpdateUserFromAuth(
-        firebaseUser,
-      );
-      return Right(user.toEntity());
-    } on ServerException {
-      return Left(ServerFailure());
-    } catch (e) {
-      return Left(ServerFailure());
-    }
-  }
 }

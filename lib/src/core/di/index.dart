@@ -9,7 +9,6 @@ import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dar
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/user_auth_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -126,13 +125,5 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<CheckUserExistsUseCase>(
     () => CheckUserExistsUseCase(sl<UserRepository>()),
-  );
-
-  // User-Auth Integration Use Cases
-  sl.registerLazySingleton<CreateOrUpdateUserFromAuthUseCase>(
-    () => CreateOrUpdateUserFromAuthUseCase(sl<UserRepository>()),
-  );
-  sl.registerLazySingleton<SyncUserWithAuthUseCase>(
-    () => SyncUserWithAuthUseCase(sl<UserRepository>()),
   );
 }
