@@ -11,7 +11,7 @@ class AppTheme {
     primaryColorDark: LightTheme.primaryColorDark,
     primaryColorLight: LightTheme.primaryColorLight,
     scaffoldBackgroundColor: LightTheme.backgroundColor,
-    cardColor: LightTheme.backgroundColor,
+    cardColor: LightTheme.cardBackgroundColor,
     disabledColor: ColorPalette.greyLighten3,
     colorScheme: const ColorScheme.light(
       primary: LightTheme.primaryColor,
@@ -39,7 +39,7 @@ class AppTheme {
       onTertiaryFixed: LightTheme.onTertiaryColor,
       tertiaryFixedDim: LightTheme.tertiaryColorDim,
       onTertiaryFixedVariant: LightTheme.onTertiaryColor,
-      surface: LightTheme.backgroundColor,
+      surface: LightTheme.cardBackgroundColor,
       onSurface: ColorPalette.greyDarken3,
       outline: ColorPalette.greyLighten2,
       outlineVariant: ColorPalette.greyLighten2,
@@ -48,7 +48,7 @@ class AppTheme {
       onError: LightTheme.onPrimaryColor,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: LightTheme.backgroundColor,
+      backgroundColor: LightTheme.cardBackgroundColor,
       foregroundColor: ColorPalette.greyDarken3,
       centerTitle: true,
     ),
@@ -69,7 +69,7 @@ class AppTheme {
     primaryColorDark: DarkTheme.primaryColorDark,
     primaryColorLight: DarkTheme.primaryColorLight,
     scaffoldBackgroundColor: DarkTheme.backgroundColor,
-    cardColor: DarkTheme.backgroundColor,
+    cardColor: DarkTheme.cardBackgroundColor,
     disabledColor: ColorPalette.greyDarken3,
     colorScheme: const ColorScheme.dark(
       primary: DarkTheme.primaryColor,
@@ -81,7 +81,7 @@ class AppTheme {
       tertiary: DarkTheme.tertiaryColor,
       tertiaryContainer: DarkTheme.tertiaryColorLight,
       onTertiary: DarkTheme.onTertiaryColor,
-      surface: DarkTheme.backgroundColor,
+      surface: DarkTheme.cardBackgroundColor,
       onSurface: ColorPalette.greyLighten4,
       outline: ColorPalette.greyDarken3,
       outlineVariant: ColorPalette.greyDarken2,
@@ -90,7 +90,7 @@ class AppTheme {
       onError: DarkTheme.onPrimaryColor,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: DarkTheme.backgroundColor,
+      backgroundColor: DarkTheme.cardBackgroundColor,
       foregroundColor: ColorPalette.greyLighten4,
       centerTitle: true,
     ),
