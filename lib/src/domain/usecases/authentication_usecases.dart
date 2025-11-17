@@ -41,7 +41,7 @@ class CheckEmailVerificationUseCase {
 
   CheckEmailVerificationUseCase(this.repository);
 
-  Future<Either<Failure, Unit>> call() async {
+  Future<Either<Failure, bool>> call() async {
     return await repository.checkEmailVerification();
   }
 }

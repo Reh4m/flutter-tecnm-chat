@@ -144,15 +144,21 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> checkEmailVerification() {
+  Future<Either<Failure, bool>> checkEmailVerification() async {
+    if (!await networkInfo.isConnected) {
+      return Future.value(Left(NetworkFailure()));
+    }
+
     try {
       final user = FirebaseAuth.instance.currentUser;
 
-      if (user != null && user.emailVerified) {
-        return Future.value(const Right(unit));
-      } else {
-        return Future.value(Left(EmailVerificationFailure()));
+      if (user == null) {
+        return Future.value(Left(UserNotFoundFailure()));
       }
+
+      await user.reload();
+
+      return Future.value(Right(user.emailVerified));
     } catch (e) {
       return Future.value(Left(ServerFailure()));
     }
