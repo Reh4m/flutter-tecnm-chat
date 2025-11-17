@@ -19,7 +19,10 @@ class EmailVerificationScreen extends StatefulWidget {
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
-  final VerifyEmailUseCase _verifyEmailUseCase = sl<VerifyEmailUseCase>();
+  final SendEmailVerificationUseCase _sendEmailVerification =
+      sl<SendEmailVerificationUseCase>();
+  final CheckEmailVerificationUseCase _checkEmailVerificationUseCase =
+      sl<CheckEmailVerificationUseCase>();
 
   Timer? _verificationTimer;
   Timer? _cooldownTimer;
@@ -62,19 +65,26 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   }
 
   Future<void> _checkEmailVerification() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final result = await _checkEmailVerificationUseCase();
 
-    if (user == null) return;
+    result.fold(
+      (failure) {
+        _showToast(
+          title: 'Error',
+          description: 'Ocurrió un error al verificar el correo.',
+          type: ToastNotificationType.error,
+        );
+      },
+      (isVerified) {
+        if (isVerified) {
+          _verificationTimer?.cancel();
 
-    await user.reload();
-
-    if (user.emailVerified) {
-      _verificationTimer?.cancel();
-
-      if (mounted) {
-        _showSuccessDialog();
-      }
-    }
+          if (mounted) {
+            _showSuccessDialog();
+          }
+        }
+      },
+    );
   }
 
   Future<void> _resendVerificationEmail() async {
@@ -84,7 +94,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       _isResendingEmail = true;
     });
 
-    final result = await _verifyEmailUseCase();
+    final result = await _sendEmailVerification();
 
     result.fold(
       (failure) {
@@ -157,22 +167,29 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       _isLoading = true;
     });
 
-    final user = FirebaseAuth.instance.currentUser;
+    final result = await _checkEmailVerificationUseCase();
 
-    if (user != null) {
-      await user.reload();
-
-      if (user.emailVerified) {
-        _showSuccessDialog();
-      } else {
+    result.fold(
+      (failure) {
         _showToast(
-          title: 'Email no verificado',
-          description:
-              'Tu correo electrónico aún no ha sido verificado. Por favor, revisa tu bandeja de entrada.',
-          type: ToastNotificationType.warning,
+          title: 'Error',
+          description: 'Ocurrió un error al verificar el correo.',
+          type: ToastNotificationType.error,
         );
-      }
-    }
+      },
+      (isVerified) {
+        if (isVerified) {
+          _showSuccessDialog();
+        } else {
+          _showToast(
+            title: 'Email no verificado',
+            description:
+                'Tu correo electrónico aún no ha sido verificado. Por favor, revisa tu bandeja de entrada.',
+            type: ToastNotificationType.warning,
+          );
+        }
+      },
+    );
 
     setState(() {
       _isLoading = false;
