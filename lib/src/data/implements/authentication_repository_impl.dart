@@ -159,7 +159,13 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
 
       await user.reload();
 
-      return Future.value(Right(user.emailVerified));
+      final isVerified = user.emailVerified;
+
+      if (isVerified) {
+        await firebaseUserService.markUserAsVerified(user.uid);
+      }
+
+      return Future.value(Right(isVerified));
     } catch (e) {
       return Future.value(Left(ServerFailure()));
     }
