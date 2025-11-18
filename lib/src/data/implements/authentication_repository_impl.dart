@@ -8,7 +8,7 @@ import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_auth_model.dart
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_verification_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/user_sign_up_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_entity.dart';
@@ -18,13 +18,13 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verificatio
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
-  final FirebaseAuthenticationService firebaseAuthentication;
+  final FirebaseEmailAuthenticationService firebaseEmailAuthentication;
   final FirebasePhoneAuthenticationService firebasePhoneAuthentication;
   final FirebaseUserService firebaseUserService;
   final NetworkInfo networkInfo;
 
   AuthenticationRepositoryImpl({
-    required this.firebaseAuthentication,
+    required this.firebaseEmailAuthentication,
     required this.firebasePhoneAuthentication,
     required this.firebaseUserService,
     required this.networkInfo,
@@ -43,7 +43,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      final userCredential = await firebaseAuthentication
+      final userCredential = await firebaseEmailAuthentication
           .signUpWithEmailAndPassword(
             UserSignUpModel(
               name: signUpData.name,
@@ -65,7 +65,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         ),
       );
 
-      await firebaseAuthentication.sendEmailVerification();
+      await firebaseEmailAuthentication.sendEmailVerification();
 
       return Right(userCredential);
     } on WeakPasswordException {
@@ -86,7 +86,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      await firebaseAuthentication.sendEmailVerification();
+      await firebaseEmailAuthentication.sendEmailVerification();
 
       return const Right(unit);
     } on TooManyRequestsException {
@@ -387,7 +387,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       final passwordResetModel = PasswordResetModel(
         email: passwordResetData.email,
       );
-      await firebaseAuthentication.resetPassword(passwordResetModel);
+      await firebaseEmailAuthentication.resetPassword(passwordResetModel);
       return const Right(unit);
     } on UserNotFoundException {
       return Left(UserNotFoundFailure());

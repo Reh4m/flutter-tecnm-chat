@@ -3,13 +3,13 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/authentication_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user_repository_impl.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/email_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/phone_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
 import 'package:get_it/get_it.dart';
@@ -34,8 +34,8 @@ Future<void> init() async {
 
   /* Data Sources */
   // Firebase Authentication
-  sl.registerLazySingleton<FirebaseAuthenticationService>(
-    () => FirebaseAuthenticationService(),
+  sl.registerLazySingleton<FirebaseEmailAuthenticationService>(
+    () => FirebaseEmailAuthenticationService(),
   );
 
   // Firebase Phone Authentication
@@ -69,7 +69,7 @@ Future<void> init() async {
   // Authentication Repository
   sl.registerLazySingleton<AuthenticationRepository>(
     () => AuthenticationRepositoryImpl(
-      firebaseAuthentication: sl<FirebaseAuthenticationService>(),
+      firebaseEmailAuthentication: sl<FirebaseEmailAuthenticationService>(),
       firebasePhoneAuthentication: sl<FirebasePhoneAuthenticationService>(),
       firebaseUserService: sl<FirebaseUserService>(),
       networkInfo: sl<NetworkInfo>(),

@@ -4,7 +4,7 @@ import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/password_reset_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/user_sign_up_model.dart';
 
-class FirebaseAuthenticationService {
+class FirebaseEmailAuthenticationService {
   Future<UserCredential> signUpWithEmailAndPassword(
     UserSignUpModel signUpData,
   ) async {
