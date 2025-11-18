@@ -2,31 +2,9 @@ import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/password_reset_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/auth/sign_in_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/sign_up_model.dart';
 
 class FirebaseAuthenticationService {
-  Future<UserCredential> signInWithEmailAndPassword(
-    SignInModel signInData,
-  ) async {
-    try {
-      return await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: signInData.email,
-        password: signInData.password,
-      );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        throw UserNotFoundException();
-      } else if (e.code == 'wrong-password') {
-        throw WrongPasswordException();
-      } else if (e.code == 'invalid-credential') {
-        throw WrongPasswordException();
-      } else {
-        throw ServerException();
-      }
-    }
-  }
-
   Future<UserCredential> signUpWithEmailAndPassword(
     SignUpModel signUpData,
   ) async {

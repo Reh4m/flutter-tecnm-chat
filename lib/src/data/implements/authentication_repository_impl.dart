@@ -6,7 +6,6 @@ import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/password_reset_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_auth_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_verification_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/auth/sign_in_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/sign_up_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
@@ -16,7 +15,6 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_en
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_auth_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_registration_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verification_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/sign_in_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/sign_up_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 
@@ -32,32 +30,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     required this.firebaseUserService,
     required this.networkInfo,
   });
-
-  @override
-  Future<Either<Failure, UserCredential>> signInWithEmailAndPassword(
-    SignInEntity signInData,
-  ) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      final signInModel = SignInModel(
-        email: signInData.email,
-        password: signInData.password,
-      );
-      final userCredential = await firebaseAuthentication
-          .signInWithEmailAndPassword(signInModel);
-
-      return Right(userCredential);
-    } on UserNotFoundException {
-      return Left(UserNotFoundFailure());
-    } on WrongPasswordException {
-      return Left(WrongPasswordFailure());
-    } on ServerException {
-      return Left(ServerFailure());
-    }
-  }
 
   @override
   Future<Either<Failure, UserCredential>> signUpWithEmailAndPassword(

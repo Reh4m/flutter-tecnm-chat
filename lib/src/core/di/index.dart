@@ -78,9 +78,6 @@ Future<void> init() async {
 
   /* Use Cases */
   // Authentication Use Cases
-  sl.registerLazySingleton<SignInUseCase>(
-    () => SignInUseCase(sl<AuthenticationRepository>()),
-  );
   sl.registerLazySingleton<SignUpUseCase>(
     () => SignUpUseCase(sl<AuthenticationRepository>()),
   );

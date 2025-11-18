@@ -5,13 +5,9 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_en
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_auth_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_registration_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verification_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/sign_in_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/sign_up_entity.dart';
 
 abstract class AuthenticationRepository {
-  Future<Either<Failure, UserCredential>> signInWithEmailAndPassword(
-    SignInEntity signInData,
-  );
   Future<Either<Failure, UserCredential>> signUpWithEmailAndPassword(
     SignUpEntity signUpData,
   );
