@@ -10,4 +10,31 @@ class ErrorMessages {
   static const String emailNotVerified = 'Email no verificado';
   static const String invalidEmail = 'Email inválido';
   static const String emptyFields = 'Todos los campos son obligatorios';
+  static const String invalidPhoneNumber = 'Número de teléfono inválido';
+  static const String phoneAlreadyInUse = 'Este número ya está registrado';
+  static const String invalidVerificationCode =
+      'Código de verificación incorrecto';
+  static const String tooManySMSRequests =
+      'Demasiados intentos. Espera un momento e intenta de nuevo';
+  static const String smsQuotaExceeded =
+      'Se ha excedido el límite de mensajes. Intenta más tarde';
+  static const String verificationExpired =
+      'El código ha expirado. Solicita uno nuevo';
+  static const String incompleteRegistration =
+      'Completa tu registro con nombre y email';
+  static const String missingVerificationId =
+      'Error en el proceso de verificación. Inicia de nuevo';
+  static const String phoneAuthNotEnabled =
+      'Autenticación por teléfono no disponible';
+  static const String smsNotSent =
+      'No se pudo enviar el código. Verifica tu número';
+  static const String emptyPhoneNumber = 'Ingresa tu número de teléfono';
+  static const String emptyVerificationCode =
+      'Ingresa el código de verificación';
+  static const String emptyName = 'El nombre es obligatorio';
+  static const String emptyEmail = 'El email es obligatorio';
+  static const String phoneNumberHint =
+      'Ingresa tu número con código de país: +52 123 456 7890';
+  static const String verificationCodeHint =
+      'Código de 6 dígitos enviado por SMS';
 }

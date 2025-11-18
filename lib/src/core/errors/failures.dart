@@ -77,3 +77,49 @@ class ProfileImageUploadFailure extends Failure {
   @override
   List<Object?> get props => [];
 }
+
+class InvalidPhoneNumberFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+// Phone Auth Failures
+class PhoneAlreadyInUseFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class InvalidVerificationCodeFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class TooManySMSRequestsFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class SMSQuotaExceededFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class VerificationExpiredFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class IncompleteRegistrationFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class MissingVerificationIdFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class PhoneAuthNotEnabledFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}

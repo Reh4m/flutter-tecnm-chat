@@ -12,6 +12,37 @@ class FormValidators {
     return null;
   }
 
+  static String? validatePhoneNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'El número de teléfono es obligatorio';
+    }
+
+    final cleanedValue = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+
+    final phoneRegex = RegExp(r'^\+?\d{7,15}$');
+    if (!phoneRegex.hasMatch(cleanedValue)) {
+      return 'Número de teléfono inválido';
+    }
+
+    return null;
+  }
+
+  static String? validateOTPCode(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'El código de verificación es obligatorio';
+    }
+
+    if (value.length != 6) {
+      return 'El código debe tener 6 dígitos';
+    }
+
+    if (!RegExp(r'^\d{6}$').hasMatch(value)) {
+      return 'El código solo debe contener números';
+    }
+
+    return null;
+  }
+
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'La contraseña es obligatoria';

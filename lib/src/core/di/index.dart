@@ -4,11 +4,13 @@ import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/authentication_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/phone_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -34,6 +36,11 @@ Future<void> init() async {
   // Firebase Authentication
   sl.registerLazySingleton<FirebaseAuthenticationService>(
     () => FirebaseAuthenticationService(),
+  );
+
+  // Firebase Phone Authentication
+  sl.registerLazySingleton<FirebasePhoneAuthenticationService>(
+    () => FirebasePhoneAuthenticationService(),
   );
 
   // Firebase Storage Service
@@ -63,6 +70,7 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthenticationRepository>(
     () => AuthenticationRepositoryImpl(
       firebaseAuthentication: sl<FirebaseAuthenticationService>(),
+      firebasePhoneAuthentication: sl<FirebasePhoneAuthenticationService>(),
       firebaseUserService: sl<FirebaseUserService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
@@ -87,6 +95,27 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<SignOutUseCase>(
     () => SignOutUseCase(sl<AuthenticationRepository>()),
+  );
+
+  // Phone Authentication Use Cases
+  sl.registerLazySingleton<SendPhoneVerificationCodeUseCase>(
+    () => SendPhoneVerificationCodeUseCase(sl<AuthenticationRepository>()),
+  );
+  sl.registerLazySingleton<VerifyPhoneCodeUseCase>(
+    () => VerifyPhoneCodeUseCase(sl<AuthenticationRepository>()),
+  );
+  sl.registerLazySingleton<CompleteUserRegistrationUseCase>(
+    () => CompleteUserRegistrationUseCase(sl<AuthenticationRepository>()),
+  );
+  sl.registerLazySingleton<ResendPhoneVerificationCodeUseCase>(
+    () => ResendPhoneVerificationCodeUseCase(sl<AuthenticationRepository>()),
+  );
+  sl.registerLazySingleton<IsRegistrationCompleteUseCase>(
+    () => IsRegistrationCompleteUseCase(sl<AuthenticationRepository>()),
+  );
+  sl.registerLazySingleton<LinkEmailPasswordToPhoneAccountUseCase>(
+    () =>
+        LinkEmailPasswordToPhoneAccountUseCase(sl<AuthenticationRepository>()),
   );
 
   // User Use Cases
