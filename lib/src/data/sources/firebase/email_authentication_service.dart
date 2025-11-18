@@ -14,8 +14,6 @@ class FirebaseEmailAuthenticationService {
         password: signUpData.password,
       );
 
-      await result.user?.updateDisplayName(signUpData.name);
-
       return result;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
