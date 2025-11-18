@@ -6,16 +6,15 @@ import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/password_reset_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_auth_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_verification_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/auth/sign_up_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/auth/user_sign_up_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_auth_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_registration_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verification_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/sign_up_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
@@ -33,7 +32,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
 
   @override
   Future<Either<Failure, UserCredential>> signUpWithEmailAndPassword(
-    SignUpEntity signUpData,
+    UserSignUpEntity signUpData,
   ) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
@@ -46,7 +45,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     try {
       final userCredential = await firebaseAuthentication
           .signUpWithEmailAndPassword(
-            SignUpModel(
+            UserSignUpModel(
               name: signUpData.name,
               email: signUpData.email,
               password: signUpData.password,
@@ -194,7 +193,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
 
   @override
   Future<Either<Failure, Unit>> completeUserRegistration(
-    UserRegistrationEntity registrationData,
+    UserSignUpEntity registrationData,
   ) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());

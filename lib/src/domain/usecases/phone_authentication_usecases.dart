@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_auth_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verification_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_registration_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 
 class SendPhoneVerificationCodeUseCase {
@@ -33,9 +33,7 @@ class CompleteUserRegistrationUseCase {
 
   CompleteUserRegistrationUseCase(this.repository);
 
-  Future<Either<Failure, Unit>> call(
-    UserRegistrationEntity registrationData,
-  ) async {
+  Future<Either<Failure, Unit>> call(UserSignUpEntity registrationData) async {
     return await repository.completeUserRegistration(registrationData);
   }
 }
