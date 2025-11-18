@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/authentication_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.dart';
@@ -36,6 +37,11 @@ Future<void> init() async {
 
   /* Data Sources */
   // Firebase Authentication
+  sl.registerLazySingleton<FirebaseAuthenticationService>(
+    () => FirebaseAuthenticationService(firebaseAuth: sl<FirebaseAuth>()),
+  );
+
+  // Firebase Email Authentication
   sl.registerLazySingleton<FirebaseEmailAuthenticationService>(
     () => FirebaseEmailAuthenticationService(firebaseAuth: sl<FirebaseAuth>()),
   );
@@ -71,6 +77,7 @@ Future<void> init() async {
   // Authentication Repository
   sl.registerLazySingleton<AuthenticationRepository>(
     () => AuthenticationRepositoryImpl(
+      firebaseAuthentication: sl<FirebaseAuthenticationService>(),
       firebaseEmailAuthentication: sl<FirebaseEmailAuthenticationService>(),
       firebasePhoneAuthentication: sl<FirebasePhoneAuthenticationService>(),
       firebaseUserService: sl<FirebaseUserService>(),

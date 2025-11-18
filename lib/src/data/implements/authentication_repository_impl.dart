@@ -8,6 +8,7 @@ import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_auth_model.dart
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_verification_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/user_sign_up_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
@@ -18,12 +19,14 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verificatio
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
+  final FirebaseAuthenticationService firebaseAuthentication;
   final FirebaseEmailAuthenticationService firebaseEmailAuthentication;
   final FirebasePhoneAuthenticationService firebasePhoneAuthentication;
   final FirebaseUserService firebaseUserService;
   final NetworkInfo networkInfo;
 
   AuthenticationRepositoryImpl({
+    required this.firebaseAuthentication,
     required this.firebaseEmailAuthentication,
     required this.firebasePhoneAuthentication,
     required this.firebaseUserService,
@@ -207,7 +210,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       }
 
       // Actualizar perfil en Firebase Auth
-      await firebasePhoneAuthentication.updateUserProfile(
+      await firebaseAuthentication.updateUserProfile(
         displayName: registrationData.name,
       );
 
@@ -296,8 +299,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      final isComplete =
-          await firebasePhoneAuthentication.isRegistrationComplete();
+      final isComplete = await firebaseAuthentication.isRegistrationComplete();
 
       final currentUser = FirebaseAuth.instance.currentUser;
 
@@ -337,8 +339,10 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      final userCredential = await firebasePhoneAuthentication
-          .linkEmailPassword(email: email, password: password);
+      final userCredential = await firebaseAuthentication.linkEmailPassword(
+        email: email,
+        password: password,
+      );
 
       final currentUser = FirebaseAuth.instance.currentUser;
 
