@@ -31,11 +31,7 @@ class FirebaseUserService {
 
   Future<UserModel?> getCurrentUser() async {
     try {
-      final firebaseInstance = FirebaseAuth.instance;
-
-      await firebaseInstance.currentUser?.reload();
-
-      final currentUser = firebaseInstance.currentUser;
+      final currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser == null) return null;
 
@@ -55,9 +51,7 @@ class FirebaseUserService {
 
   Stream<UserModel?> getCurrentUserStream() {
     try {
-      final firebaseInstance = FirebaseAuth.instance;
-
-      final currentUser = firebaseInstance.currentUser;
+      final currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser == null) {
         return Stream.value(null);

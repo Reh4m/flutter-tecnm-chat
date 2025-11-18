@@ -10,7 +10,6 @@ class FirebaseAuthenticationService {
     SignInModel signInData,
   ) async {
     try {
-      // Remove unnecessary reload() - we're about to authenticate and get fresh user data
       return await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: signInData.email,
         password: signInData.password,
