@@ -5,11 +5,15 @@ import 'package:flutter_whatsapp_clon/src/data/models/auth/password_reset_model.
 import 'package:flutter_whatsapp_clon/src/data/models/auth/user_sign_up_model.dart';
 
 class FirebaseEmailAuthenticationService {
+  final FirebaseAuth firebaseAuth;
+
+  FirebaseEmailAuthenticationService({required this.firebaseAuth});
+
   Future<UserCredential> signUpWithEmailAndPassword(
     UserSignUpModel signUpData,
   ) async {
     try {
-      final result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final result = await firebaseAuth.createUserWithEmailAndPassword(
         email: signUpData.email,
         password: signUpData.password,
       );
@@ -28,7 +32,7 @@ class FirebaseEmailAuthenticationService {
 
   Future<Unit> sendEmailVerification() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = firebaseAuth.currentUser;
 
       if (user == null) {
         throw UserNotFoundException();
@@ -51,7 +55,7 @@ class FirebaseEmailAuthenticationService {
 
   Future<bool> isEmailVerified() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = firebaseAuth.currentUser;
 
       if (user == null) {
         throw UserNotFoundException();
@@ -68,9 +72,7 @@ class FirebaseEmailAuthenticationService {
 
   Future<Unit> resetPassword(PasswordResetModel passwordResetData) async {
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
-        email: passwordResetData.email,
-      );
+      await firebaseAuth.sendPasswordResetEmail(email: passwordResetData.email);
 
       return unit;
     } on FirebaseAuthException catch (e) {

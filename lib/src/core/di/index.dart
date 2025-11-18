@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/authentication_repository_impl.dart';
@@ -23,6 +24,7 @@ Future<void> init() async {
   sl.registerLazySingleton<InternetConnection>(() => InternetConnection());
 
   // Firebase instances
+  sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   sl.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
 
@@ -35,12 +37,12 @@ Future<void> init() async {
   /* Data Sources */
   // Firebase Authentication
   sl.registerLazySingleton<FirebaseEmailAuthenticationService>(
-    () => FirebaseEmailAuthenticationService(),
+    () => FirebaseEmailAuthenticationService(firebaseAuth: sl<FirebaseAuth>()),
   );
 
   // Firebase Phone Authentication
   sl.registerLazySingleton<FirebasePhoneAuthenticationService>(
-    () => FirebasePhoneAuthenticationService(),
+    () => FirebasePhoneAuthenticationService(firebaseAuth: sl<FirebaseAuth>()),
   );
 
   // Firebase Storage Service
@@ -77,7 +79,7 @@ Future<void> init() async {
   );
 
   /* Use Cases */
-  // Authentication Use Cases
+  // Email Authentication Use Cases
   sl.registerLazySingleton<SignUpUseCase>(
     () => SignUpUseCase(sl<AuthenticationRepository>()),
   );

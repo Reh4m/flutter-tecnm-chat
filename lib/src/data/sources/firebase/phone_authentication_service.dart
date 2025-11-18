@@ -6,7 +6,9 @@ import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_auth_model.dart
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_verification_model.dart';
 
 class FirebasePhoneAuthenticationService {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseAuth firebaseAuth;
+
+  FirebasePhoneAuthenticationService({required this.firebaseAuth});
 
   static const Duration _verificationTimeout = Duration(seconds: 30);
 
@@ -20,7 +22,7 @@ class FirebasePhoneAuthenticationService {
     final Completer<String> completer = Completer<String>();
 
     try {
-      await _firebaseAuth.verifyPhoneNumber(
+      await firebaseAuth.verifyPhoneNumber(
         phoneNumber: phoneAuthData.phoneNumber,
         timeout: _verificationTimeout,
 
@@ -76,7 +78,7 @@ class FirebasePhoneAuthenticationService {
         smsCode: verificationData.verificationCode,
       );
 
-      final UserCredential userCredential = await _firebaseAuth
+      final UserCredential userCredential = await firebaseAuth
           .signInWithCredential(credential);
 
       return userCredential;
@@ -89,7 +91,7 @@ class FirebasePhoneAuthenticationService {
 
   Future<bool> isRegistrationComplete() async {
     try {
-      final User? user = _firebaseAuth.currentUser;
+      final User? user = firebaseAuth.currentUser;
 
       if (user == null) {
         throw UserNotFoundException();
@@ -107,7 +109,7 @@ class FirebasePhoneAuthenticationService {
 
   Future<void> updateUserProfile({String? displayName}) async {
     try {
-      final User? user = _firebaseAuth.currentUser;
+      final User? user = firebaseAuth.currentUser;
 
       if (user == null) {
         throw UserNotFoundException();
@@ -141,7 +143,7 @@ class FirebasePhoneAuthenticationService {
     final Completer<String> completer = Completer<String>();
 
     try {
-      await _firebaseAuth.verifyPhoneNumber(
+      await firebaseAuth.verifyPhoneNumber(
         phoneNumber: phoneAuthData.phoneNumber,
         timeout: _verificationTimeout,
 
@@ -186,7 +188,7 @@ class FirebasePhoneAuthenticationService {
     required String password,
   }) async {
     try {
-      final User? user = _firebaseAuth.currentUser;
+      final User? user = firebaseAuth.currentUser;
 
       if (user == null) {
         throw UserNotFoundException();
