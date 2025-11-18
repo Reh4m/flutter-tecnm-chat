@@ -79,9 +79,6 @@ Future<void> init() async {
   sl.registerLazySingleton<SendEmailVerificationUseCase>(
     () => SendEmailVerificationUseCase(sl<AuthenticationRepository>()),
   );
-  sl.registerLazySingleton<WaitForEmailVerificationUseCase>(
-    () => WaitForEmailVerificationUseCase(sl<AuthenticationRepository>()),
-  );
   sl.registerLazySingleton<CheckEmailVerificationUseCase>(
     () => CheckEmailVerificationUseCase(sl<AuthenticationRepository>()),
   );

@@ -36,16 +36,6 @@ class SendEmailVerificationUseCase {
   }
 }
 
-class WaitForEmailVerificationUseCase {
-  final AuthenticationRepository repository;
-
-  WaitForEmailVerificationUseCase(this.repository);
-
-  Future<Either<Failure, Unit>> call() async {
-    return await repository.waitForEmailVerification();
-  }
-}
-
 class CheckEmailVerificationUseCase {
   final AuthenticationRepository repository;
 

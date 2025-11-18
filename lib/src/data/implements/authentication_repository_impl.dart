@@ -120,31 +120,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> waitForEmailVerification() async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user == null) {
-        return Left(UserNotFoundFailure());
-      }
-
-      while (!await firebaseAuthentication.isEmailVerified()) {
-        await Future.delayed(const Duration(seconds: 5));
-      }
-
-      return const Right(unit);
-    } on ServerException {
-      return Left(ServerFailure());
-    } catch (e) {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
   Future<Either<Failure, bool>> checkEmailVerification() async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
