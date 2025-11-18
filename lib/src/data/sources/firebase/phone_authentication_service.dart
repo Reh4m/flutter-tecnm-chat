@@ -105,7 +105,7 @@ class FirebasePhoneAuthenticationService {
     }
   }
 
-  Future<void> updateUserProfile({String? displayName, String? email}) async {
+  Future<void> updateUserProfile({String? displayName}) async {
     try {
       final User? user = _firebaseAuth.currentUser;
 
@@ -117,24 +117,14 @@ class FirebasePhoneAuthenticationService {
         await user.updateDisplayName(displayName);
       }
 
-      // if (email != null && email.isNotEmpty) {
-      //   await user.updateProfile()
-      // }
-
       await user.reload();
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        throw ExistingEmailException();
-      } else if (e.code == 'invalid-email') {
-        throw InvalidUserDataException();
-      } else if (e.code == 'requires-recent-login') {
+      if (e.code == 'requires-recent-login') {
         throw UnauthorizedUserOperationException();
       }
       throw ServerException();
     } catch (e) {
       if (e is UserNotFoundException ||
-          e is ExistingEmailException ||
-          e is InvalidUserDataException ||
           e is UnauthorizedUserOperationException) {
         rethrow;
       }

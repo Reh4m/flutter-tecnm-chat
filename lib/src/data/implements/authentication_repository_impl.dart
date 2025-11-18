@@ -209,7 +209,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       // Actualizar perfil en Firebase Auth
       await firebasePhoneAuthentication.updateUserProfile(
         displayName: registrationData.name,
-        email: registrationData.email,
       );
 
       // Verificar si el usuario ya existe en Firestore
@@ -250,8 +249,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       return const Right(unit);
     } on UserNotFoundException {
       return Left(UserNotFoundFailure());
-    } on ExistingEmailException {
-      return Left(ExistingEmailFailure());
     } on InvalidUserDataException {
       return Left(InvalidUserDataFailure());
     } on ServerException {
