@@ -54,13 +54,9 @@ class EmailAuthRepositoryImpl implements EmailAuthenticationRepository {
 
       await user.reload();
 
-      final isVerified = user.emailVerified;
+      final updatedUser = FirebaseAuth.instance.currentUser;
 
-      if (isVerified) {
-        await firebaseUserService.markUserAsVerified(user.uid);
-      }
-
-      return Right(isVerified);
+      return Right(updatedUser?.emailVerified ?? false);
     } catch (e) {
       return Left(ServerFailure());
     }
