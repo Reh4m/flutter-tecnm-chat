@@ -87,9 +87,6 @@ Future<void> init() async {
 
   /* Use Cases */
   // Email Authentication Use Cases
-  sl.registerLazySingleton<SignUpUseCase>(
-    () => SignUpUseCase(sl<AuthenticationRepository>()),
-  );
   sl.registerLazySingleton<SendEmailVerificationUseCase>(
     () => SendEmailVerificationUseCase(sl<AuthenticationRepository>()),
   );

@@ -7,12 +7,8 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_enti
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verification_entity.dart';
 
 abstract class AuthenticationRepository {
-  Future<Either<Failure, UserCredential>> signUpWithEmailAndPassword(
-    UserSignUpEntity signUpData,
-  );
   Future<Either<Failure, Unit>> sendEmailVerification();
   Future<Either<Failure, bool>> checkEmailVerification();
-
   Future<Either<Failure, String>> sendPhoneVerificationCode(
     PhoneAuthEntity phoneAuthData,
   );

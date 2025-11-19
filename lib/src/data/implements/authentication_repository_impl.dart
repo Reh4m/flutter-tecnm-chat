@@ -6,7 +6,6 @@ import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/password_reset_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_auth_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_verification_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/auth/user_sign_up_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
@@ -32,55 +31,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     required this.firebaseUserService,
     required this.networkInfo,
   });
-
-  @override
-  Future<Either<Failure, UserCredential>> signUpWithEmailAndPassword(
-    UserSignUpEntity signUpData,
-  ) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    if (signUpData.password != signUpData.confirmPassword) {
-      return Left(PasswordMismatchFailure());
-    }
-
-    try {
-      final userCredential = await firebaseEmailAuthentication
-          .signUpWithEmailAndPassword(
-            UserSignUpModel(
-              name: signUpData.name,
-              email: signUpData.email,
-              password: signUpData.password,
-              confirmPassword: signUpData.confirmPassword,
-            ),
-          );
-
-      final currentUser = userCredential.user;
-
-      await firebaseUserService.createUser(
-        UserModel(
-          id: currentUser!.uid,
-          name: signUpData.name,
-          email: signUpData.email,
-          createdAt: DateTime.now(),
-          isVerified: currentUser.emailVerified,
-        ),
-      );
-
-      await firebaseEmailAuthentication.sendEmailVerification();
-
-      return Right(userCredential);
-    } on WeakPasswordException {
-      return Left(WeakPasswordFailure());
-    } on ExistingEmailException {
-      return Left(ExistingEmailFailure());
-    } on TooManyRequestsException {
-      return Left(TooManyRequestsFailure());
-    } on ServerException {
-      return Left(ServerFailure());
-    }
-  }
 
   @override
   Future<Either<Failure, Unit>> sendEmailVerification() async {
