@@ -96,6 +96,10 @@ Future<void> init() async {
   sl.registerLazySingleton<CheckEmailVerificationUseCase>(
     () => CheckEmailVerificationUseCase(sl<AuthenticationRepository>()),
   );
+  sl.registerLazySingleton<CreateUserAfterEmailVerificationUseCase>(
+    () =>
+        CreateUserAfterEmailVerificationUseCase(sl<AuthenticationRepository>()),
+  );
   sl.registerLazySingleton<ResetPasswordUseCase>(
     () => ResetPasswordUseCase(sl<AuthenticationRepository>()),
   );

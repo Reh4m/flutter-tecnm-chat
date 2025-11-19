@@ -37,6 +37,16 @@ class CheckEmailVerificationUseCase {
   }
 }
 
+class CreateUserAfterEmailVerificationUseCase {
+  final AuthenticationRepository repository;
+
+  CreateUserAfterEmailVerificationUseCase(this.repository);
+
+  Future<Either<Failure, Unit>> call() async {
+    return await repository.createUserAfterEmailVerification();
+  }
+}
+
 class ResetPasswordUseCase {
   final AuthenticationRepository repository;
 

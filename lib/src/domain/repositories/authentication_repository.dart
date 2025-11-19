@@ -22,6 +22,7 @@ abstract class AuthenticationRepository {
   Future<Either<Failure, Unit>> completeUserRegistration(
     UserSignUpEntity registrationData,
   );
+  Future<Either<Failure, Unit>> createUserAfterEmailVerification();
   Future<Either<Failure, String>> resendPhoneVerificationCode(
     PhoneAuthEntity phoneAuthData,
     int? resendToken,

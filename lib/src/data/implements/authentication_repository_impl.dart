@@ -209,10 +209,67 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         return Left(UserNotFoundFailure());
       }
 
-      // Actualizar perfil en Firebase Auth
-      await firebaseAuthentication.updateUserProfile(
-        displayName: registrationData.name,
+      if (registrationData.password != registrationData.confirmPassword) {
+        return Left(PasswordMismatchFailure());
+      }
+
+      // 1. Vincular cuenta de correo electrónico y contraseña
+      final linkResult = await linkEmailPasswordToPhoneAccount(
+        email: registrationData.email,
+        password: registrationData.password,
       );
+
+      return await linkResult.fold((failure) async => Left(failure), (
+        userCredential,
+      ) async {
+        try {
+          // 2. Actualizar perfil en Firebase Auth
+          await firebaseAuthentication.updateUserProfile(
+            displayName: registrationData.name,
+          );
+
+          // 3. Enviar verificación de correo electrónico
+          await firebaseEmailAuthentication.sendEmailVerification();
+
+          return const Right(unit);
+        } on TooManyRequestsException {
+          return Left(TooManyRequestsFailure());
+        } on ServerException {
+          return Left(ServerFailure());
+        } catch (e) {
+          return Left(ServerFailure());
+        }
+      });
+    } on UserNotFoundException {
+      return Left(UserNotFoundFailure());
+    } on InvalidUserDataException {
+      return Left(InvalidUserDataFailure());
+    } on ServerException {
+      return Left(ServerFailure());
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> createUserAfterEmailVerification() async {
+    if (!await networkInfo.isConnected) {
+      return Left(NetworkFailure());
+    }
+
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) {
+        return Left(UserNotFoundFailure());
+      }
+
+      // Verificar que el email esté realmente verificado
+      await currentUser.reload();
+
+      if (!currentUser.emailVerified) {
+        return Left(EmailVerificationFailure());
+      }
 
       // Verificar si el usuario ya existe en Firestore
       final userExists = await firebaseUserService.checkUserExists(
@@ -220,16 +277,16 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       );
 
       if (userExists) {
-        // Si ya existe, actualizar sus datos
+        // Si ya existe, actualizar sus datos y marcar como verificado
         final existingUser = await firebaseUserService.getUserById(
           currentUser.uid,
         );
 
         final updatedUser = existingUser.copyWith(
-          name: registrationData.name,
-          email: registrationData.email,
-          photoUrl: registrationData.photoUrl,
+          name: currentUser.displayName ?? existingUser.name,
+          email: currentUser.email ?? existingUser.email,
           phoneNumber: currentUser.phoneNumber,
+          isVerified: true,
           updatedAt: DateTime.now(),
         );
 
@@ -239,9 +296,8 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         await firebaseUserService.createUser(
           UserModel(
             id: currentUser.uid,
-            name: registrationData.name,
-            email: registrationData.email,
-            photoUrl: registrationData.photoUrl,
+            name: currentUser.displayName ?? '',
+            email: currentUser.email ?? '',
             phoneNumber: currentUser.phoneNumber,
             createdAt: DateTime.now(),
             isVerified: true,
@@ -299,29 +355,56 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      final isComplete = await firebaseAuthentication.isRegistrationComplete();
-
       final currentUser = FirebaseAuth.instance.currentUser;
 
-      if (currentUser != null && isComplete) {
-        final userExists = await firebaseUserService.checkUserExists(
-          currentUser.uid,
-        );
-
-        if (!userExists) {
-          return const Right(false);
-        }
-
-        final user = await firebaseUserService.getUserById(currentUser.uid);
-
-        final hasCompleteData = user.name.isNotEmpty && user.email.isNotEmpty;
-
-        return Right(hasCompleteData);
+      if (currentUser == null) {
+        return const Right(false);
       }
 
-      return Right(isComplete);
+      await currentUser.reload();
+
+      // Verificar que tenga los proveedores necesarios
+      final hasPhoneProvider = currentUser.providerData.any(
+        (provider) => provider.providerId == 'phone',
+      );
+      final hasEmailProvider = currentUser.providerData.any(
+        (provider) => provider.providerId == 'password',
+      );
+
+      final isEmailVerified = currentUser.emailVerified;
+
+      final hasName =
+          currentUser.displayName != null &&
+          currentUser.displayName!.isNotEmpty;
+      final hasEmail =
+          currentUser.email != null && currentUser.email!.isNotEmpty;
+
+      // Si no tiene todos los datos necesarios en Auth, no está completo
+      if (!hasPhoneProvider ||
+          !hasEmailProvider ||
+          !isEmailVerified ||
+          !hasName ||
+          !hasEmail) {
+        return const Right(false);
+      }
+
+      final userExists = await firebaseUserService.checkUserExists(
+        currentUser.uid,
+      );
+
+      if (!userExists) {
+        return const Right(false);
+      }
+
+      // Verificar que los datos en Firestore estén completos
+      final user = await firebaseUserService.getUserById(currentUser.uid);
+
+      final hasCompleteData =
+          user.name.isNotEmpty && user.email.isNotEmpty && user.isVerified;
+
+      return Right(hasCompleteData);
     } on UserNotFoundException {
-      return Left(UserNotFoundFailure());
+      return const Right(false);
     } on ServerException {
       return Left(ServerFailure());
     } catch (e) {
@@ -343,20 +426,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
         email: email,
         password: password,
       );
-
-      final currentUser = FirebaseAuth.instance.currentUser;
-
-      if (currentUser != null) {
-        final user = await firebaseUserService.getUserById(currentUser.uid);
-
-        if (user.email != email) {
-          final updatedUser = user.copyWith(
-            email: email,
-            updatedAt: DateTime.now(),
-          );
-          await firebaseUserService.updateUser(updatedUser);
-        }
-      }
 
       return Right(userCredential);
     } on UserNotFoundException {
