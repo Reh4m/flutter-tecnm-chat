@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:blobs/blobs.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/email_verification_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_alert_dialog.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/loading_overlay.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   const EmailVerificationScreen({super.key});
@@ -19,15 +19,8 @@ class EmailVerificationScreen extends StatefulWidget {
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
-  final SendEmailVerificationUseCase _sendEmailVerification =
-      sl<SendEmailVerificationUseCase>();
-  final CheckEmailVerificationUseCase _checkEmailVerificationUseCase =
-      sl<CheckEmailVerificationUseCase>();
-
   Timer? _verificationTimer;
   Timer? _cooldownTimer;
-  bool _isLoading = false;
-  bool _isResendingEmail = false;
   bool _canResend = true;
   int _resendCooldown = 0;
   String? _userEmail;
@@ -53,7 +46,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       _userEmail = user.email;
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.go('/login');
+        context.go('/phone-auth');
       });
     }
   }
@@ -65,60 +58,94 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   }
 
   Future<void> _checkEmailVerification() async {
-    final result = await _checkEmailVerificationUseCase();
+    final provider = context.read<EmailVerificationProvider>();
 
-    result.fold(
-      (failure) {
+    if (provider.state == EmailVerificationState.loading) return;
+
+    final isVerified = await provider.checkEmailVerification();
+
+    if (!mounted) return;
+
+    if (provider.state == EmailVerificationState.error &&
+        provider.errorMessage != null) {
+      _showToast(
+        title: 'Error de verificación',
+        description: provider.errorMessage!,
+        type: ToastNotificationType.error,
+      );
+      return;
+    }
+
+    if (isVerified) {
+      _verificationTimer?.cancel();
+
+      final created = await provider.createUserAfterEmailVerification();
+
+      if (!mounted) return;
+
+      if (created) {
+        _showSuccessDialog();
+      } else if (provider.errorMessage != null) {
         _showToast(
-          title: 'Error',
-          description: 'Ocurrió un error al verificar el correo.',
+          title: 'Error al crear usuario',
+          description: provider.errorMessage!,
           type: ToastNotificationType.error,
         );
-      },
-      (isVerified) {
-        if (isVerified) {
-          _verificationTimer?.cancel();
+      }
+    }
+  }
 
-          if (mounted) {
-            _showSuccessDialog();
-          }
-        }
-      },
-    );
+  Future<void> _manualCheckVerification() async {
+    final provider = context.read<EmailVerificationProvider>();
+
+    final isVerified = await provider.checkEmailVerification();
+
+    if (!mounted) return;
+
+    if (isVerified) {
+      final created = await provider.createUserAfterEmailVerification();
+
+      if (created) {
+        _showSuccessDialog();
+      } else if (provider.errorMessage != null) {
+        _showToast(
+          title: 'Error',
+          description: provider.errorMessage!,
+          type: ToastNotificationType.error,
+        );
+      }
+    } else {
+      _showToast(
+        title: 'Email no verificado',
+        description:
+            'Tu correo aún no ha sido verificado. Revisa tu bandeja de entrada.',
+        type: ToastNotificationType.warning,
+      );
+    }
   }
 
   Future<void> _resendVerificationEmail() async {
-    if (!_canResend || _isResendingEmail) return;
+    if (!_canResend) return;
 
-    setState(() {
-      _isResendingEmail = true;
-    });
+    final provider = context.read<EmailVerificationProvider>();
+    await provider.sendEmailVerification();
 
-    final result = await _sendEmailVerification();
+    if (!mounted) return;
 
-    result.fold(
-      (failure) {
-        _showToast(
-          title: 'Error al reenviar correo',
-          description:
-              'No se pudo enviar el correo de verificación. Por favor, inténtalo de nuevo más tarde.',
-          type: ToastNotificationType.error,
-        );
-      },
-      (_) {
-        _showToast(
-          title: 'Correo reenviado',
-          description:
-              'Te hemos enviado un nuevo correo de verificación. Por favor, revisa tu bandeja de entrada.',
-          type: ToastNotificationType.success,
-        );
-        _startResendCooldown();
-      },
-    );
-
-    setState(() {
-      _isResendingEmail = false;
-    });
+    if (provider.state != EmailVerificationState.error) {
+      _showToast(
+        title: 'Correo reenviado',
+        description: 'Te hemos enviado un nuevo correo de verificación.',
+        type: ToastNotificationType.success,
+      );
+      _startResendCooldown();
+    } else if (provider.errorMessage != null) {
+      _showToast(
+        title: 'Error',
+        description: provider.errorMessage!,
+        type: ToastNotificationType.error,
+      );
+    }
   }
 
   void _startResendCooldown() {
@@ -129,13 +156,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
     _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_resendCooldown > 0) {
-        setState(() {
-          _resendCooldown--;
-        });
+        setState(() => _resendCooldown--);
       } else {
-        setState(() {
-          _canResend = true;
-        });
+        setState(() => _canResend = true);
         timer.cancel();
       }
     });
@@ -148,9 +171,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       builder:
           (context) => CustomAlertDialog(
             status: AlertDialogStatus.success,
-            title: '¡Email Verificado!',
+            title: '¡Registro Completo!',
             description:
-                'Tu correo electrónico ha sido verificado exitosamente. Ya puedes acceder a todos nuestros servicios.',
+                'Tu cuenta ha sido verificada exitosamente. Ahora puedes acceder a todas las funciones.',
             primaryButtonVariant: ButtonVariant.primary,
             primaryButtonText: 'Continuar',
             primaryButtonIcon: Icons.arrow_forward_rounded,
@@ -162,91 +185,29 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     );
   }
 
-  Future<void> _manualCheckVerification() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final result = await _checkEmailVerificationUseCase();
-
-    result.fold(
-      (failure) {
-        _showToast(
-          title: 'Error',
-          description: 'Ocurrió un error al verificar el correo.',
-          type: ToastNotificationType.error,
-        );
-      },
-      (isVerified) {
-        if (isVerified) {
-          _showSuccessDialog();
-        } else {
-          _showToast(
-            title: 'Email no verificado',
-            description:
-                'Tu correo electrónico aún no ha sido verificado. Por favor, revisa tu bandeja de entrada.',
-            type: ToastNotificationType.warning,
-          );
-        }
-      },
-    );
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  void _backToLogin() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => CustomAlertDialog(
-            status: AlertDialogStatus.warning,
-            title: 'Volver al Login',
-            description:
-                '¿Estás seguro de que quieres volver a la pantalla de inicio de sesión?',
-            primaryButtonVariant: ButtonVariant.outline,
-            primaryButtonText: 'Sí, Volver',
-            onPrimaryPressed: () async {
-              Navigator.of(context).pop();
-              await FirebaseAuth.instance.signOut();
-              if (mounted) {
-                // ignore: use_build_context_synchronously
-                context.go('/login');
-              }
-            },
-            isSecondaryButtonEnabled: true,
-            secondaryButtonVariant: ButtonVariant.primary,
-            onSecondaryPressed: () => Navigator.of(context).pop(),
-          ),
-    );
-  }
-
-  void _changeEmail() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => CustomAlertDialog(
-            status: AlertDialogStatus.warning,
-            title: 'Cambiar Email',
-            description:
-                'Para cambiar tu correo electrónico necesitas cerrar sesión y crear una nueva cuenta.',
-            primaryButtonVariant: ButtonVariant.outline,
-            primaryButtonText: 'Cerrar Sesión',
-            onPrimaryPressed: () async {
-              Navigator.of(context).pop();
-              await FirebaseAuth.instance.signOut();
-              if (mounted) {
-                // ignore: use_build_context_synchronously
-                context.go('/login');
-              }
-            },
-            isSecondaryButtonEnabled: true,
-            secondaryButtonVariant: ButtonVariant.primary,
-            onSecondaryPressed: () => Navigator.of(context).pop(),
-          ),
-    );
-  }
+  // void _backToLogin() {
+  //   showDialog(
+  //     context: context,
+  //     builder:
+  //         (context) => CustomAlertDialog(
+  //           status: AlertDialogStatus.warning,
+  //           title: 'Cerrar Sesión',
+  //           description: '¿Estás seguro de que quieres cerrar sesión?',
+  //           primaryButtonVariant: ButtonVariant.outline,
+  //           primaryButtonText: 'Sí, Cerrar',
+  //           onPrimaryPressed: () async {
+  //             Navigator.of(context).pop();
+  //             await FirebaseAuth.instance.signOut();
+  //             if (mounted) {
+  //               context.go('/phone-auth');
+  //             }
+  //           },
+  //           isSecondaryButtonEnabled: true,
+  //           secondaryButtonVariant: ButtonVariant.primary,
+  //           onSecondaryPressed: () => Navigator.of(context).pop(),
+  //         ),
+  //   );
+  // }
 
   void _showToast({
     required String title,
@@ -266,31 +227,38 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: LoadingOverlay(
-        isLoading: _isLoading,
-        message: 'Verificando...',
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                _buildHeader(theme),
-                const SizedBox(height: 20),
-                _buildEmailIcon(theme),
-                const SizedBox(height: 20),
-                _buildTitle(theme),
-                const SizedBox(height: 5),
-                _buildDescription(theme),
-                const SizedBox(height: 20),
-                _buildEmailInfo(theme),
-                const SizedBox(height: 20),
-                _buildActionButtons(),
-                const SizedBox(height: 20),
-                _buildFooter(theme),
-              ],
+      body: Consumer<EmailVerificationProvider>(
+        builder: (context, provider, child) {
+          final isLoading = provider.state == EmailVerificationState.loading;
+
+          return LoadingOverlay(
+            isLoading: isLoading,
+            message: 'Verificando...',
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    _buildHeader(theme),
+                    const SizedBox(height: 20),
+                    _buildIcon(theme),
+                    const SizedBox(height: 20),
+                    _buildTitle(theme),
+                    const SizedBox(height: 10),
+                    _buildDescription(theme),
+                    const SizedBox(height: 20),
+                    _buildEmailInfo(theme, provider),
+                    const SizedBox(height: 20),
+                    _buildActionButtons(isLoading),
+                    const SizedBox(height: 20),
+                    _buildFooter(theme),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -298,32 +266,46 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        IconButton(
-          onPressed: _backToLogin,
-          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+        Text(
+          'Paso 3 de 3',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const Spacer(),
-        TextButton(
-          onPressed: _changeEmail,
-          child: Text(
-            'Cambiar Email',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: theme.primaryColorLight,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 5),
+              Text(
+                'Datos completos',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildEmailIcon(ThemeData theme) {
+  Widget _buildIcon(ThemeData theme) {
     return Blob.random(
       size: 130,
       minGrowth: 10,
-      styles: BlobStyles(color: theme.primaryColorLight.withAlpha(100)),
+      styles: BlobStyles(color: theme.primaryColorLight),
       child: Icon(
-        Icons.mark_email_read_outlined,
+        Icons.email_rounded,
         size: 60,
         color: theme.colorScheme.primary,
       ),
@@ -343,22 +325,20 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
   Widget _buildDescription(ThemeData theme) {
     return Text(
-      'Te hemos enviado un enlace de verificación a tu correo electrónico. Haz clic en el enlace para activar tu cuenta.',
-      style: theme.textTheme.bodyLarge?.copyWith(
+      'Te hemos enviado un enlace de verificación a tu correo. Haz clic en el enlace para completar tu registro.',
+      style: theme.textTheme.bodyMedium?.copyWith(
         color: theme.colorScheme.onSurface,
-        height: 1.5,
       ),
       textAlign: TextAlign.center,
     );
   }
 
-  Widget _buildEmailInfo(ThemeData theme) {
+  Widget _buildEmailInfo(ThemeData theme, EmailVerificationProvider provider) {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.colorScheme.outline),
       ),
       child: Row(
         children: [
@@ -367,7 +347,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             color: theme.colorScheme.primary,
             size: 24,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,13 +374,13 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(bool isLoading) {
     return Column(
       children: [
         CustomButton(
           text: 'Ya Verifiqué mi Email',
-          onPressed: _isLoading ? null : _manualCheckVerification,
-          isLoading: _isLoading,
+          onPressed: isLoading ? null : _manualCheckVerification,
+          isLoading: isLoading,
           width: double.infinity,
           icon: const Icon(Icons.refresh, size: 20),
         ),
@@ -411,13 +391,11 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   ? 'Reenviar Correo'
                   : 'Reenviar en ${_resendCooldown}s',
           onPressed:
-              (_canResend && !_isResendingEmail)
-                  ? _resendVerificationEmail
-                  : null,
-          isLoading: _isResendingEmail,
+              (_canResend && !isLoading) ? _resendVerificationEmail : null,
           variant: ButtonVariant.outline,
           width: double.infinity,
           icon: const Icon(Icons.send, size: 20),
+          iconPosition: ButtonIconPosition.right,
         ),
       ],
     );
@@ -458,7 +436,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        // Ayuda adicional
         Text(
           '¿No recibiste el correo? Revisa tu carpeta de spam',
           style: theme.textTheme.bodySmall?.copyWith(

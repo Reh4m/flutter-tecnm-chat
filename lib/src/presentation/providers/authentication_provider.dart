@@ -3,15 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/sign_in_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/sign_up_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
 
 enum AuthState { initial, loading, success, error }
 
 class AuthenticationProvider extends ChangeNotifier {
-  final SignInUseCase _signInUseCase = sl<SignInUseCase>();
-  final SignUpUseCase _signUpUseCase = sl<SignUpUseCase>();
   final SignOutUseCase _signOutUseCase = sl<SignOutUseCase>();
 
   AuthState _state = AuthState.initial;
@@ -22,50 +18,6 @@ class AuthenticationProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   User? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
-
-  Future<void> signIn(String email, String password) async {
-    _setState(AuthState.loading);
-
-    final result = await _signInUseCase(
-      SignInEntity(email: email, password: password),
-    );
-
-    await result.fold(
-      (failure) async => _setError(_mapFailureToMessage(failure)),
-      (userCredential) async {
-        _currentUser = userCredential.user;
-
-        _setState(AuthState.success);
-      },
-    );
-  }
-
-  Future<void> signUp(
-    String name,
-    String email,
-    String password,
-    String confirmPassword,
-  ) async {
-    _setState(AuthState.loading);
-
-    final result = await _signUpUseCase(
-      SignUpEntity(
-        name: name,
-        email: email,
-        password: password,
-        confirmPassword: confirmPassword,
-      ),
-    );
-
-    await result.fold(
-      (failure) async => _setError(_mapFailureToMessage(failure)),
-      (userCredential) async {
-        _currentUser = userCredential.user;
-
-        _setState(AuthState.success);
-      },
-    );
-  }
 
   Future<void> signOut() async {
     _setState(AuthState.loading);

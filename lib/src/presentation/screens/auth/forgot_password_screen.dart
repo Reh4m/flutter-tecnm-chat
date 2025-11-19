@@ -5,7 +5,7 @@ import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/email_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/config/themes/color_palette.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';

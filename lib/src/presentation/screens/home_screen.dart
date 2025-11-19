@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     userProvider.clearCurrentUser();
 
     if (mounted) {
-      context.go('/login');
+      context.go('/phone-sign-in');
     }
   }
 

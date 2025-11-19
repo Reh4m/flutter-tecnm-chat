@@ -43,6 +43,10 @@ class FormValidators {
     return null;
   }
 
+  static bool isValidOTPCode(String code) {
+    return validateOTPCode(code) == null;
+  }
+
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'La contraseña es obligatoria';
