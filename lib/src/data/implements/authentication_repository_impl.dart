@@ -3,149 +3,28 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/auth/password_reset_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_auth_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_verification_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_auth_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verification_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
   final FirebaseAuthenticationService firebaseAuthentication;
   final FirebaseEmailAuthenticationService firebaseEmailAuthentication;
-  final FirebasePhoneAuthenticationService firebasePhoneAuthentication;
   final FirebaseUserService firebaseUserService;
   final NetworkInfo networkInfo;
 
   AuthenticationRepositoryImpl({
     required this.firebaseAuthentication,
     required this.firebaseEmailAuthentication,
-    required this.firebasePhoneAuthentication,
     required this.firebaseUserService,
     required this.networkInfo,
   });
 
   @override
-  Future<Either<Failure, Unit>> sendEmailVerification() async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      await firebaseEmailAuthentication.sendEmailVerification();
-
-      return const Right(unit);
-    } on TooManyRequestsException {
-      return Left(TooManyRequestsFailure());
-    } on ServerException {
-      return Left(ServerFailure());
-    } catch (e) {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, bool>> checkEmailVerification() async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user == null) {
-        return Left(UserNotFoundFailure());
-      }
-
-      await user.reload();
-
-      final isVerified = user.emailVerified;
-
-      if (isVerified) {
-        await firebaseUserService.markUserAsVerified(user.uid);
-      }
-
-      return Right(isVerified);
-    } catch (e) {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, String>> sendPhoneVerificationCode(
-    PhoneAuthEntity phoneAuthData,
-  ) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      final phoneAuthModel = PhoneAuthModel(
-        phoneNumber: phoneAuthData.phoneNumber,
-      );
-
-      final verificationId = await firebasePhoneAuthentication
-          .sendVerificationCode(phoneAuthModel);
-
-      return Right(verificationId);
-    } on InvalidPhoneNumberException {
-      return Left(InvalidPhoneNumberFailure());
-    } on TooManySMSRequestsException {
-      return Left(TooManySMSRequestsFailure());
-    } on SMSQuotaExceededException {
-      return Left(SMSQuotaExceededFailure());
-    } on PhoneAuthNotEnabledException {
-      return Left(PhoneAuthNotEnabledFailure());
-    } on ServerException {
-      return Left(ServerFailure());
-    } catch (e) {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, UserCredential>> verifyPhoneCode(
-    PhoneVerificationEntity verificationData,
-  ) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      final verificationModel = PhoneVerificationModel(
-        verificationId: verificationData.verificationId,
-        verificationCode: verificationData.verificationCode,
-      );
-
-      final userCredential = await firebasePhoneAuthentication.verifyOTPCode(
-        verificationModel,
-      );
-
-      return Right(userCredential);
-    } on InvalidVerificationCodeException {
-      return Left(InvalidVerificationCodeFailure());
-    } on MissingVerificationIdException {
-      return Left(MissingVerificationIdFailure());
-    } on VerificationExpiredException {
-      return Left(VerificationExpiredFailure());
-    } on PhoneAlreadyInUseException {
-      return Left(PhoneAlreadyInUseFailure());
-    } on ServerException {
-      return Left(ServerFailure());
-    } catch (e) {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, Unit>> completeUserRegistration(
+  Future<Either<Failure, Unit>> linkEmailCredentialsAndVerify(
     UserSignUpEntity registrationData,
   ) async {
     if (!await networkInfo.isConnected) {
@@ -164,36 +43,32 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       }
 
       // 1. Vincular cuenta de correo electrónico y contraseña
-      final linkResult = await linkEmailPasswordToPhoneAccount(
+      await firebaseEmailAuthentication.linkEmailPassword(
         email: registrationData.email,
         password: registrationData.password,
       );
 
-      return await linkResult.fold((failure) async => Left(failure), (
-        userCredential,
-      ) async {
-        try {
-          // 2. Actualizar perfil en Firebase Auth
-          await firebaseAuthentication.updateUserProfile(
-            displayName: registrationData.name,
-          );
+      // 2. Actualizar perfil en Firebase Auth
+      await firebaseAuthentication.updateUserProfile(
+        displayName: registrationData.name,
+      );
 
-          // 3. Enviar verificación de correo electrónico
-          await firebaseEmailAuthentication.sendEmailVerification();
+      // 3. Enviar verificación de correo electrónico
+      await firebaseEmailAuthentication.sendEmailVerification();
 
-          return const Right(unit);
-        } on TooManyRequestsException {
-          return Left(TooManyRequestsFailure());
-        } on ServerException {
-          return Left(ServerFailure());
-        } catch (e) {
-          return Left(ServerFailure());
-        }
-      });
+      return const Right(unit);
     } on UserNotFoundException {
       return Left(UserNotFoundFailure());
+    } on ExistingEmailException {
+      return Left(ExistingEmailFailure());
+    } on WeakPasswordException {
+      return Left(WeakPasswordFailure());
     } on InvalidUserDataException {
       return Left(InvalidUserDataFailure());
+    } on UserAlreadyExistsException {
+      return Left(UserAlreadyExistsFailure());
+    } on TooManyRequestsException {
+      return Left(TooManyRequestsFailure());
     } on ServerException {
       return Left(ServerFailure());
     } catch (e) {
@@ -202,7 +77,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> createUserAfterEmailVerification() async {
+  Future<Either<Failure, Unit>> saveUserDataToFirestore() async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
     }
@@ -268,37 +143,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
   }
 
   @override
-  Future<Either<Failure, String>> resendPhoneVerificationCode(
-    PhoneAuthEntity phoneAuthData,
-    int? resendToken,
-  ) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      final phoneAuthModel = PhoneAuthModel(
-        phoneNumber: phoneAuthData.phoneNumber,
-      );
-
-      final verificationId = await firebasePhoneAuthentication
-          .resendVerificationCode(phoneAuthModel, resendToken);
-
-      return Right(verificationId);
-    } on InvalidPhoneNumberException {
-      return Left(InvalidPhoneNumberFailure());
-    } on TooManySMSRequestsException {
-      return Left(TooManySMSRequestsFailure());
-    } on SMSQuotaExceededException {
-      return Left(SMSQuotaExceededFailure());
-    } on ServerException {
-      return Left(ServerFailure());
-    } catch (e) {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
   Future<Either<Failure, bool>> isRegistrationComplete() async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
@@ -355,64 +199,6 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       return Right(hasCompleteData);
     } on UserNotFoundException {
       return const Right(false);
-    } on ServerException {
-      return Left(ServerFailure());
-    } catch (e) {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, UserCredential>> linkEmailPasswordToPhoneAccount({
-    required String email,
-    required String password,
-  }) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      final userCredential = await firebaseAuthentication.linkEmailPassword(
-        email: email,
-        password: password,
-      );
-
-      return Right(userCredential);
-    } on UserNotFoundException {
-      return Left(UserNotFoundFailure());
-    } on ExistingEmailException {
-      return Left(ExistingEmailFailure());
-    } on WeakPasswordException {
-      return Left(WeakPasswordFailure());
-    } on InvalidUserDataException {
-      return Left(InvalidUserDataFailure());
-    } on UserAlreadyExistsException {
-      return Left(UserAlreadyExistsFailure());
-    } on ServerException {
-      return Left(ServerFailure());
-    } catch (e) {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, Unit>> resetPassword(
-    PasswordResetEntity passwordResetData,
-  ) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      final passwordResetModel = PasswordResetModel(
-        email: passwordResetData.email,
-      );
-      await firebaseEmailAuthentication.resetPassword(passwordResetModel);
-      return const Right(unit);
-    } on UserNotFoundException {
-      return Left(UserNotFoundFailure());
-    } on TooManyRequestsException {
-      return Left(TooManyRequestsFailure());
     } on ServerException {
       return Left(ServerFailure());
     } catch (e) {

@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/email_authentication_repository.dart';
 
 class SendEmailVerificationUseCase {
-  final AuthenticationRepository repository;
+  final EmailAuthenticationRepository repository;
 
   SendEmailVerificationUseCase(this.repository);
 
@@ -14,7 +14,7 @@ class SendEmailVerificationUseCase {
 }
 
 class CheckEmailVerificationUseCase {
-  final AuthenticationRepository repository;
+  final EmailAuthenticationRepository repository;
 
   CheckEmailVerificationUseCase(this.repository);
 
@@ -23,18 +23,8 @@ class CheckEmailVerificationUseCase {
   }
 }
 
-class CreateUserAfterEmailVerificationUseCase {
-  final AuthenticationRepository repository;
-
-  CreateUserAfterEmailVerificationUseCase(this.repository);
-
-  Future<Either<Failure, Unit>> call() async {
-    return await repository.createUserAfterEmailVerification();
-  }
-}
-
 class ResetPasswordUseCase {
-  final AuthenticationRepository repository;
+  final EmailAuthenticationRepository repository;
 
   ResetPasswordUseCase(this.repository);
 
@@ -42,15 +32,5 @@ class ResetPasswordUseCase {
     PasswordResetEntity passwordResetData,
   ) async {
     return await repository.resetPassword(passwordResetData);
-  }
-}
-
-class SignOutUseCase {
-  final AuthenticationRepository repository;
-
-  SignOutUseCase(this.repository);
-
-  Future<Either<Failure, Unit>> call() async {
-    return await repository.signOut();
   }
 }

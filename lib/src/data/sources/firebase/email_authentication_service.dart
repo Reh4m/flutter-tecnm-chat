@@ -48,6 +48,40 @@ class FirebaseEmailAuthenticationService {
     }
   }
 
+  Future<UserCredential> linkEmailPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final User? user = firebaseAuth.currentUser;
+
+      if (user == null) {
+        throw UserNotFoundException();
+      }
+
+      final authCredentials = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+
+      return await user.linkWithCredential(authCredentials);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        throw ExistingEmailException();
+      } else if (e.code == 'invalid-email') {
+        throw InvalidUserDataException();
+      } else if (e.code == 'weak-password') {
+        throw WeakPasswordException();
+      } else if (e.code == 'provider-already-linked') {
+        throw UserAlreadyExistsException();
+      }
+      throw ServerException();
+    } catch (e) {
+      if (e is UserNotFoundException) rethrow;
+      throw ServerException();
+    }
+  }
+
   Future<Unit> resetPassword(PasswordResetModel passwordResetData) async {
     try {
       await firebaseAuth.sendPasswordResetEmail(email: passwordResetData.email);

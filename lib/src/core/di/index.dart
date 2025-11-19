@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/authentication_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/implements/email_auth_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/implements/phone_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
@@ -10,7 +12,10 @@ import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentica
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/email_authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/phone_authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/email_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/phone_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
@@ -79,50 +84,64 @@ Future<void> init() async {
     () => AuthenticationRepositoryImpl(
       firebaseAuthentication: sl<FirebaseAuthenticationService>(),
       firebaseEmailAuthentication: sl<FirebaseEmailAuthenticationService>(),
-      firebasePhoneAuthentication: sl<FirebasePhoneAuthenticationService>(),
       firebaseUserService: sl<FirebaseUserService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
 
+  // Email Authentication Repository
+  sl.registerLazySingleton<EmailAuthenticationRepository>(
+    () => EmailAuthRepositoryImpl(
+      firebaseEmailAuthentication: sl<FirebaseEmailAuthenticationService>(),
+      firebaseUserService: sl<FirebaseUserService>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Phone Authentication Repository
+  sl.registerLazySingleton<PhoneAuthenticationRepository>(
+    () => PhoneAuthRepositoryImpl(
+      firebasePhoneAuthentication: sl<FirebasePhoneAuthenticationService>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
   /* Use Cases */
-  // Email Authentication Use Cases
-  sl.registerLazySingleton<SendEmailVerificationUseCase>(
-    () => SendEmailVerificationUseCase(sl<AuthenticationRepository>()),
+  // Authentication Use Cases
+  sl.registerLazySingleton<LinkEmailCredentialsAndVerify>(
+    () => LinkEmailCredentialsAndVerify(sl<AuthenticationRepository>()),
   );
-  sl.registerLazySingleton<CheckEmailVerificationUseCase>(
-    () => CheckEmailVerificationUseCase(sl<AuthenticationRepository>()),
+  sl.registerLazySingleton<SaveUserDataToFirestore>(
+    () => SaveUserDataToFirestore(sl<AuthenticationRepository>()),
   );
-  sl.registerLazySingleton<CreateUserAfterEmailVerificationUseCase>(
-    () =>
-        CreateUserAfterEmailVerificationUseCase(sl<AuthenticationRepository>()),
-  );
-  sl.registerLazySingleton<ResetPasswordUseCase>(
-    () => ResetPasswordUseCase(sl<AuthenticationRepository>()),
+  sl.registerLazySingleton<IsRegistrationCompleteUseCase>(
+    () => IsRegistrationCompleteUseCase(sl<AuthenticationRepository>()),
   );
   sl.registerLazySingleton<SignOutUseCase>(
     () => SignOutUseCase(sl<AuthenticationRepository>()),
   );
 
+  // Email Authentication Use Cases
+  sl.registerLazySingleton<SendEmailVerificationUseCase>(
+    () => SendEmailVerificationUseCase(sl<EmailAuthenticationRepository>()),
+  );
+  sl.registerLazySingleton<CheckEmailVerificationUseCase>(
+    () => CheckEmailVerificationUseCase(sl<EmailAuthenticationRepository>()),
+  );
+  sl.registerLazySingleton<ResetPasswordUseCase>(
+    () => ResetPasswordUseCase(sl<EmailAuthenticationRepository>()),
+  );
+
   // Phone Authentication Use Cases
   sl.registerLazySingleton<SendPhoneVerificationCodeUseCase>(
-    () => SendPhoneVerificationCodeUseCase(sl<AuthenticationRepository>()),
+    () => SendPhoneVerificationCodeUseCase(sl<PhoneAuthenticationRepository>()),
   );
   sl.registerLazySingleton<VerifyPhoneCodeUseCase>(
-    () => VerifyPhoneCodeUseCase(sl<AuthenticationRepository>()),
-  );
-  sl.registerLazySingleton<CompleteUserRegistrationUseCase>(
-    () => CompleteUserRegistrationUseCase(sl<AuthenticationRepository>()),
+    () => VerifyPhoneCodeUseCase(sl<PhoneAuthenticationRepository>()),
   );
   sl.registerLazySingleton<ResendPhoneVerificationCodeUseCase>(
-    () => ResendPhoneVerificationCodeUseCase(sl<AuthenticationRepository>()),
-  );
-  sl.registerLazySingleton<IsRegistrationCompleteUseCase>(
-    () => IsRegistrationCompleteUseCase(sl<AuthenticationRepository>()),
-  );
-  sl.registerLazySingleton<LinkEmailPasswordToPhoneAccountUseCase>(
     () =>
-        LinkEmailPasswordToPhoneAccountUseCase(sl<AuthenticationRepository>()),
+        ResendPhoneVerificationCodeUseCase(sl<PhoneAuthenticationRepository>()),
   );
 
   // User Use Cases
