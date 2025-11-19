@@ -108,11 +108,11 @@ Future<void> init() async {
 
   /* Use Cases */
   // Authentication Use Cases
-  sl.registerLazySingleton<LinkEmailCredentialsAndVerify>(
-    () => LinkEmailCredentialsAndVerify(sl<AuthenticationRepository>()),
+  sl.registerLazySingleton<LinkEmailCredentialsAndVerifyUseCase>(
+    () => LinkEmailCredentialsAndVerifyUseCase(sl<AuthenticationRepository>()),
   );
-  sl.registerLazySingleton<SaveUserDataToFirestore>(
-    () => SaveUserDataToFirestore(sl<AuthenticationRepository>()),
+  sl.registerLazySingleton<SaveUserDataToFirestoreUseCase>(
+    () => SaveUserDataToFirestoreUseCase(sl<AuthenticationRepository>()),
   );
   sl.registerLazySingleton<IsRegistrationCompleteUseCase>(
     () => IsRegistrationCompleteUseCase(sl<AuthenticationRepository>()),

@@ -3,10 +3,10 @@ import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 
-class LinkEmailCredentialsAndVerify {
+class LinkEmailCredentialsAndVerifyUseCase {
   final AuthenticationRepository repository;
 
-  LinkEmailCredentialsAndVerify(this.repository);
+  LinkEmailCredentialsAndVerifyUseCase(this.repository);
 
   Future<Either<Failure, Unit>> call(
     UserSignUpEntity userRegistrationData,
@@ -15,10 +15,10 @@ class LinkEmailCredentialsAndVerify {
   }
 }
 
-class SaveUserDataToFirestore {
+class SaveUserDataToFirestoreUseCase {
   final AuthenticationRepository repository;
 
-  SaveUserDataToFirestore(this.repository);
+  SaveUserDataToFirestoreUseCase(this.repository);
 
   Future<Either<Failure, Unit>> call() async {
     return await repository.saveUserDataToFirestore();
