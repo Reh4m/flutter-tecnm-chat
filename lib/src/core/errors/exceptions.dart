@@ -74,3 +74,18 @@ class MediaTooLargeException implements Exception {}
 class UnsupportedMediaTypeException implements Exception {}
 
 class ThumbnailGenerationException implements Exception {}
+
+// Group Exceptions
+class GroupNotFoundException implements Exception {}
+
+class GroupAlreadyExistsException implements Exception {}
+
+class NotGroupAdminException implements Exception {}
+
+class NotGroupMemberException implements Exception {}
+
+class GroupOperationFailedException implements Exception {}
+
+class MaxGroupMembersExceededException implements Exception {}
+
+class CannotRemoveGroupCreatorException implements Exception {}

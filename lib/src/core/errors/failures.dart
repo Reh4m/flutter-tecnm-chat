@@ -201,3 +201,39 @@ class ThumbnailGenerationFailure extends Failure {
   @override
   List<Object?> get props => [];
 }
+
+// Group Failures
+class GroupNotFoundFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class GroupAlreadyExistsFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class NotGroupAdminFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class NotGroupMemberFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class GroupOperationFailedFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class MaxGroupMembersExceededFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class CannotRemoveGroupCreatorFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
