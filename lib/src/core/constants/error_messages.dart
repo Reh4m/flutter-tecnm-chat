@@ -37,4 +37,15 @@ class ErrorMessages {
       'Ingresa tu número con código de país: +52 123 456 7890';
   static const String verificationCodeHint =
       'Código de 6 dígitos enviado por SMS';
+  // Contact Errors
+  static const String contactAlreadyExists = 'Este contacto ya está agregado';
+  static const String contactNotFound = 'Contacto no encontrado';
+  static const String cannotAddSelfAsContact =
+      'No puedes agregarte a ti mismo como contacto';
+  static const String contactOperationFailed =
+      'No se pudo completar la operación';
+  static const String userNotFoundByPhone =
+      'No se encontró ningún usuario con ese número';
+  static const String userNotFoundByEmail =
+      'No se encontró ningún usuario con ese correo';
 }

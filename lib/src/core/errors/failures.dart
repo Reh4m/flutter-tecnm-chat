@@ -123,3 +123,24 @@ class PhoneAuthNotEnabledFailure extends Failure {
   @override
   List<Object?> get props => [];
 }
+
+// Contact Failures
+class ContactAlreadyExistsFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class ContactNotFoundFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class CannotAddSelfAsContactFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class ContactOperationFailedFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}

@@ -3,19 +3,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/authentication_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/implements/contact_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/email_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/phone_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/contact_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/contact_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/email_authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/phone_authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/contact_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/email_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/phone_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
@@ -69,8 +73,12 @@ Future<void> init() async {
     ),
   );
 
+  // Firebase Contact Service
+  sl.registerLazySingleton<FirebaseContactService>(
+    () => FirebaseContactService(firestore: sl<FirebaseFirestore>()),
+  );
+
   /* Repositories */
-  // Authentication Repository
   // User Repository
   sl.registerLazySingleton<UserRepository>(
     () => UserRepositoryImpl(
@@ -102,6 +110,15 @@ Future<void> init() async {
   sl.registerLazySingleton<PhoneAuthenticationRepository>(
     () => PhoneAuthRepositoryImpl(
       firebasePhoneAuthentication: sl<FirebasePhoneAuthenticationService>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Contact Repository
+  sl.registerLazySingleton<ContactRepository>(
+    () => ContactRepositoryImpl(
+      contactService: sl<FirebaseContactService>(),
+      userService: sl<FirebaseUserService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
@@ -177,5 +194,46 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<CheckUserExistsUseCase>(
     () => CheckUserExistsUseCase(sl<UserRepository>()),
+  );
+
+  // Contact Use Cases
+  sl.registerLazySingleton<AddContactUseCase>(
+    () => AddContactUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<GetUserContactsUseCase>(
+    () => GetUserContactsUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<GetUserContactsStreamUseCase>(
+    () => GetUserContactsStreamUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<GetContactByUserIdUseCase>(
+    () => GetContactByUserIdUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<RemoveContactUseCase>(
+    () => RemoveContactUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<UpdateContactUseCase>(
+    () => UpdateContactUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<ToggleFavoriteContactUseCase>(
+    () => ToggleFavoriteContactUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<ToggleBlockContactUseCase>(
+    () => ToggleBlockContactUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<CheckContactExistsUseCase>(
+    () => CheckContactExistsUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<SearchUserByPhoneNumberUseCase>(
+    () => SearchUserByPhoneNumberUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<SearchUserByEmailUseCase>(
+    () => SearchUserByEmailUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<GetFavoriteContactsUseCase>(
+    () => GetFavoriteContactsUseCase(sl<ContactRepository>()),
+  );
+  sl.registerLazySingleton<GetBlockedContactsUseCase>(
+    () => GetBlockedContactsUseCase(sl<ContactRepository>()),
   );
 }

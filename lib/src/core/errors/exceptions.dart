@@ -41,3 +41,12 @@ class IncompleteRegistrationException implements Exception {}
 class MissingVerificationIdException implements Exception {}
 
 class PhoneAuthNotEnabledException implements Exception {}
+
+// Contact Exceptions
+class ContactAlreadyExistsException implements Exception {}
+
+class ContactNotFoundException implements Exception {}
+
+class CannotAddSelfAsContactException implements Exception {}
+
+class ContactOperationFailedException implements Exception {}
