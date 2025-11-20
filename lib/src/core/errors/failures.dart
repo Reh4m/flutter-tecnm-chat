@@ -175,3 +175,29 @@ class MessageSendFailedFailure extends Failure {
   @override
   List<Object?> get props => [];
 }
+
+// Media Failures
+class MediaUploadFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class InvalidMediaFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class MediaTooLargeFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class UnsupportedMediaTypeFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class ThumbnailGenerationFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}

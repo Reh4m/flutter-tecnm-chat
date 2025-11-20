@@ -6,9 +6,11 @@ import 'package:flutter_whatsapp_clon/src/data/implements/authentication_reposit
 import 'package:flutter_whatsapp_clon/src/data/implements/contact_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/conversation_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/email_auth_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/implements/media_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/phone_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/chat_media_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/contact_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversation_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
@@ -19,12 +21,14 @@ import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_rep
 import 'package:flutter_whatsapp_clon/src/domain/repositories/contact_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/conversation_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/email_authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/media_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/phone_authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/contact_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/conversation_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/email_authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/media_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/phone_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
 import 'package:get_it/get_it.dart';
@@ -87,6 +91,11 @@ Future<void> init() async {
     () => FirebaseConversationService(firestore: sl<FirebaseFirestore>()),
   );
 
+  // Firebase Chat Media Service
+  sl.registerLazySingleton<FirebaseChatMediaService>(
+    () => FirebaseChatMediaService(storage: sl<FirebaseStorage>()),
+  );
+
   /* Repositories */
   // User Repository
   sl.registerLazySingleton<UserRepository>(
@@ -136,6 +145,14 @@ Future<void> init() async {
   sl.registerLazySingleton<ConversationRepository>(
     () => ConversationRepositoryImpl(
       conversationService: sl<FirebaseConversationService>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Media Repository
+  sl.registerLazySingleton<MediaRepository>(
+    () => MediaRepositoryImpl(
+      mediaService: sl<FirebaseChatMediaService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
@@ -293,5 +310,37 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<GetMessageByIdUseCase>(
     () => GetMessageByIdUseCase(sl<ConversationRepository>()),
+  );
+
+  // Media Use Cases
+  sl.registerLazySingleton<UploadChatImageUseCase>(
+    () => UploadChatImageUseCase(sl<MediaRepository>()),
+  );
+  sl.registerLazySingleton<UploadChatVideoUseCase>(
+    () => UploadChatVideoUseCase(sl<MediaRepository>()),
+  );
+  sl.registerLazySingleton<UploadChatAudioUseCase>(
+    () => UploadChatAudioUseCase(sl<MediaRepository>()),
+  );
+  sl.registerLazySingleton<UploadChatDocumentUseCase>(
+    () => UploadChatDocumentUseCase(sl<MediaRepository>()),
+  );
+  sl.registerLazySingleton<UploadVideoThumbnailUseCase>(
+    () => UploadVideoThumbnailUseCase(sl<MediaRepository>()),
+  );
+  sl.registerLazySingleton<DeleteMediaUseCase>(
+    () => DeleteMediaUseCase(sl<MediaRepository>()),
+  );
+  sl.registerLazySingleton<UploadFileWithProgressUseCase>(
+    () => UploadFileWithProgressUseCase(sl<MediaRepository>()),
+  );
+  sl.registerLazySingleton<ValidateImageSizeUseCase>(
+    () => ValidateImageSizeUseCase(sl<MediaRepository>()),
+  );
+  sl.registerLazySingleton<ValidateVideoSizeUseCase>(
+    () => ValidateVideoSizeUseCase(sl<MediaRepository>()),
+  );
+  sl.registerLazySingleton<ValidateAudioSizeUseCase>(
+    () => ValidateAudioSizeUseCase(sl<MediaRepository>()),
   );
 }

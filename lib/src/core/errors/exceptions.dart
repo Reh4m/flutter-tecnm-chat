@@ -63,3 +63,14 @@ class InvalidConversationDataException implements Exception {}
 class ConversationOperationFailedException implements Exception {}
 
 class MessageSendFailedException implements Exception {}
+
+// Media Exceptions
+class MediaUploadException implements Exception {}
+
+class InvalidMediaException implements Exception {}
+
+class MediaTooLargeException implements Exception {}
+
+class UnsupportedMediaTypeException implements Exception {}
+
+class ThumbnailGenerationException implements Exception {}
