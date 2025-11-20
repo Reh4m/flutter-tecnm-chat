@@ -4,22 +4,26 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/authentication_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/contact_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/implements/conversation_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/email_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/phone_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/contact_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversation_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/contact_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/conversation_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/email_authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/phone_authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/contact_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/conversation_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/email_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/phone_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
@@ -78,6 +82,11 @@ Future<void> init() async {
     () => FirebaseContactService(firestore: sl<FirebaseFirestore>()),
   );
 
+  // Firebase Conversation Service
+  sl.registerLazySingleton<FirebaseConversationService>(
+    () => FirebaseConversationService(firestore: sl<FirebaseFirestore>()),
+  );
+
   /* Repositories */
   // User Repository
   sl.registerLazySingleton<UserRepository>(
@@ -119,6 +128,14 @@ Future<void> init() async {
     () => ContactRepositoryImpl(
       contactService: sl<FirebaseContactService>(),
       userService: sl<FirebaseUserService>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Conversation Repository
+  sl.registerLazySingleton<ConversationRepository>(
+    () => ConversationRepositoryImpl(
+      conversationService: sl<FirebaseConversationService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
@@ -235,5 +252,46 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<GetBlockedContactsUseCase>(
     () => GetBlockedContactsUseCase(sl<ContactRepository>()),
+  );
+
+  // Conversation
+  sl.registerLazySingleton<CreateConversationUseCase>(
+    () => CreateConversationUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<GetOrCreateDirectConversationUseCase>(
+    () => GetOrCreateDirectConversationUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<GetUserConversationsStreamUseCase>(
+    () => GetUserConversationsStreamUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<GetConversationByIdUseCase>(
+    () => GetConversationByIdUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<UpdateConversationUseCase>(
+    () => UpdateConversationUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<DeleteConversationUseCase>(
+    () => DeleteConversationUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<SendMessageUseCase>(
+    () => SendMessageUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<GetConversationMessagesStreamUseCase>(
+    () => GetConversationMessagesStreamUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<GetConversationMessagesUseCase>(
+    () => GetConversationMessagesUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<MarkMessageAsReadUseCase>(
+    () => MarkMessageAsReadUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<MarkConversationAsReadUseCase>(
+    () => MarkConversationAsReadUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<DeleteMessageUseCase>(
+    () => DeleteMessageUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<GetMessageByIdUseCase>(
+    () => GetMessageByIdUseCase(sl<ConversationRepository>()),
   );
 }

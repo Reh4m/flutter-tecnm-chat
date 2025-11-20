@@ -144,3 +144,34 @@ class ContactOperationFailedFailure extends Failure {
   @override
   List<Object?> get props => [];
 }
+
+// Conversation Failures
+class ConversationNotFoundFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class ConversationAlreadyExistsFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class MessageNotFoundFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class InvalidConversationDataFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class ConversationOperationFailedFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class MessageSendFailedFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}

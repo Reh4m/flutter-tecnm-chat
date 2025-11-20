@@ -50,3 +50,16 @@ class ContactNotFoundException implements Exception {}
 class CannotAddSelfAsContactException implements Exception {}
 
 class ContactOperationFailedException implements Exception {}
+
+// Conversation Exceptions
+class ConversationNotFoundException implements Exception {}
+
+class ConversationAlreadyExistsException implements Exception {}
+
+class MessageNotFoundException implements Exception {}
+
+class InvalidConversationDataException implements Exception {}
+
+class ConversationOperationFailedException implements Exception {}
+
+class MessageSendFailedException implements Exception {}
