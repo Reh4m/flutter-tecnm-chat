@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/authentication_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_alert_dialog.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';

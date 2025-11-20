@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/phone_authentication_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/phone_authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_text_field.dart';

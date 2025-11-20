@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:blobs/blobs.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/email_verification_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/email_verification_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_alert_dialog.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
