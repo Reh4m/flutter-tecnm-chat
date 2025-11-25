@@ -1,0 +1,196 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_text_field.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/loading_overlay.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
+
+  @override
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _bioController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  void _loadUserData() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = context.read<UserProvider>();
+      final user = userProvider.currentUser;
+
+      if (user != null) {
+        _nameController.text = user.name;
+        _bioController.text = user.bio ?? '';
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _bioController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSaveProfile() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final userProvider = context.read<UserProvider>();
+    final currentUser = userProvider.currentUser;
+
+    if (currentUser == null) return;
+
+    final updatedUser = currentUser.copyWith(
+      name: _nameController.text.trim(),
+      bio: _bioController.text.trim(),
+      updatedAt: DateTime.now(),
+    );
+
+    final success = await userProvider.updateCurrentUserProfile(updatedUser);
+
+    if (!mounted) return;
+
+    if (success) {
+      _showToast(
+        title: 'Perfil actualizado',
+        description: 'Tu perfil se actualizó correctamente',
+        type: ToastNotificationType.success,
+      );
+      context.pop();
+    } else {
+      _showToast(
+        title: 'Error',
+        description:
+            userProvider.operationError ?? 'No se pudo actualizar el perfil',
+        type: ToastNotificationType.error,
+      );
+    }
+  }
+
+  void _showToast({
+    required String title,
+    required String description,
+    required ToastNotificationType type,
+  }) {
+    ToastNotification.show(
+      context,
+      title: title,
+      description: description,
+      type: type,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Editar Perfil',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: Consumer<UserProvider>(
+        builder: (context, userProvider, _) {
+          final isLoading = userProvider.operationState == UserState.loading;
+
+          return LoadingOverlay(
+            isLoading: isLoading,
+            message: 'Actualizando...',
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildProfileImage(theme, userProvider),
+                    const SizedBox(height: 32),
+                    CustomTextField(
+                      label: 'Nombre',
+                      hint: 'Tu nombre completo',
+                      controller: _nameController,
+                      validator: FormValidators.validateName,
+                    ),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      label: 'Bio',
+                      hint: 'Cuéntanos sobre ti',
+                      controller: _bioController,
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 32),
+                    CustomButton(
+                      text: 'Guardar Cambios',
+                      onPressed: isLoading ? null : _handleSaveProfile,
+                      width: double.infinity,
+                      icon: const Icon(Icons.save, size: 20),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildProfileImage(ThemeData theme, UserProvider userProvider) {
+    final user = userProvider.currentUser;
+
+    return Stack(
+      children: [
+        CircleAvatar(
+          radius: 60,
+          backgroundColor: theme.colorScheme.primary.withAlpha(50),
+          backgroundImage:
+              user?.photoUrl != null ? NetworkImage(user!.photoUrl!) : null,
+          child:
+              user?.photoUrl == null
+                  ? Icon(
+                    Icons.person,
+                    size: 60,
+                    color: theme.colorScheme.primary,
+                  )
+                  : null,
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: theme.scaffoldBackgroundColor,
+                width: 3,
+              ),
+            ),
+            child: Icon(
+              Icons.camera_alt,
+              size: 20,
+              color: theme.colorScheme.onPrimary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
