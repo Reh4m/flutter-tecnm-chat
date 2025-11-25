@@ -196,7 +196,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),

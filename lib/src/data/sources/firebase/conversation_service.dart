@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/conversation_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/message_model.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
 
 class FirebaseConversationService {
   final FirebaseFirestore firestore;
@@ -201,10 +202,40 @@ class FirebaseConversationService {
     required String userId,
   }) async {
     try {
+      final conversationDoc =
+          await firestore
+              .collection(_conversationsCollection)
+              .doc(conversationId)
+              .get();
+
+      if (!conversationDoc.exists) return;
+
       await firestore
           .collection(_conversationsCollection)
           .doc(conversationId)
-          .update({'unreadCount.$userId': 0});
+          .update({
+            'unreadCount.$userId': 0,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+
+      final messagesSnapshot =
+          await firestore
+              .collection(_messagesCollection)
+              .where('conversationId', isEqualTo: conversationId)
+              .where('senderId', isNotEqualTo: userId)
+              .where('status', whereIn: ['sent', 'delivered'])
+              .get();
+
+      if (messagesSnapshot.docs.isNotEmpty) {
+        final batch = firestore.batch();
+        for (var doc in messagesSnapshot.docs) {
+          batch.update(doc.reference, {
+            'status': 'read',
+            'readBy': FieldValue.arrayUnion([userId]),
+          });
+        }
+        await batch.commit();
+      }
     } catch (e) {
       throw ServerException();
     }
@@ -237,6 +268,9 @@ class FirebaseConversationService {
         if (participantId != message.senderId) {
           newUnreadCount[participantId] =
               (newUnreadCount[participantId] ?? 0) + 1;
+        } else {
+          // El remitente siempre tiene contador en 0
+          newUnreadCount[participantId] = 0;
         }
       }
 
@@ -265,6 +299,61 @@ class FirebaseConversationService {
     } catch (e) {
       if (e is MessageNotFoundException) rethrow;
       throw ServerException();
+    }
+  }
+
+  Future<void> updateMessageStatus({
+    required String messageId,
+    required MessageStatus status,
+  }) async {
+    try {
+      await firestore.collection(_messagesCollection).doc(messageId).update({
+        'status': _messageStatusToString(status),
+      });
+    } catch (e) {
+      throw ServerException();
+    }
+  }
+
+  Future<void> markAllMessagesAsDelivered({
+    required String conversationId,
+    required String userId,
+  }) async {
+    try {
+      // Obtener todos los mensajes no leídos que no son del usuario actual
+      final querySnapshot =
+          await firestore
+              .collection(_messagesCollection)
+              .where('conversationId', isEqualTo: conversationId)
+              .where('senderId', isNotEqualTo: userId)
+              .where('status', whereIn: ['sending', 'sent'])
+              .get();
+
+      // Actualizar en batch
+      final batch = firestore.batch();
+
+      for (var doc in querySnapshot.docs) {
+        batch.update(doc.reference, {'status': 'delivered'});
+      }
+
+      await batch.commit();
+    } catch (e) {
+      throw ServerException();
+    }
+  }
+
+  static String _messageStatusToString(MessageStatus status) {
+    switch (status) {
+      case MessageStatus.sending:
+        return 'sending';
+      case MessageStatus.sent:
+        return 'sent';
+      case MessageStatus.delivered:
+        return 'delivered';
+      case MessageStatus.read:
+        return 'read';
+      case MessageStatus.failed:
+        return 'failed';
     }
   }
 }

@@ -312,4 +312,48 @@ class ConversationRepositoryImpl implements ConversationRepository {
       return Left(ServerFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> updateMessageStatus({
+    required String messageId,
+    required MessageStatus status,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return Left(NetworkFailure());
+    }
+
+    try {
+      await conversationService.updateMessageStatus(
+        messageId: messageId,
+        status: status,
+      );
+      return const Right(unit);
+    } on ServerException {
+      return Left(ServerFailure());
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> markAllMessagesAsDelivered({
+    required String conversationId,
+    required String userId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return Left(NetworkFailure());
+    }
+
+    try {
+      await conversationService.markAllMessagesAsDelivered(
+        conversationId: conversationId,
+        userId: userId,
+      );
+      return const Right(unit);
+    } on ServerException {
+      return Left(ServerFailure());
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
 }

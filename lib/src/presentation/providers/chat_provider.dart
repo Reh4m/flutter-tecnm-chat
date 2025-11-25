@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
@@ -14,7 +15,13 @@ class ChatProvider extends ChangeNotifier {
   final SendMessageUseCase _sendMessageUseCase = sl<SendMessageUseCase>();
   final MarkMessageAsReadUseCase _markMessageAsReadUseCase =
       sl<MarkMessageAsReadUseCase>();
+  final MarkConversationAsReadUseCase _markConversationAsReadUseCase =
+      sl<MarkConversationAsReadUseCase>();
   final DeleteMessageUseCase _deleteMessageUseCase = sl<DeleteMessageUseCase>();
+  final UpdateMessageStatusUseCase _updateMessageStatusUseCase =
+      sl<UpdateMessageStatusUseCase>();
+  final MarkAllMessagesAsDeliveredUseCase _markAllMessagesAsDeliveredUseCase =
+      sl<MarkAllMessagesAsDeliveredUseCase>();
 
   ChatState _messagesState = ChatState.initial;
   List<MessageEntity> _messages = [];
@@ -25,6 +32,7 @@ class ChatProvider extends ChangeNotifier {
   String? _operationError;
 
   String? _currentConversationId;
+  Timer? _statusCheckTimer;
 
   ChatState get messagesState => _messagesState;
   List<MessageEntity> get messages => _messages;
@@ -39,6 +47,8 @@ class ChatProvider extends ChangeNotifier {
     _currentConversationId = conversationId;
     _setMessagesState(ChatState.loading);
 
+    _statusCheckTimer?.cancel();
+
     _messagesSubscription = _getMessagesStreamUseCase(
       conversationId: conversationId,
       limit: limit,
@@ -49,6 +59,10 @@ class ChatProvider extends ChangeNotifier {
           (messages) {
             _messages = messages;
             _setMessagesState(ChatState.success);
+
+            _markMessagesAsDeliveredOnLoad(conversationId);
+
+            _startStatusCheckTimer(conversationId);
           },
         );
       },
@@ -58,24 +72,82 @@ class ChatProvider extends ChangeNotifier {
     );
   }
 
+  void _startStatusCheckTimer(String conversationId) {
+    _statusCheckTimer?.cancel();
+
+    _statusCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      _checkAndUpdateMessageStatuses(conversationId);
+    });
+  }
+
+  Future<void> _checkAndUpdateMessageStatuses(String conversationId) async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (currentUserId == null) return;
+
+    // Actualizar mensajes en estado 'sending' a 'sent'
+    for (final message in _messages) {
+      if (message.senderId == currentUserId) {
+        if (message.status == MessageStatus.sending) {
+          await _updateMessageStatusUseCase(
+            messageId: message.id,
+            status: MessageStatus.sent,
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _markMessagesAsDeliveredOnLoad(String conversationId) async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (currentUserId == null) return;
+
+    await _markAllMessagesAsDeliveredUseCase(
+      conversationId: conversationId,
+      userId: currentUserId,
+    );
+  }
+
   void stopMessagesListener() {
     _messagesSubscription?.cancel();
     _messagesSubscription = null;
+    _statusCheckTimer?.cancel();
+    _statusCheckTimer = null;
     _currentConversationId = null;
   }
 
   Future<bool> sendMessage(MessageEntity message) async {
     _setOperationState(ChatState.loading);
 
-    final result = await _sendMessageUseCase(message);
+    // Crear mensaje con estado 'sending'
+    final messageToSend = message.copyWith(status: MessageStatus.sending);
+
+    final result = await _sendMessageUseCase(messageToSend);
 
     return result.fold(
       (failure) {
         _setOperationError(_mapFailureToMessage(failure));
+
+        // Marcar como fallido si hay error
+        if (message.id.isNotEmpty) {
+          _updateMessageStatusUseCase(
+            messageId: message.id,
+            status: MessageStatus.failed,
+          );
+        }
+
         return false;
       },
       (sentMessage) {
         _setOperationState(ChatState.success);
+
+        // Actualizar a 'sent' después de enviar exitosamente
+        _updateMessageStatusUseCase(
+          messageId: sentMessage.id,
+          status: MessageStatus.sent,
+        );
+
         return true;
       },
     );
@@ -108,6 +180,37 @@ class ChatProvider extends ChangeNotifier {
         return true;
       },
     );
+  }
+
+  Future<void> markMessagesAsReadInConversation(String conversationId) async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) return;
+
+    await _markConversationAsReadUseCase(
+      conversationId: conversationId,
+      userId: currentUserId,
+    );
+
+    for (final message in _messages) {
+      if (message.senderId != currentUserId &&
+          message.status != MessageStatus.read) {
+        await _markMessageAsReadUseCase(
+          messageId: message.id,
+          userId: currentUserId,
+        );
+      }
+    }
+  }
+
+  Future<bool> retryFailedMessage(MessageEntity message) async {
+    // Actualizar estado a 'sending'
+    await _updateMessageStatusUseCase(
+      messageId: message.id,
+      status: MessageStatus.sending,
+    );
+
+    // Intentar reenviar
+    return await sendMessage(message);
   }
 
   void _setMessagesState(ChatState newState) {
@@ -162,6 +265,7 @@ class ChatProvider extends ChangeNotifier {
   @override
   void dispose() {
     stopMessagesListener();
+    _statusCheckTimer?.cancel();
     super.dispose();
   }
 }

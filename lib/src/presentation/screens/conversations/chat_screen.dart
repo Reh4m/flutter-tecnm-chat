@@ -39,6 +39,8 @@ class _ChatScreenState extends State<ChatScreen> {
           conversationId: widget.conversationId,
           userId: currentUserId,
         );
+
+        chatProvider.markMessagesAsReadInConversation(widget.conversationId);
       }
     });
   }
@@ -75,6 +77,19 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _retryMessage(MessageEntity message) async {
+    final chatProvider = context.read<ChatProvider>();
+    final success = await chatProvider.retryFailedMessage(message);
+
+    if (!success && mounted) {
+      _showToast(
+        title: 'Error',
+        description: 'No se pudo reenviar el mensaje',
+        type: ToastNotificationType.error,
+      );
+    }
+  }
+
   void _showToast({
     required String title,
     required String description,
@@ -98,8 +113,8 @@ class _ChatScreenState extends State<ChatScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: Consumer<ConversationsProvider>(
-          builder: (context, conversationsProvider, _) {
+        title: Consumer2<ConversationsProvider, ChatProvider>(
+          builder: (context, conversationsProvider, chatProvider, _) {
             final conversation =
                 conversationsProvider.conversations
                     .where((c) => c.id == widget.conversationId)
@@ -110,6 +125,7 @@ class _ChatScreenState extends State<ChatScreen> {
             }
 
             final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+            final unreadCount = conversation.getUnreadCount(currentUserId);
 
             if (conversation.isDirect) {
               final otherUserId = conversationsProvider.getOtherUserId(
@@ -175,13 +191,27 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      conversation.groupName ?? 'Grupo',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          conversation.groupName ?? 'Grupo',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (unreadCount > 0)
+                          Text(
+                            '$unreadCount mensaje${unreadCount > 1 ? 's' : ''} no leído${unreadCount > 1 ? 's' : ''}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.secondary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -263,7 +293,14 @@ class _ChatScreenState extends State<ChatScreen> {
                         FirebaseAuth.instance.currentUser?.uid ?? '';
                     final isMe = message.senderId == currentUserId;
 
-                    return MessageBubble(message: message, isMe: isMe);
+                    return MessageBubble(
+                      message: message,
+                      isMe: isMe,
+                      onRetry:
+                          message.status == MessageStatus.failed
+                              ? () => _retryMessage(message)
+                              : null,
+                    );
                   },
                 );
               },

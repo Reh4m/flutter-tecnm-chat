@@ -172,3 +172,35 @@ class GetMessageByIdUseCase {
     return await repository.getMessageById(messageId);
   }
 }
+
+class UpdateMessageStatusUseCase {
+  final ConversationRepository repository;
+
+  UpdateMessageStatusUseCase(this.repository);
+
+  Future<Either<Failure, Unit>> call({
+    required String messageId,
+    required MessageStatus status,
+  }) async {
+    return await repository.updateMessageStatus(
+      messageId: messageId,
+      status: status,
+    );
+  }
+}
+
+class MarkAllMessagesAsDeliveredUseCase {
+  final ConversationRepository repository;
+
+  MarkAllMessagesAsDeliveredUseCase(this.repository);
+
+  Future<Either<Failure, Unit>> call({
+    required String conversationId,
+    required String userId,
+  }) async {
+    return await repository.markAllMessagesAsDelivered(
+      conversationId: conversationId,
+      userId: userId,
+    );
+  }
+}

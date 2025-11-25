@@ -42,4 +42,12 @@ abstract class ConversationRepository {
   });
   Future<Either<Failure, Unit>> deleteMessage(String messageId);
   Future<Either<Failure, MessageEntity>> getMessageById(String messageId);
+  Future<Either<Failure, Unit>> updateMessageStatus({
+    required String messageId,
+    required MessageStatus status,
+  });
+  Future<Either<Failure, Unit>> markAllMessagesAsDelivered({
+    required String conversationId,
+    required String userId,
+  });
 }

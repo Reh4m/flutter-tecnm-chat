@@ -328,6 +328,12 @@ Future<void> init() async {
   sl.registerLazySingleton<GetMessageByIdUseCase>(
     () => GetMessageByIdUseCase(sl<ConversationRepository>()),
   );
+  sl.registerLazySingleton<UpdateMessageStatusUseCase>(
+    () => UpdateMessageStatusUseCase(sl<ConversationRepository>()),
+  );
+  sl.registerLazySingleton<MarkAllMessagesAsDeliveredUseCase>(
+    () => MarkAllMessagesAsDeliveredUseCase(sl<ConversationRepository>()),
+  );
 
   // Media Use Cases
   sl.registerLazySingleton<UploadChatImageUseCase>(
