@@ -49,7 +49,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       );
 
       // 2. Actualizar perfil en Firebase Auth
-      await firebaseAuthentication.updateUserProfile(
+      await firebaseUserService.updateUserProfile(
         displayName: registrationData.name,
         photoUrl: registrationData.photoUrl,
       );

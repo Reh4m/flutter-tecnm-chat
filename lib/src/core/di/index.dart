@@ -80,6 +80,7 @@ Future<void> init() async {
   // Firebase Users Service
   sl.registerLazySingleton<FirebaseUserService>(
     () => FirebaseUserService(
+      firebaseAuth: sl<FirebaseAuth>(),
       firestore: sl<FirebaseFirestore>(),
       storageService: sl<FirebaseStorageService>(),
     ),

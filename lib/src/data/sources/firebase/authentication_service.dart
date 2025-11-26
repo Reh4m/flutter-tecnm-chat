@@ -23,38 +23,4 @@ class FirebaseAuthenticationService {
       throw ServerException();
     }
   }
-
-  Future<void> updateUserProfile({
-    String? displayName,
-    String? photoUrl,
-  }) async {
-    try {
-      final User? user = firebaseAuth.currentUser;
-
-      if (user == null) {
-        throw UserNotFoundException();
-      }
-
-      if (displayName != null && displayName.isNotEmpty) {
-        await user.updateDisplayName(displayName);
-      }
-
-      if (photoUrl != null && photoUrl.isNotEmpty) {
-        await user.updatePhotoURL(photoUrl);
-      }
-
-      await user.reload();
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'requires-recent-login') {
-        throw UnauthorizedUserOperationException();
-      }
-      throw ServerException();
-    } catch (e) {
-      if (e is UserNotFoundException ||
-          e is UnauthorizedUserOperationException) {
-        rethrow;
-      }
-      throw ServerException();
-    }
-  }
 }
