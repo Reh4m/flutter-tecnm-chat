@@ -112,7 +112,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
           name: currentUser.displayName ?? existingUser.name,
           email: currentUser.email ?? existingUser.email,
           phoneNumber: currentUser.phoneNumber,
-          photoUrl: currentUser.photoURL ?? existingUser.photoUrl,
+          photoUrl: currentUser.photoURL,
           isVerified: true,
           updatedAt: DateTime.now(),
         );
@@ -126,7 +126,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
             name: currentUser.displayName ?? '',
             email: currentUser.email ?? '',
             phoneNumber: currentUser.phoneNumber,
-            photoUrl: currentUser.photoURL ?? '',
+            photoUrl: currentUser.photoURL,
             createdAt: DateTime.now(),
             isVerified: true,
           ),
