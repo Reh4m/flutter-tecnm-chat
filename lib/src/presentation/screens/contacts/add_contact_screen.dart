@@ -255,9 +255,11 @@ class _AddContactScreenState extends State<AddContactScreen> {
               radius: 40,
               backgroundColor: theme.colorScheme.primary.withAlpha(50),
               backgroundImage:
-                  user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+                  user.photoUrl != null && user.photoUrl!.isNotEmpty
+                      ? NetworkImage(user.photoUrl!)
+                      : null,
               child:
-                  user.photoUrl == null
+                  user.photoUrl == null || user.photoUrl!.isEmpty
                       ? Text(
                         user.initials,
                         style: theme.textTheme.headlineMedium?.copyWith(

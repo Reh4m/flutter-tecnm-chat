@@ -148,9 +148,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         CircleAvatar(
           radius: 60,
           backgroundColor: theme.colorScheme.primary.withAlpha(50),
-          backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+          backgroundImage:
+              photoUrl != null && photoUrl.isNotEmpty
+                  ? NetworkImage(photoUrl)
+                  : null,
           child:
-              photoUrl == null
+              photoUrl == null || photoUrl.isEmpty
                   ? Icon(
                     Icons.person,
                     size: 60,

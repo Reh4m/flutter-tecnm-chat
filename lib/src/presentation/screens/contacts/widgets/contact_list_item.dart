@@ -24,11 +24,11 @@ class ContactListItem extends StatelessWidget {
         radius: 28,
         backgroundColor: theme.colorScheme.primary.withAlpha(50),
         backgroundImage:
-            contactUser?.photoUrl != null
+            contactUser?.photoUrl != null && contactUser!.photoUrl!.isNotEmpty
                 ? NetworkImage(contactUser!.photoUrl!)
                 : null,
         child:
-            contactUser?.photoUrl == null
+            contactUser?.photoUrl == null || contactUser!.photoUrl!.isEmpty
                 ? Text(
                   contactUser?.initials ?? '?',
                   style: theme.textTheme.titleLarge?.copyWith(
