@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/phone_authentication_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/utils/image_picker_service.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_text_field.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/editable_avatar.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/loading_overlay.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +27,8 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  File? _profileImage;
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -35,18 +41,32 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
     super.dispose();
   }
 
+  Future<void> _handleSelectImage() async {
+    await ImagePickerService.showImageSourceDialog(
+      context,
+      onImageSelected: (file) {
+        if (file != null) {
+          setState(() {
+            _profileImage = file;
+          });
+        }
+      },
+    );
+  }
+
   Future<void> _handleCompleteRegistration() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final provider = context.read<PhoneAuthenticationProvider>();
 
     await provider.completeRegistration(
-      UserSignUpEntity(
+      userRegistrationData: UserSignUpEntity(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
         confirmPassword: _confirmPasswordController.text,
       ),
+      profileImageFile: _profileImage,
     );
 
     if (!mounted) return;
@@ -159,38 +179,14 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
   }
 
   Widget _buildAvatar(ThemeData theme) {
-    return Stack(
-      children: [
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: theme.colorScheme.surface,
-          child: Icon(
-            Icons.person,
-            size: 60,
-            color: theme.colorScheme.onSurface.withAlpha(100),
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.scaffoldBackgroundColor,
-                width: 3,
-              ),
-            ),
-            child: Icon(
-              Icons.camera_alt,
-              size: 20,
-              color: theme.colorScheme.onPrimary,
-            ),
-          ),
-        ),
-      ],
+    return EditableAvatar(
+      imageFile: _profileImage,
+      initials:
+          _nameController.text.isNotEmpty
+              ? _nameController.text[0].toUpperCase()
+              : '?',
+      radius: 60,
+      onTap: _handleSelectImage,
     );
   }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/user_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
 
 enum UserState { initial, loading, success, error }
+
+enum AvatarUploadState { initial, uploading, success, error }
 
 class UserProvider extends ChangeNotifier {
   final GetCurrentUserUseCase _getCurrentUserUseCase =
@@ -17,6 +20,8 @@ class UserProvider extends ChangeNotifier {
   final UpdateUserUseCase _updateUserUseCase = sl<UpdateUserUseCase>();
   final UpdateNotificationSettingsUseCase _updateNotificationSettingsUseCase =
       sl<UpdateNotificationSettingsUseCase>();
+  final UploadProfileImageUseCase _uploadProfileImageUseCase =
+      sl<UploadProfileImageUseCase>();
 
   UserState _currentUserState = UserState.initial;
   UserEntity? _currentUser;
@@ -94,12 +99,45 @@ class UserProvider extends ChangeNotifier {
     );
   }
 
-  Future<bool> updateCurrentUserProfile(UserEntity updatedUser) async {
+  Future<bool> updateCurrentUserWithImage({
+    required UserEntity updatedUser,
+    File? profileImageFile,
+  }) async {
     if (_currentUser == null) return false;
 
     _setOperationState(UserState.loading);
+    notifyListeners();
 
-    final result = await _updateUserUseCase(updatedUser);
+    String? imageUrl;
+
+    if (profileImageFile != null) {
+      notifyListeners();
+
+      final uploadResult = await _uploadProfileImageUseCase(
+        profileImageFile,
+        _currentUser!.id,
+      );
+
+      final imageUploadSuccess = await uploadResult.fold(
+        (failure) {
+          _setOperationError(_mapFailureToMessage(failure));
+          return false;
+        },
+        (url) {
+          imageUrl = url;
+          return true;
+        },
+      );
+
+      if (!imageUploadSuccess) return false;
+    }
+
+    final userToUpdate =
+        imageUrl != null
+            ? updatedUser.copyWith(photoUrl: imageUrl)
+            : updatedUser;
+
+    final result = await _updateUserUseCase(userToUpdate);
 
     return result.fold(
       (failure) {
@@ -108,6 +146,7 @@ class UserProvider extends ChangeNotifier {
       },
       (user) {
         _currentUser = user;
+        _setOperationState(UserState.success);
         _setOperationState(UserState.success);
         notifyListeners();
         return true;

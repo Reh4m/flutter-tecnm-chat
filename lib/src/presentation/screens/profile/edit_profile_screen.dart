@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/utils/image_picker_service.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_text_field.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/editable_avatar.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/loading_overlay.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +23,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _bioController = TextEditingController();
+
+  File? _newProfileImage;
 
   @override
   void initState() {
@@ -36,6 +42,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _bioController.text = user.bio ?? '';
       }
     });
+  }
+
+  Future<void> _handleSelectImage() async {
+    await ImagePickerService.showImageSourceDialog(
+      context,
+      onImageSelected: (file) {
+        if (file != null) {
+          setState(() {
+            _newProfileImage = file;
+          });
+        }
+      },
+    );
   }
 
   @override
@@ -59,7 +78,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       updatedAt: DateTime.now(),
     );
 
-    final success = await userProvider.updateCurrentUserProfile(updatedUser);
+    final success = await userProvider.updateCurrentUserWithImage(
+      updatedUser: updatedUser,
+      profileImageFile: _newProfileImage,
+    );
 
     if (!mounted) return;
 
@@ -153,44 +175,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildProfileImage(ThemeData theme, UserProvider userProvider) {
     final user = userProvider.currentUser;
+    final isLoading = userProvider.currentUserState == UserState.loading;
 
-    return Stack(
-      children: [
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: theme.colorScheme.primary.withAlpha(50),
-          backgroundImage:
-              user?.photoUrl != null ? NetworkImage(user!.photoUrl!) : null,
-          child:
-              user?.photoUrl == null
-                  ? Icon(
-                    Icons.person,
-                    size: 60,
-                    color: theme.colorScheme.primary,
-                  )
-                  : null,
-        ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.scaffoldBackgroundColor,
-                width: 3,
-              ),
-            ),
-            child: Icon(
-              Icons.camera_alt,
-              size: 20,
-              color: theme.colorScheme.onPrimary,
-            ),
-          ),
-        ),
-      ],
+    return EditableAvatar(
+      imageUrl: _newProfileImage == null ? user?.photoUrl : null,
+      imageFile: _newProfileImage,
+      initials: user?.initials ?? '?',
+      radius: 60,
+      onTap: isLoading ? () {} : _handleSelectImage,
+      showEditIcon: !isLoading,
     );
   }
 }

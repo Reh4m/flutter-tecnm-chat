@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verificatio
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/phone_authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
 
 enum PhoneAuthState {
   initial,
@@ -30,6 +33,8 @@ class PhoneAuthenticationProvider extends ChangeNotifier {
   final LinkEmailCredentialsAndVerifyUseCase
   _linkEmailCredentialsAndVerifyUseCase =
       sl<LinkEmailCredentialsAndVerifyUseCase>();
+  final UploadProfileImageUseCase _uploadProfileImageUseCase =
+      sl<UploadProfileImageUseCase>();
 
   PhoneAuthState _state = PhoneAuthState.initial;
   String? _errorMessage;
@@ -116,15 +121,44 @@ class PhoneAuthenticationProvider extends ChangeNotifier {
     });
   }
 
-  Future<void> completeRegistration(
-    UserSignUpEntity userRegistrationData,
-  ) async {
+  Future<void> completeRegistration({
+    required UserSignUpEntity userRegistrationData,
+    File? profileImageFile,
+  }) async {
     _setState(PhoneAuthState.loading);
+
+    String? imageUrl;
+
+    if (_currentUser == null) {
+      _setError('Usuario no autenticado');
+      return;
+    }
+
+    if (profileImageFile != null) {
+      final uploadResult = await _uploadProfileImageUseCase(
+        profileImageFile,
+        _currentUser!.uid,
+      );
+
+      final imageUploadSuccess = await uploadResult.fold(
+        (failure) {
+          _setError(_mapFailureToMessage(failure));
+          return false;
+        },
+        (url) {
+          imageUrl = url;
+          return true;
+        },
+      );
+
+      if (!imageUploadSuccess) return;
+    }
 
     final result = await _linkEmailCredentialsAndVerifyUseCase(
       UserSignUpEntity(
         name: userRegistrationData.name,
         email: userRegistrationData.email,
+        photoUrl: imageUrl,
         password: userRegistrationData.password,
         confirmPassword: userRegistrationData.confirmPassword,
       ),
