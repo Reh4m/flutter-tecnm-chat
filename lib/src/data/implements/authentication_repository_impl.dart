@@ -51,6 +51,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
       // 2. Actualizar perfil en Firebase Auth
       await firebaseAuthentication.updateUserProfile(
         displayName: registrationData.name,
+        photoUrl: registrationData.photoUrl,
       );
 
       // 3. Enviar verificación de correo electrónico
@@ -111,6 +112,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
           name: currentUser.displayName ?? existingUser.name,
           email: currentUser.email ?? existingUser.email,
           phoneNumber: currentUser.phoneNumber,
+          photoUrl: currentUser.photoURL ?? existingUser.photoUrl,
           isVerified: true,
           updatedAt: DateTime.now(),
         );
@@ -124,6 +126,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
             name: currentUser.displayName ?? '',
             email: currentUser.email ?? '',
             phoneNumber: currentUser.phoneNumber,
+            photoUrl: currentUser.photoURL ?? '',
             createdAt: DateTime.now(),
             isVerified: true,
           ),

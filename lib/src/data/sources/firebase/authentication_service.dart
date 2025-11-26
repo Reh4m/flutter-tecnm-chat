@@ -24,7 +24,10 @@ class FirebaseAuthenticationService {
     }
   }
 
-  Future<void> updateUserProfile({String? displayName}) async {
+  Future<void> updateUserProfile({
+    String? displayName,
+    String? photoUrl,
+  }) async {
     try {
       final User? user = firebaseAuth.currentUser;
 
@@ -34,6 +37,10 @@ class FirebaseAuthenticationService {
 
       if (displayName != null && displayName.isNotEmpty) {
         await user.updateDisplayName(displayName);
+      }
+
+      if (photoUrl != null && photoUrl.isNotEmpty) {
+        await user.updatePhotoURL(photoUrl);
       }
 
       await user.reload();
