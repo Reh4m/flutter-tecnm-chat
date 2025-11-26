@@ -143,11 +143,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     radius: 18,
                     backgroundColor: theme.colorScheme.primary.withAlpha(50),
                     backgroundImage:
-                        otherUser?.photoUrl != null
-                            ? NetworkImage(otherUser!.photoUrl!)
+                        otherUser?.photoUrl != null &&
+                                otherUser!.photoUrl!.isNotEmpty
+                            ? NetworkImage(otherUser.photoUrl!)
                             : null,
                     child:
-                        otherUser?.photoUrl == null
+                        otherUser?.photoUrl == null ||
+                                otherUser!.photoUrl!.isEmpty
                             ? Text(
                               otherUser?.initials ?? '?',
                               style: theme.textTheme.bodySmall?.copyWith(
