@@ -4,7 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/authentication_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/contact_repository_impl.dart';
-import 'package:flutter_whatsapp_clon/src/data/implements/conversation_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/implements/direct_chat_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/email_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/group_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/media_repository_impl.dart';
@@ -13,7 +13,7 @@ import 'package:flutter_whatsapp_clon/src/data/implements/user_repository_impl.d
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/chat_media_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/contact_service.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversation_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/direct_chat_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/group_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
@@ -21,7 +21,7 @@ import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/contact_repository.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/conversation_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/direct_chat_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/email_authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/group_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/media_repository.dart';
@@ -29,7 +29,7 @@ import 'package:flutter_whatsapp_clon/src/domain/repositories/phone_authenticati
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/contact_usecases.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/conversation_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/direct_chat_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/email_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/group_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/media_usecases.dart';
@@ -91,9 +91,9 @@ Future<void> init() async {
     () => FirebaseContactService(firestore: sl<FirebaseFirestore>()),
   );
 
-  // Firebase Conversation Service
-  sl.registerLazySingleton<FirebaseConversationService>(
-    () => FirebaseConversationService(firestore: sl<FirebaseFirestore>()),
+  // Firebase Direct Chat Service
+  sl.registerLazySingleton<FirebaseDirectChatService>(
+    () => FirebaseDirectChatService(firestore: sl<FirebaseFirestore>()),
   );
 
   // Firebase Chat Media Service
@@ -151,10 +151,10 @@ Future<void> init() async {
     ),
   );
 
-  // Conversation Repository
-  sl.registerLazySingleton<ConversationRepository>(
-    () => ConversationRepositoryImpl(
-      conversationService: sl<FirebaseConversationService>(),
+  // Direct Chat Repository
+  sl.registerLazySingleton<DirectChatRepository>(
+    () => DirectChatRepositoryImpl(
+      conversationService: sl<FirebaseDirectChatService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
@@ -289,51 +289,51 @@ Future<void> init() async {
     () => GetBlockedContactsUseCase(sl<ContactRepository>()),
   );
 
-  // Conversation
+  // Direct Chat Use Cases
   sl.registerLazySingleton<CreateConversationUseCase>(
-    () => CreateConversationUseCase(sl<ConversationRepository>()),
+    () => CreateConversationUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<GetOrCreateDirectConversationUseCase>(
-    () => GetOrCreateDirectConversationUseCase(sl<ConversationRepository>()),
+    () => GetOrCreateDirectConversationUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<GetUserConversationsStreamUseCase>(
-    () => GetUserConversationsStreamUseCase(sl<ConversationRepository>()),
+    () => GetUserConversationsStreamUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<GetConversationByIdUseCase>(
-    () => GetConversationByIdUseCase(sl<ConversationRepository>()),
+    () => GetConversationByIdUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<UpdateConversationUseCase>(
-    () => UpdateConversationUseCase(sl<ConversationRepository>()),
+    () => UpdateConversationUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<DeleteConversationUseCase>(
-    () => DeleteConversationUseCase(sl<ConversationRepository>()),
+    () => DeleteConversationUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<SendMessageUseCase>(
-    () => SendMessageUseCase(sl<ConversationRepository>()),
+    () => SendMessageUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<GetConversationMessagesStreamUseCase>(
-    () => GetConversationMessagesStreamUseCase(sl<ConversationRepository>()),
+    () => GetConversationMessagesStreamUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<GetConversationMessagesUseCase>(
-    () => GetConversationMessagesUseCase(sl<ConversationRepository>()),
+    () => GetConversationMessagesUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<MarkMessageAsReadUseCase>(
-    () => MarkMessageAsReadUseCase(sl<ConversationRepository>()),
+    () => MarkMessageAsReadUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<MarkConversationAsReadUseCase>(
-    () => MarkConversationAsReadUseCase(sl<ConversationRepository>()),
+    () => MarkConversationAsReadUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<DeleteMessageUseCase>(
-    () => DeleteMessageUseCase(sl<ConversationRepository>()),
+    () => DeleteMessageUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<GetMessageByIdUseCase>(
-    () => GetMessageByIdUseCase(sl<ConversationRepository>()),
+    () => GetMessageByIdUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<UpdateMessageStatusUseCase>(
-    () => UpdateMessageStatusUseCase(sl<ConversationRepository>()),
+    () => UpdateMessageStatusUseCase(sl<DirectChatRepository>()),
   );
   sl.registerLazySingleton<MarkAllMessagesAsDeliveredUseCase>(
-    () => MarkAllMessagesAsDeliveredUseCase(sl<ConversationRepository>()),
+    () => MarkAllMessagesAsDeliveredUseCase(sl<DirectChatRepository>()),
   );
 
   // Media Use Cases

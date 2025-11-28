@@ -3,34 +3,34 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/conversation_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/direct_chat_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/message_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversation_service.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/conversation_entity.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/direct_chat_service.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/direct_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/conversation_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/direct_chat_repository.dart';
 
-class ConversationRepositoryImpl implements ConversationRepository {
-  final FirebaseConversationService conversationService;
+class DirectChatRepositoryImpl implements DirectChatRepository {
+  final FirebaseDirectChatService conversationService;
   final NetworkInfo networkInfo;
 
-  ConversationRepositoryImpl({
+  DirectChatRepositoryImpl({
     required this.conversationService,
     required this.networkInfo,
   });
 
   @override
-  Future<Either<Failure, ConversationEntity>> createConversation(
-    ConversationEntity conversation,
+  Future<Either<Failure, DirectChatEntity>> createConversation(
+    DirectChatEntity conversation,
   ) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
     }
 
     try {
-      final conversationModel = ConversationModel.fromEntity(conversation);
+      final directChatModel = DirectChatModel.fromEntity(conversation);
       final created = await conversationService.createConversation(
-        conversationModel,
+        directChatModel,
       );
       return Right(created.toEntity());
     } on ServerException {
@@ -41,7 +41,7 @@ class ConversationRepositoryImpl implements ConversationRepository {
   }
 
   @override
-  Future<Either<Failure, ConversationEntity>> getOrCreateDirectConversation({
+  Future<Either<Failure, DirectChatEntity>> getOrCreateDirectConversation({
     required String userId1,
     required String userId2,
   }) async {
@@ -59,7 +59,7 @@ class ConversationRepositoryImpl implements ConversationRepository {
         return Right(existing.toEntity());
       }
 
-      final newConversation = ConversationModel(
+      final newConversation = DirectChatModel(
         id: '',
         participantIds: [userId1, userId2],
         type: ConversationType.direct,
@@ -78,7 +78,7 @@ class ConversationRepositoryImpl implements ConversationRepository {
   }
 
   @override
-  Stream<Either<Failure, List<ConversationEntity>>> getUserConversationsStream(
+  Stream<Either<Failure, List<DirectChatEntity>>> getUserConversationsStream(
     String userId,
   ) async* {
     if (!await networkInfo.isConnected) {
@@ -99,7 +99,7 @@ class ConversationRepositoryImpl implements ConversationRepository {
   }
 
   @override
-  Future<Either<Failure, ConversationEntity>> getConversationById(
+  Future<Either<Failure, DirectChatEntity>> getConversationById(
     String conversationId,
   ) async {
     if (!await networkInfo.isConnected) {
@@ -121,17 +121,17 @@ class ConversationRepositoryImpl implements ConversationRepository {
   }
 
   @override
-  Future<Either<Failure, ConversationEntity>> updateConversation(
-    ConversationEntity conversation,
+  Future<Either<Failure, DirectChatEntity>> updateConversation(
+    DirectChatEntity conversation,
   ) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
     }
 
     try {
-      final conversationModel = ConversationModel.fromEntity(conversation);
+      final directChatModel = DirectChatModel.fromEntity(conversation);
       final updated = await conversationService.updateConversation(
-        conversationModel,
+        directChatModel,
       );
       return Right(updated.toEntity());
     } on ConversationOperationFailedException {

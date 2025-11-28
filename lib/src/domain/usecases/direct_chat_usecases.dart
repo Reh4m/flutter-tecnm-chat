@@ -1,28 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/conversation_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/direct_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/conversation_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/direct_chat_repository.dart';
 
 class CreateConversationUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   CreateConversationUseCase(this.repository);
 
-  Future<Either<Failure, ConversationEntity>> call(
-    ConversationEntity conversation,
+  Future<Either<Failure, DirectChatEntity>> call(
+    DirectChatEntity conversation,
   ) async {
     return await repository.createConversation(conversation);
   }
 }
 
 class GetOrCreateDirectConversationUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   GetOrCreateDirectConversationUseCase(this.repository);
 
-  Future<Either<Failure, ConversationEntity>> call({
+  Future<Either<Failure, DirectChatEntity>> call({
     required String userId1,
     required String userId2,
   }) async {
@@ -34,41 +34,39 @@ class GetOrCreateDirectConversationUseCase {
 }
 
 class GetUserConversationsStreamUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   GetUserConversationsStreamUseCase(this.repository);
 
-  Stream<Either<Failure, List<ConversationEntity>>> call(String userId) {
+  Stream<Either<Failure, List<DirectChatEntity>>> call(String userId) {
     return repository.getUserConversationsStream(userId);
   }
 }
 
 class GetConversationByIdUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   GetConversationByIdUseCase(this.repository);
 
-  Future<Either<Failure, ConversationEntity>> call(
-    String conversationId,
-  ) async {
+  Future<Either<Failure, DirectChatEntity>> call(String conversationId) async {
     return await repository.getConversationById(conversationId);
   }
 }
 
 class UpdateConversationUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   UpdateConversationUseCase(this.repository);
 
-  Future<Either<Failure, ConversationEntity>> call(
-    ConversationEntity conversation,
+  Future<Either<Failure, DirectChatEntity>> call(
+    DirectChatEntity conversation,
   ) async {
     return await repository.updateConversation(conversation);
   }
 }
 
 class DeleteConversationUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   DeleteConversationUseCase(this.repository);
 
@@ -78,7 +76,7 @@ class DeleteConversationUseCase {
 }
 
 class SendMessageUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   SendMessageUseCase(this.repository);
 
@@ -88,7 +86,7 @@ class SendMessageUseCase {
 }
 
 class GetConversationMessagesStreamUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   GetConversationMessagesStreamUseCase(this.repository);
 
@@ -104,7 +102,7 @@ class GetConversationMessagesStreamUseCase {
 }
 
 class GetConversationMessagesUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   GetConversationMessagesUseCase(this.repository);
 
@@ -122,7 +120,7 @@ class GetConversationMessagesUseCase {
 }
 
 class MarkMessageAsReadUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   MarkMessageAsReadUseCase(this.repository);
 
@@ -138,7 +136,7 @@ class MarkMessageAsReadUseCase {
 }
 
 class MarkConversationAsReadUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   MarkConversationAsReadUseCase(this.repository);
 
@@ -154,7 +152,7 @@ class MarkConversationAsReadUseCase {
 }
 
 class DeleteMessageUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   DeleteMessageUseCase(this.repository);
 
@@ -164,7 +162,7 @@ class DeleteMessageUseCase {
 }
 
 class GetMessageByIdUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   GetMessageByIdUseCase(this.repository);
 
@@ -174,7 +172,7 @@ class GetMessageByIdUseCase {
 }
 
 class UpdateMessageStatusUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   UpdateMessageStatusUseCase(this.repository);
 
@@ -190,7 +188,7 @@ class UpdateMessageStatusUseCase {
 }
 
 class MarkAllMessagesAsDeliveredUseCase {
-  final ConversationRepository repository;
+  final DirectChatRepository repository;
 
   MarkAllMessagesAsDeliveredUseCase(this.repository);
 

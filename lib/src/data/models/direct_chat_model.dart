@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/conversation_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/direct_chat_entity.dart';
 
-class ConversationModel extends ConversationEntity {
-  const ConversationModel({
+class DirectChatModel extends DirectChatEntity {
+  const DirectChatModel({
     required super.id,
     required super.participantIds,
     required super.type,
@@ -14,10 +14,10 @@ class ConversationModel extends ConversationEntity {
     super.updatedAt,
   });
 
-  factory ConversationModel.fromFirestore(DocumentSnapshot doc) {
+  factory DirectChatModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
-    return ConversationModel(
+    return DirectChatModel(
       id: doc.id,
       participantIds: List<String>.from(data['participantIds'] ?? []),
       type:
@@ -47,8 +47,8 @@ class ConversationModel extends ConversationEntity {
     };
   }
 
-  factory ConversationModel.fromEntity(ConversationEntity entity) {
-    return ConversationModel(
+  factory DirectChatModel.fromEntity(DirectChatEntity entity) {
+    return DirectChatModel(
       id: entity.id,
       participantIds: entity.participantIds,
       type: entity.type,
@@ -61,8 +61,8 @@ class ConversationModel extends ConversationEntity {
     );
   }
 
-  ConversationEntity toEntity() {
-    return ConversationEntity(
+  DirectChatEntity toEntity() {
+    return DirectChatEntity(
       id: id,
       participantIds: participantIds,
       type: type,
@@ -76,7 +76,7 @@ class ConversationModel extends ConversationEntity {
   }
 
   @override
-  ConversationModel copyWith({
+  DirectChatModel copyWith({
     String? id,
     List<String>? participantIds,
     ConversationType? type,
@@ -87,7 +87,7 @@ class ConversationModel extends ConversationEntity {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return ConversationModel(
+    return DirectChatModel(
       id: id ?? this.id,
       participantIds: participantIds ?? this.participantIds,
       type: type ?? this.type,

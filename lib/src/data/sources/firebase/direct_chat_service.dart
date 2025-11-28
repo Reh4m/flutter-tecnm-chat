@@ -1,19 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/conversation_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/direct_chat_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/message_model.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
 
-class FirebaseConversationService {
+class FirebaseDirectChatService {
   final FirebaseFirestore firestore;
 
-  FirebaseConversationService({required this.firestore});
+  FirebaseDirectChatService({required this.firestore});
 
   static const String _conversationsCollection = 'conversations';
   static const String _messagesCollection = 'messages';
 
-  Future<ConversationModel> createConversation(
-    ConversationModel conversation,
+  Future<DirectChatModel> createConversation(
+    DirectChatModel conversation,
   ) async {
     try {
       final docRef = await firestore
@@ -21,13 +21,13 @@ class FirebaseConversationService {
           .add(conversation.toFirestore());
 
       final createdDoc = await docRef.get();
-      return ConversationModel.fromFirestore(createdDoc);
+      return DirectChatModel.fromFirestore(createdDoc);
     } catch (e) {
       throw ServerException();
     }
   }
 
-  Future<ConversationModel?> findDirectConversation({
+  Future<DirectChatModel?> findDirectConversation({
     required String userId1,
     required String userId2,
   }) async {
@@ -40,7 +40,7 @@ class FirebaseConversationService {
               .get();
 
       for (var doc in querySnapshot.docs) {
-        final conversation = ConversationModel.fromFirestore(doc);
+        final conversation = DirectChatModel.fromFirestore(doc);
         if (conversation.participantIds.contains(userId2)) {
           return conversation;
         }
@@ -52,7 +52,7 @@ class FirebaseConversationService {
     }
   }
 
-  Stream<List<ConversationModel>> getUserConversationsStream(String userId) {
+  Stream<List<DirectChatModel>> getUserConversationsStream(String userId) {
     try {
       return firestore
           .collection(_conversationsCollection)
@@ -61,7 +61,7 @@ class FirebaseConversationService {
           .snapshots()
           .map((snapshot) {
             return snapshot.docs
-                .map((doc) => ConversationModel.fromFirestore(doc))
+                .map((doc) => DirectChatModel.fromFirestore(doc))
                 .toList();
           });
     } catch (e) {
@@ -69,7 +69,7 @@ class FirebaseConversationService {
     }
   }
 
-  Future<ConversationModel> getConversationById(String conversationId) async {
+  Future<DirectChatModel> getConversationById(String conversationId) async {
     try {
       final doc =
           await firestore
@@ -81,15 +81,15 @@ class FirebaseConversationService {
         throw ConversationNotFoundException();
       }
 
-      return ConversationModel.fromFirestore(doc);
+      return DirectChatModel.fromFirestore(doc);
     } catch (e) {
       if (e is ConversationNotFoundException) rethrow;
       throw ServerException();
     }
   }
 
-  Future<ConversationModel> updateConversation(
-    ConversationModel conversation,
+  Future<DirectChatModel> updateConversation(
+    DirectChatModel conversation,
   ) async {
     try {
       await firestore
@@ -103,7 +103,7 @@ class FirebaseConversationService {
               .doc(conversation.id)
               .get();
 
-      return ConversationModel.fromFirestore(updatedDoc);
+      return DirectChatModel.fromFirestore(updatedDoc);
     } catch (e) {
       throw ConversationOperationFailedException();
     }
@@ -261,7 +261,7 @@ class FirebaseConversationService {
       final conversationDoc = await conversationRef.get();
       if (!conversationDoc.exists) return;
 
-      final conversation = ConversationModel.fromFirestore(conversationDoc);
+      final conversation = DirectChatModel.fromFirestore(conversationDoc);
 
       Map<String, int> newUnreadCount = Map.from(conversation.unreadCount);
       for (var participantId in conversation.participantIds) {

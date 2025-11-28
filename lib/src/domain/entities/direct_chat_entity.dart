@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 enum ConversationType { direct, group }
 
-class ConversationEntity extends Equatable {
+class DirectChatEntity extends Equatable {
   final String id;
   final List<String> participantIds;
   final ConversationType type;
@@ -13,7 +13,7 @@ class ConversationEntity extends Equatable {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  const ConversationEntity({
+  const DirectChatEntity({
     required this.id,
     required this.participantIds,
     required this.type,
@@ -45,7 +45,7 @@ class ConversationEntity extends Equatable {
     return unreadCount[userId] ?? 0;
   }
 
-  ConversationEntity copyWith({
+  DirectChatEntity copyWith({
     String? id,
     List<String>? participantIds,
     ConversationType? type,
@@ -56,7 +56,7 @@ class ConversationEntity extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return ConversationEntity(
+    return DirectChatEntity(
       id: id ?? this.id,
       participantIds: participantIds ?? this.participantIds,
       type: type ?? this.type,

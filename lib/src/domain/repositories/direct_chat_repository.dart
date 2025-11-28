@@ -1,25 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/conversation_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/direct_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
 
-abstract class ConversationRepository {
-  Future<Either<Failure, ConversationEntity>> createConversation(
-    ConversationEntity conversation,
+abstract class DirectChatRepository {
+  Future<Either<Failure, DirectChatEntity>> createConversation(
+    DirectChatEntity conversation,
   );
-  Future<Either<Failure, ConversationEntity>> getOrCreateDirectConversation({
+  Future<Either<Failure, DirectChatEntity>> getOrCreateDirectConversation({
     required String userId1,
     required String userId2,
   });
-  Stream<Either<Failure, List<ConversationEntity>>> getUserConversationsStream(
+  Stream<Either<Failure, List<DirectChatEntity>>> getUserConversationsStream(
     String userId,
   );
-  Future<Either<Failure, ConversationEntity>> getConversationById(
+  Future<Either<Failure, DirectChatEntity>> getConversationById(
     String conversationId,
   );
-  Future<Either<Failure, ConversationEntity>> updateConversation(
-    ConversationEntity conversation,
+  Future<Either<Failure, DirectChatEntity>> updateConversation(
+    DirectChatEntity conversation,
   );
   Future<Either<Failure, Unit>> deleteConversation(String conversationId);
   Future<Either<Failure, MessageEntity>> sendMessage(MessageEntity message);
