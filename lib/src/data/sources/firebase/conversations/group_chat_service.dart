@@ -303,7 +303,7 @@ class FirebaseGroupChatService {
       final messagesSnapshot =
           await firestore
               .collection(_messagesCollection)
-              .where('chatId', isEqualTo: chatId)
+              .where('conversationId', isEqualTo: chatId)
               .where('senderId', isNotEqualTo: userId)
               .where('status', whereIn: ['sent', 'delivered'])
               .get();
