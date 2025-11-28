@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/direct_chat_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/direct_chat_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/direct_chat_repository.dart';
 
 class CreateConversationUseCase {
   final DirectChatRepository repository;

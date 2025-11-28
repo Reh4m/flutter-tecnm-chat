@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/message_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/message_repository.dart';
 
 class SendMessageUseCase {
   final MessageRepository repository;

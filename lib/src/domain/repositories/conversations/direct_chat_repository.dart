@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/direct_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
 
 abstract class DirectChatRepository {
   Future<Either<Failure, DirectChatEntity>> createConversation(

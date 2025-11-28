@@ -2,10 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/group_chat_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/group_chat_service.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/group_chat_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/group_chat_repository.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/group_chat_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/group_chat_service.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/group_chat_repository.dart';
 
 class GroupChatRepositoryImpl implements GroupChatRepository {
   final FirebaseGroupChatService groupService;

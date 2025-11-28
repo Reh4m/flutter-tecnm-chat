@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/direct_chat_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/message_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/message_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/direct_chat_model.dart';
 
 class FirebaseDirectChatService {
   final FirebaseFirestore firestore;

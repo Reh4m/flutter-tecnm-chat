@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/direct_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
 
 class DirectChatModel extends DirectChatEntity {
   const DirectChatModel({

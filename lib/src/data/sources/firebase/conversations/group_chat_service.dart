@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/group_chat_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/group_chat_model.dart';
 
 class FirebaseGroupChatService {
   final FirebaseFirestore firestore;

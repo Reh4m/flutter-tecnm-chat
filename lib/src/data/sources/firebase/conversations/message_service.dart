@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/message_model.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/message_model.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 
 class FirebaseMessageService {
   final FirebaseFirestore firestore;

@@ -3,10 +3,10 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/message_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/message_service.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/message_repository.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/message_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/message_service.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/message_repository.dart';
 
 class MessageRepositoryImpl implements MessageRepository {
   final FirebaseMessageService messageService;

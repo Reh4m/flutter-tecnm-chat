@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/group_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
 
 class GroupChatModel extends GroupEntity {
   const GroupChatModel({
