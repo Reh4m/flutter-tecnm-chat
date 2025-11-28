@@ -9,27 +9,25 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_c
 import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/direct_chat_repository.dart';
 
 class DirectChatRepositoryImpl implements DirectChatRepository {
-  final FirebaseDirectChatService conversationService;
+  final FirebaseDirectChatService directChatService;
   final NetworkInfo networkInfo;
 
   DirectChatRepositoryImpl({
-    required this.conversationService,
+    required this.directChatService,
     required this.networkInfo,
   });
 
   @override
-  Future<Either<Failure, DirectChatEntity>> createConversation(
-    DirectChatEntity conversation,
+  Future<Either<Failure, DirectChatEntity>> createChat(
+    DirectChatEntity chat,
   ) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
     }
 
     try {
-      final directChatModel = DirectChatModel.fromEntity(conversation);
-      final created = await conversationService.createConversation(
-        directChatModel,
-      );
+      final directChatModel = DirectChatModel.fromEntity(chat);
+      final created = await directChatService.createChat(directChatModel);
       return Right(created.toEntity());
     } on ServerException {
       return Left(ServerFailure());
@@ -39,7 +37,7 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
   }
 
   @override
-  Future<Either<Failure, DirectChatEntity>> getOrCreateDirectConversation({
+  Future<Either<Failure, DirectChatEntity>> getOrCreateChat({
     required String userId1,
     required String userId2,
   }) async {
@@ -48,7 +46,7 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
     }
 
     try {
-      final existing = await conversationService.findDirectConversation(
+      final existing = await directChatService.findChatByParticipants(
         userId1: userId1,
         userId2: userId2,
       );
@@ -57,16 +55,14 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
         return Right(existing.toEntity());
       }
 
-      final newConversation = DirectChatModel(
+      final newChat = DirectChatModel(
         id: '',
         participantIds: [userId1, userId2],
         type: ConversationType.direct,
         createdAt: DateTime.now(),
       );
 
-      final created = await conversationService.createConversation(
-        newConversation,
-      );
+      final created = await directChatService.createChat(newChat);
       return Right(created.toEntity());
     } on ServerException {
       return Left(ServerFailure());
@@ -76,7 +72,7 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
   }
 
   @override
-  Stream<Either<Failure, List<DirectChatEntity>>> getUserConversationsStream(
+  Stream<Either<Failure, List<DirectChatEntity>>> getUserChatsStream(
     String userId,
   ) async* {
     if (!await networkInfo.isConnected) {
@@ -85,9 +81,8 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
     }
 
     try {
-      await for (final conversations in conversationService
-          .getUserConversationsStream(userId)) {
-        yield Right(conversations.map((c) => c.toEntity()).toList());
+      await for (final chats in directChatService.getUserChatsStream(userId)) {
+        yield Right(chats.map((c) => c.toEntity()).toList());
       }
     } on ServerException {
       yield Left(ServerFailure());
@@ -97,18 +92,14 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
   }
 
   @override
-  Future<Either<Failure, DirectChatEntity>> getConversationById(
-    String conversationId,
-  ) async {
+  Future<Either<Failure, DirectChatEntity>> getChatById(String chatId) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
     }
 
     try {
-      final conversation = await conversationService.getConversationById(
-        conversationId,
-      );
-      return Right(conversation.toEntity());
+      final chat = await directChatService.getChatById(chatId);
+      return Right(chat.toEntity());
     } on ConversationNotFoundException {
       return Left(ConversationNotFoundFailure());
     } on ServerException {
@@ -119,18 +110,16 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
   }
 
   @override
-  Future<Either<Failure, DirectChatEntity>> updateConversation(
-    DirectChatEntity conversation,
+  Future<Either<Failure, DirectChatEntity>> updateChat(
+    DirectChatEntity chat,
   ) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
     }
 
     try {
-      final directChatModel = DirectChatModel.fromEntity(conversation);
-      final updated = await conversationService.updateConversation(
-        directChatModel,
-      );
+      final directChatModel = DirectChatModel.fromEntity(chat);
+      final updated = await directChatService.updateChat(directChatModel);
       return Right(updated.toEntity());
     } on ConversationOperationFailedException {
       return Left(ConversationOperationFailedFailure());
@@ -142,15 +131,13 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> deleteConversation(
-    String conversationId,
-  ) async {
+  Future<Either<Failure, Unit>> deleteChat(String chatId) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
     }
 
     try {
-      await conversationService.deleteConversation(conversationId);
+      await directChatService.deleteChat(chatId);
       return const Right(unit);
     } on ConversationOperationFailedException {
       return Left(ConversationOperationFailedFailure());
@@ -162,8 +149,8 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> markConversationAsRead({
-    required String conversationId,
+  Future<Either<Failure, Unit>> markChatAsRead({
+    required String chatId,
     required String userId,
   }) async {
     if (!await networkInfo.isConnected) {
@@ -171,10 +158,7 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
     }
 
     try {
-      await conversationService.markConversationAsRead(
-        conversationId: conversationId,
-        userId: userId,
-      );
+      await directChatService.markChatAsRead(chatId: chatId, userId: userId);
       return const Right(unit);
     } on ServerException {
       return Left(ServerFailure());

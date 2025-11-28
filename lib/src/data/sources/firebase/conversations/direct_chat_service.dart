@@ -1,23 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/conversations/message_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/conversations/direct_chat_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/message_model.dart';
 
 class FirebaseDirectChatService {
   final FirebaseFirestore firestore;
 
   FirebaseDirectChatService({required this.firestore});
 
-  static const String _conversationsCollection = 'conversations';
+  static const String _chats = 'chats';
   static const String _messagesCollection = 'messages';
 
-  Future<DirectChatModel> createConversation(
-    DirectChatModel conversation,
-  ) async {
+  Future<DirectChatModel> createChat(DirectChatModel chat) async {
     try {
-      final docRef = await firestore
-          .collection(_conversationsCollection)
-          .add(conversation.toFirestore());
+      final docRef = await firestore.collection(_chats).add(chat.toFirestore());
 
       final createdDoc = await docRef.get();
       return DirectChatModel.fromFirestore(createdDoc);
@@ -26,22 +22,21 @@ class FirebaseDirectChatService {
     }
   }
 
-  Future<DirectChatModel?> findDirectConversation({
+  Future<DirectChatModel?> findChatByParticipants({
     required String userId1,
     required String userId2,
   }) async {
     try {
       final querySnapshot =
           await firestore
-              .collection(_conversationsCollection)
-              .where('type', isEqualTo: 'direct')
+              .collection(_chats)
               .where('participantIds', arrayContains: userId1)
               .get();
 
       for (var doc in querySnapshot.docs) {
-        final conversation = DirectChatModel.fromFirestore(doc);
-        if (conversation.participantIds.contains(userId2)) {
-          return conversation;
+        final chat = DirectChatModel.fromFirestore(doc);
+        if (chat.participantIds.contains(userId2)) {
+          return chat;
         }
       }
 
@@ -51,10 +46,10 @@ class FirebaseDirectChatService {
     }
   }
 
-  Stream<List<DirectChatModel>> getUserConversationsStream(String userId) {
+  Stream<List<DirectChatModel>> getUserChatsStream(String userId) {
     try {
       return firestore
-          .collection(_conversationsCollection)
+          .collection(_chats)
           .where('participantIds', arrayContains: userId)
           .orderBy('lastMessageTime', descending: true)
           .snapshots()
@@ -68,13 +63,9 @@ class FirebaseDirectChatService {
     }
   }
 
-  Future<DirectChatModel> getConversationById(String conversationId) async {
+  Future<DirectChatModel> getChatById(String chatId) async {
     try {
-      final doc =
-          await firestore
-              .collection(_conversationsCollection)
-              .doc(conversationId)
-              .get();
+      final doc = await firestore.collection(_chats).doc(chatId).get();
 
       if (!doc.exists) {
         throw ConversationNotFoundException();
@@ -87,20 +78,14 @@ class FirebaseDirectChatService {
     }
   }
 
-  Future<DirectChatModel> updateConversation(
-    DirectChatModel conversation,
-  ) async {
+  Future<DirectChatModel> updateChat(DirectChatModel chat) async {
     try {
       await firestore
-          .collection(_conversationsCollection)
-          .doc(conversation.id)
-          .update(conversation.toFirestore());
+          .collection(_chats)
+          .doc(chat.id)
+          .update(chat.toFirestore());
 
-      final updatedDoc =
-          await firestore
-              .collection(_conversationsCollection)
-              .doc(conversation.id)
-              .get();
+      final updatedDoc = await firestore.collection(_chats).doc(chat.id).get();
 
       return DirectChatModel.fromFirestore(updatedDoc);
     } catch (e) {
@@ -108,42 +93,32 @@ class FirebaseDirectChatService {
     }
   }
 
-  Future<void> deleteConversation(String conversationId) async {
+  Future<void> deleteChat(String chatId) async {
     try {
-      await firestore
-          .collection(_conversationsCollection)
-          .doc(conversationId)
-          .delete();
+      await firestore.collection(_chats).doc(chatId).delete();
     } catch (e) {
       throw ConversationOperationFailedException();
     }
   }
 
-  Future<void> markConversationAsRead({
-    required String conversationId,
+  Future<void> markChatAsRead({
+    required String chatId,
     required String userId,
   }) async {
     try {
-      final conversationDoc =
-          await firestore
-              .collection(_conversationsCollection)
-              .doc(conversationId)
-              .get();
+      final chatDoc = await firestore.collection(_chats).doc(chatId).get();
 
-      if (!conversationDoc.exists) return;
+      if (!chatDoc.exists) return;
 
-      await firestore
-          .collection(_conversationsCollection)
-          .doc(conversationId)
-          .update({
-            'unreadCount.$userId': 0,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
+      await firestore.collection(_chats).doc(chatId).update({
+        'unreadCount.$userId': 0,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
 
       final messagesSnapshot =
           await firestore
               .collection(_messagesCollection)
-              .where('conversationId', isEqualTo: conversationId)
+              .where('chatId', isEqualTo: chatId)
               .where('senderId', isNotEqualTo: userId)
               .where('status', whereIn: ['sent', 'delivered'])
               .get();
@@ -163,19 +138,17 @@ class FirebaseDirectChatService {
     }
   }
 
-  Future<void> updateConversationLastMessage(MessageModel message) async {
+  Future<void> updateChatLastMessage(MessageModel message) async {
     try {
-      final conversationRef = firestore
-          .collection(_conversationsCollection)
-          .doc(message.conversationId);
+      final chatRef = firestore.collection(_chats).doc(message.conversationId);
 
-      final conversationDoc = await conversationRef.get();
-      if (!conversationDoc.exists) return;
+      final chatDoc = await chatRef.get();
+      if (!chatDoc.exists) return;
 
-      final conversation = DirectChatModel.fromFirestore(conversationDoc);
+      final chat = DirectChatModel.fromFirestore(chatDoc);
 
-      Map<String, int> newUnreadCount = Map.from(conversation.unreadCount);
-      for (var participantId in conversation.participantIds) {
+      Map<String, int> newUnreadCount = Map.from(chat.unreadCount);
+      for (var participantId in chat.participantIds) {
         if (participantId != message.senderId) {
           newUnreadCount[participantId] =
               (newUnreadCount[participantId] ?? 0) + 1;
@@ -185,7 +158,7 @@ class FirebaseDirectChatService {
         }
       }
 
-      await conversationRef.update({
+      await chatRef.update({
         'lastMessage': message.content,
         'lastMessageSenderId': message.senderId,
         'lastMessageTime': message.timestamp,

@@ -3,88 +3,78 @@ import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/direct_chat_repository.dart';
 
-class CreateConversationUseCase {
+class CreateDirectChatUseCase {
   final DirectChatRepository repository;
 
-  CreateConversationUseCase(this.repository);
+  CreateDirectChatUseCase(this.repository);
 
-  Future<Either<Failure, DirectChatEntity>> call(
-    DirectChatEntity conversation,
-  ) async {
-    return await repository.createConversation(conversation);
+  Future<Either<Failure, DirectChatEntity>> call(DirectChatEntity chat) async {
+    return await repository.createChat(chat);
   }
 }
 
-class GetOrCreateDirectConversationUseCase {
+class GetOrCreateDirectChatUseCase {
   final DirectChatRepository repository;
 
-  GetOrCreateDirectConversationUseCase(this.repository);
+  GetOrCreateDirectChatUseCase(this.repository);
 
   Future<Either<Failure, DirectChatEntity>> call({
     required String userId1,
     required String userId2,
   }) async {
-    return await repository.getOrCreateDirectConversation(
-      userId1: userId1,
-      userId2: userId2,
-    );
+    return await repository.getOrCreateChat(userId1: userId1, userId2: userId2);
   }
 }
 
-class GetUserConversationsStreamUseCase {
+class GetUserDirectChatsStreamUseCase {
   final DirectChatRepository repository;
 
-  GetUserConversationsStreamUseCase(this.repository);
+  GetUserDirectChatsStreamUseCase(this.repository);
 
   Stream<Either<Failure, List<DirectChatEntity>>> call(String userId) {
-    return repository.getUserConversationsStream(userId);
+    return repository.getUserChatsStream(userId);
   }
 }
 
-class GetConversationByIdUseCase {
+class GetDirectChatByIdUseCase {
   final DirectChatRepository repository;
 
-  GetConversationByIdUseCase(this.repository);
+  GetDirectChatByIdUseCase(this.repository);
 
-  Future<Either<Failure, DirectChatEntity>> call(String conversationId) async {
-    return await repository.getConversationById(conversationId);
+  Future<Either<Failure, DirectChatEntity>> call(String chatId) async {
+    return await repository.getChatById(chatId);
   }
 }
 
-class UpdateConversationUseCase {
+class UpdateDirectChatUseCase {
   final DirectChatRepository repository;
 
-  UpdateConversationUseCase(this.repository);
+  UpdateDirectChatUseCase(this.repository);
 
-  Future<Either<Failure, DirectChatEntity>> call(
-    DirectChatEntity conversation,
-  ) async {
-    return await repository.updateConversation(conversation);
+  Future<Either<Failure, DirectChatEntity>> call(DirectChatEntity chat) async {
+    return await repository.updateChat(chat);
   }
 }
 
-class DeleteConversationUseCase {
+class DeleteDirectChatUseCase {
   final DirectChatRepository repository;
 
-  DeleteConversationUseCase(this.repository);
+  DeleteDirectChatUseCase(this.repository);
 
-  Future<Either<Failure, Unit>> call(String conversationId) async {
-    return await repository.deleteConversation(conversationId);
+  Future<Either<Failure, Unit>> call(String chatId) async {
+    return await repository.deleteChat(chatId);
   }
 }
 
-class MarkConversationAsReadUseCase {
+class MarkDirectChatAsReadUseCase {
   final DirectChatRepository repository;
 
-  MarkConversationAsReadUseCase(this.repository);
+  MarkDirectChatAsReadUseCase(this.repository);
 
   Future<Either<Failure, Unit>> call({
-    required String conversationId,
+    required String chatId,
     required String userId,
   }) async {
-    return await repository.markConversationAsRead(
-      conversationId: conversationId,
-      userId: userId,
-    );
+    return await repository.markChatAsRead(chatId: chatId, userId: userId);
   }
 }

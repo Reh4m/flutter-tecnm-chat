@@ -163,7 +163,7 @@ Future<void> init() async {
   // Direct Chat Repository
   sl.registerLazySingleton<DirectChatRepository>(
     () => DirectChatRepositoryImpl(
-      conversationService: sl<FirebaseDirectChatService>(),
+      directChatService: sl<FirebaseDirectChatService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
@@ -307,27 +307,27 @@ Future<void> init() async {
   );
 
   // Direct Chat Use Cases
-  sl.registerLazySingleton<CreateConversationUseCase>(
-    () => CreateConversationUseCase(sl<DirectChatRepository>()),
+  sl.registerLazySingleton<CreateDirectChatUseCase>(
+    () => CreateDirectChatUseCase(sl<DirectChatRepository>()),
   );
-  sl.registerLazySingleton<GetOrCreateDirectConversationUseCase>(
-    () => GetOrCreateDirectConversationUseCase(sl<DirectChatRepository>()),
+  sl.registerLazySingleton<GetOrCreateDirectChatUseCase>(
+    () => GetOrCreateDirectChatUseCase(sl<DirectChatRepository>()),
   );
-  sl.registerLazySingleton<GetUserConversationsStreamUseCase>(
-    () => GetUserConversationsStreamUseCase(sl<DirectChatRepository>()),
+  sl.registerLazySingleton<GetUserDirectChatsStreamUseCase>(
+    () => GetUserDirectChatsStreamUseCase(sl<DirectChatRepository>()),
   );
-  sl.registerLazySingleton<GetConversationByIdUseCase>(
-    () => GetConversationByIdUseCase(sl<DirectChatRepository>()),
+  sl.registerLazySingleton<GetDirectChatByIdUseCase>(
+    () => GetDirectChatByIdUseCase(sl<DirectChatRepository>()),
   );
-  sl.registerLazySingleton<UpdateConversationUseCase>(
-    () => UpdateConversationUseCase(sl<DirectChatRepository>()),
+  sl.registerLazySingleton<UpdateDirectChatUseCase>(
+    () => UpdateDirectChatUseCase(sl<DirectChatRepository>()),
   );
-  sl.registerLazySingleton<DeleteConversationUseCase>(
-    () => DeleteConversationUseCase(sl<DirectChatRepository>()),
+  sl.registerLazySingleton<DeleteDirectChatUseCase>(
+    () => DeleteDirectChatUseCase(sl<DirectChatRepository>()),
   );
 
-  sl.registerLazySingleton<MarkConversationAsReadUseCase>(
-    () => MarkConversationAsReadUseCase(sl<DirectChatRepository>()),
+  sl.registerLazySingleton<MarkDirectChatAsReadUseCase>(
+    () => MarkDirectChatAsReadUseCase(sl<DirectChatRepository>()),
   );
 
   // Media Use Cases
