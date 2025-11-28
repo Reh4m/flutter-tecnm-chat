@@ -12,9 +12,6 @@ class ConversationModel extends ConversationEntity {
     super.unreadCount,
     required super.createdAt,
     super.updatedAt,
-    super.groupName,
-    super.groupAvatarUrl,
-    super.hidePhoneNumbers,
   });
 
   factory ConversationModel.fromFirestore(DocumentSnapshot doc) {
@@ -33,9 +30,6 @@ class ConversationModel extends ConversationEntity {
       unreadCount: Map<String, int>.from(data['unreadCount'] ?? {}),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
-      groupName: data['groupName'],
-      groupAvatarUrl: data['groupAvatarUrl'],
-      hidePhoneNumbers: data['hidePhoneNumbers'],
     );
   }
 
@@ -50,9 +44,6 @@ class ConversationModel extends ConversationEntity {
       'unreadCount': unreadCount,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
-      'groupName': groupName,
-      'groupAvatarUrl': groupAvatarUrl,
-      'hidePhoneNumbers': hidePhoneNumbers,
     };
   }
 
@@ -67,9 +58,6 @@ class ConversationModel extends ConversationEntity {
       unreadCount: entity.unreadCount,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      groupName: entity.groupName,
-      groupAvatarUrl: entity.groupAvatarUrl,
-      hidePhoneNumbers: entity.hidePhoneNumbers,
     );
   }
 
@@ -84,9 +72,6 @@ class ConversationModel extends ConversationEntity {
       unreadCount: unreadCount,
       createdAt: createdAt,
       updatedAt: updatedAt,
-      groupName: groupName,
-      groupAvatarUrl: groupAvatarUrl,
-      hidePhoneNumbers: hidePhoneNumbers,
     );
   }
 
@@ -101,9 +86,6 @@ class ConversationModel extends ConversationEntity {
     Map<String, int>? unreadCount,
     DateTime? createdAt,
     DateTime? updatedAt,
-    String? groupName,
-    String? groupAvatarUrl,
-    bool? hidePhoneNumbers,
   }) {
     return ConversationModel(
       id: id ?? this.id,
@@ -115,9 +97,6 @@ class ConversationModel extends ConversationEntity {
       unreadCount: unreadCount ?? this.unreadCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      groupName: groupName ?? this.groupName,
-      groupAvatarUrl: groupAvatarUrl ?? this.groupAvatarUrl,
-      hidePhoneNumbers: hidePhoneNumbers ?? this.hidePhoneNumbers,
     );
   }
 }

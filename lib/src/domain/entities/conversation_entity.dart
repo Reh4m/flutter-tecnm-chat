@@ -12,9 +12,6 @@ class ConversationEntity extends Equatable {
   final Map<String, int> unreadCount;
   final DateTime createdAt;
   final DateTime? updatedAt;
-  final String? groupName;
-  final String? groupAvatarUrl;
-  final bool? hidePhoneNumbers;
 
   const ConversationEntity({
     required this.id,
@@ -26,9 +23,6 @@ class ConversationEntity extends Equatable {
     this.unreadCount = const {},
     required this.createdAt,
     this.updatedAt,
-    this.groupName,
-    this.groupAvatarUrl,
-    this.hidePhoneNumbers,
   });
 
   @override
@@ -42,9 +36,6 @@ class ConversationEntity extends Equatable {
     unreadCount,
     createdAt,
     updatedAt,
-    groupName,
-    groupAvatarUrl,
-    hidePhoneNumbers,
   ];
 
   bool get isGroup => type == ConversationType.group;
@@ -64,9 +55,6 @@ class ConversationEntity extends Equatable {
     Map<String, int>? unreadCount,
     DateTime? createdAt,
     DateTime? updatedAt,
-    String? groupName,
-    String? groupAvatarUrl,
-    bool? hidePhoneNumbers,
   }) {
     return ConversationEntity(
       id: id ?? this.id,
@@ -78,9 +66,6 @@ class ConversationEntity extends Equatable {
       unreadCount: unreadCount ?? this.unreadCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      groupName: groupName ?? this.groupName,
-      groupAvatarUrl: groupAvatarUrl ?? this.groupAvatarUrl,
-      hidePhoneNumbers: hidePhoneNumbers ?? this.hidePhoneNumbers,
     );
   }
 }
