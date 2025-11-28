@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/user_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/user/user_repository.dart';
 
 class GetUserByIdUseCase {
   final UserRepository repository;

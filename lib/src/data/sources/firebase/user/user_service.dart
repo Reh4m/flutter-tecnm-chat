@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/user/user_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.dart';
 
 class FirebaseUserService {

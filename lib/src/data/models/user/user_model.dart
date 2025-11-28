@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
 
 class UserModel extends UserEntity {
   const UserModel({

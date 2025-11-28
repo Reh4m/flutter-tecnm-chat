@@ -3,10 +3,10 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/user_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/user/user_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user/user_service.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/user/user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {
   final FirebaseUserService firebaseUserService;

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/contact_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/contact_entity.dart';
 
 class ContactModel extends ContactEntity {
   const ContactModel({

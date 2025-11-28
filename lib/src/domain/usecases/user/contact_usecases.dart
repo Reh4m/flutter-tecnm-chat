@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/contact_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/user_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/contact_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/contact_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/user/contact_repository.dart';
 
 class AddContactUseCase {
   final ContactRepository repository;

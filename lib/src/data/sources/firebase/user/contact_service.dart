@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/contact_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/user/contact_model.dart';
 
 class FirebaseContactService {
   final FirebaseFirestore firestore;
