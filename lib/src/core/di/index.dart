@@ -325,9 +325,11 @@ Future<void> init() async {
   sl.registerLazySingleton<DeleteDirectChatUseCase>(
     () => DeleteDirectChatUseCase(sl<DirectChatRepository>()),
   );
-
   sl.registerLazySingleton<MarkDirectChatAsReadUseCase>(
     () => MarkDirectChatAsReadUseCase(sl<DirectChatRepository>()),
+  );
+  sl.registerLazySingleton<UpdateDirectChatLastMessageUseCase>(
+    () => UpdateDirectChatLastMessageUseCase(sl<DirectChatRepository>()),
   );
 
   // Media Use Cases

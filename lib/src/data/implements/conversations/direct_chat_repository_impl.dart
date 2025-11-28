@@ -3,9 +3,11 @@ import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/conversations/direct_chat_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/message_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/direct_chat_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/direct_chat_repository.dart';
 
 class DirectChatRepositoryImpl implements DirectChatRepository {
@@ -164,6 +166,25 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
       return Left(ServerFailure());
     } catch (e) {
       return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updateChatLastMessage({
+    required MessageEntity message,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return Future.value(Left(NetworkFailure()));
+    }
+
+    try {
+      final messageModel = MessageModel.fromEntity(message);
+      directChatService.updateChatLastMessage(messageModel);
+      return Future.value(const Right(unit));
+    } on ServerException {
+      return Future.value(Left(ServerFailure()));
+    } catch (e) {
+      return Future.value(Left(ServerFailure()));
     }
   }
 }
