@@ -3,7 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/chat_media_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage/chat_media_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/media_repository.dart';
 
 class MediaRepositoryImpl implements MediaRepository {

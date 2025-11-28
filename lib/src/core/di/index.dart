@@ -12,14 +12,14 @@ import 'package:flutter_whatsapp_clon/src/data/implements/conversations/message_
 import 'package:flutter_whatsapp_clon/src/data/implements/auth/phone_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user/user_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/auth/authentication_service.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/chat_media_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage/chat_media_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user/contact_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/direct_chat_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/auth/email_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/group_chat_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/message_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/auth/phone_authentication_service.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage/storage_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user/contact_repository.dart';
