@@ -1,14 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
 
 class GroupChatModel extends GroupEntity {
   const GroupChatModel({
     required super.id,
+    required super.participantIds,
+    required super.type,
     required super.name,
     super.description,
     super.avatarUrl,
     required super.createdBy,
-    required super.memberIds,
     required super.adminIds,
     super.hidePhoneNumbers,
     super.lastMessage,
@@ -24,11 +26,15 @@ class GroupChatModel extends GroupEntity {
 
     return GroupChatModel(
       id: doc.id,
+      participantIds: List<String>.from(data['participantIds'] ?? []),
+      type:
+          data['type'] == 'group'
+              ? ConversationType.group
+              : ConversationType.direct,
       name: data['name'] ?? '',
       description: data['description'],
       avatarUrl: data['avatarUrl'],
       createdBy: data['createdBy'] ?? '',
-      memberIds: List<String>.from(data['memberIds'] ?? []),
       adminIds: List<String>.from(data['adminIds'] ?? []),
       hidePhoneNumbers: data['hidePhoneNumbers'] ?? false,
       lastMessage: data['lastMessage'],
@@ -42,11 +48,12 @@ class GroupChatModel extends GroupEntity {
 
   Map<String, dynamic> toFirestore() {
     return {
+      'participantIds': participantIds,
+      'type': type == ConversationType.group ? 'group' : 'direct',
       'name': name,
       'description': description,
       'avatarUrl': avatarUrl,
       'createdBy': createdBy,
-      'memberIds': memberIds,
       'adminIds': adminIds,
       'hidePhoneNumbers': hidePhoneNumbers,
       'lastMessage': lastMessage,
@@ -62,11 +69,12 @@ class GroupChatModel extends GroupEntity {
   factory GroupChatModel.fromEntity(GroupEntity entity) {
     return GroupChatModel(
       id: entity.id,
+      participantIds: entity.participantIds,
+      type: entity.type,
       name: entity.name,
       description: entity.description,
       avatarUrl: entity.avatarUrl,
       createdBy: entity.createdBy,
-      memberIds: entity.memberIds,
       adminIds: entity.adminIds,
       hidePhoneNumbers: entity.hidePhoneNumbers,
       lastMessage: entity.lastMessage,
@@ -81,11 +89,12 @@ class GroupChatModel extends GroupEntity {
   GroupEntity toEntity() {
     return GroupEntity(
       id: id,
+      participantIds: participantIds,
+      type: type,
       name: name,
       description: description,
       avatarUrl: avatarUrl,
       createdBy: createdBy,
-      memberIds: memberIds,
       adminIds: adminIds,
       hidePhoneNumbers: hidePhoneNumbers,
       lastMessage: lastMessage,
@@ -100,11 +109,12 @@ class GroupChatModel extends GroupEntity {
   @override
   GroupChatModel copyWith({
     String? id,
+    List<String>? participantIds,
+    ConversationType? type,
     String? name,
     String? description,
     String? avatarUrl,
     String? createdBy,
-    List<String>? memberIds,
     List<String>? adminIds,
     bool? hidePhoneNumbers,
     String? lastMessage,
@@ -116,11 +126,12 @@ class GroupChatModel extends GroupEntity {
   }) {
     return GroupChatModel(
       id: id ?? this.id,
+      participantIds: participantIds ?? this.participantIds,
+      type: type ?? this.type,
       name: name ?? this.name,
       description: description ?? this.description,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       createdBy: createdBy ?? this.createdBy,
-      memberIds: memberIds ?? this.memberIds,
       adminIds: adminIds ?? this.adminIds,
       hidePhoneNumbers: hidePhoneNumbers ?? this.hidePhoneNumbers,
       lastMessage: lastMessage ?? this.lastMessage,

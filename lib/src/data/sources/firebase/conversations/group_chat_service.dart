@@ -43,7 +43,7 @@ class FirebaseGroupChatService {
     try {
       return firestore
           .collection(_groupsCollection)
-          .where('memberIds', arrayContains: userId)
+          .where('participantIds', arrayContains: userId)
           .orderBy('updatedAt', descending: true)
           .snapshots()
           .map((snapshot) {
@@ -61,7 +61,7 @@ class FirebaseGroupChatService {
       final querySnapshot =
           await firestore
               .collection(_groupsCollection)
-              .where('memberIds', arrayContains: userId)
+              .where('participantIds', arrayContains: userId)
               .orderBy('updatedAt', descending: true)
               .get();
 
@@ -109,16 +109,16 @@ class FirebaseGroupChatService {
         throw NotGroupAdminException();
       }
 
-      if (group.memberIds.contains(userId)) {
+      if (group.participantIds.contains(userId)) {
         return group;
       }
 
-      if (group.memberIds.length >= maxGroupMembers) {
+      if (group.participantIds.length >= maxGroupMembers) {
         throw MaxGroupMembersExceededException();
       }
 
       await firestore.collection(_groupsCollection).doc(groupId).update({
-        'memberIds': FieldValue.arrayUnion([userId]),
+        'participantIds': FieldValue.arrayUnion([userId]),
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
@@ -149,7 +149,7 @@ class FirebaseGroupChatService {
       }
 
       await firestore.collection(_groupsCollection).doc(groupId).update({
-        'memberIds': FieldValue.arrayRemove([userId]),
+        'participantIds': FieldValue.arrayRemove([userId]),
         'adminIds': FieldValue.arrayRemove([userId]),
         'updatedAt': FieldValue.serverTimestamp(),
       });

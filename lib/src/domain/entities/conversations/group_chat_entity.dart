@@ -1,68 +1,56 @@
-import 'package:equatable/equatable.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/chat_entity.dart';
 
-class GroupEntity extends Equatable {
-  final String id;
+class GroupEntity extends ChatEntity {
   final String name;
   final String? description;
   final String? avatarUrl;
   final String createdBy;
-  final List<String> memberIds;
   final List<String> adminIds;
   final bool hidePhoneNumbers;
-  final String? lastMessage;
-  final String? lastMessageSenderId;
-  final DateTime? lastMessageTime;
-  final Map<String, int> unreadCount;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
 
   const GroupEntity({
-    required this.id,
+    required super.id,
+    required super.participantIds,
+    required super.type,
     required this.name,
     this.description,
     this.avatarUrl,
     required this.createdBy,
-    required this.memberIds,
     required this.adminIds,
     this.hidePhoneNumbers = false,
-    this.lastMessage,
-    this.lastMessageSenderId,
-    this.lastMessageTime,
-    this.unreadCount = const {},
-    required this.createdAt,
-    this.updatedAt,
+    super.lastMessage,
+    super.lastMessageSenderId,
+    super.lastMessageTime,
+    super.unreadCount,
+    required super.createdAt,
+    super.updatedAt,
   });
 
   @override
   List<Object?> get props => [
-    id,
+    ...super.props,
     name,
     description,
     avatarUrl,
     createdBy,
-    memberIds,
     adminIds,
     hidePhoneNumbers,
-    lastMessage,
-    lastMessageSenderId,
-    lastMessageTime,
-    unreadCount,
-    createdAt,
-    updatedAt,
   ];
 
+  int get memberCount => participantIds.length;
+
   bool isAdmin(String userId) => adminIds.contains(userId);
-  bool isMember(String userId) => memberIds.contains(userId);
+  bool isMember(String userId) => participantIds.contains(userId);
   bool isCreator(String userId) => createdBy == userId;
-  int get memberCount => memberIds.length;
 
   GroupEntity copyWith({
     String? id,
+    List<String>? participantIds,
+    ConversationType? type,
     String? name,
     String? description,
     String? avatarUrl,
     String? createdBy,
-    List<String>? memberIds,
     List<String>? adminIds,
     bool? hidePhoneNumbers,
     String? lastMessage,
@@ -74,11 +62,12 @@ class GroupEntity extends Equatable {
   }) {
     return GroupEntity(
       id: id ?? this.id,
+      participantIds: participantIds ?? this.participantIds,
+      type: type ?? this.type,
       name: name ?? this.name,
       description: description ?? this.description,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       createdBy: createdBy ?? this.createdBy,
-      memberIds: memberIds ?? this.memberIds,
       adminIds: adminIds ?? this.adminIds,
       hidePhoneNumbers: hidePhoneNumbers ?? this.hidePhoneNumbers,
       lastMessage: lastMessage ?? this.lastMessage,

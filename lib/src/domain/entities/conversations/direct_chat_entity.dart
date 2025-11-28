@@ -1,49 +1,17 @@
-import 'package:equatable/equatable.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/chat_entity.dart';
 
-enum ConversationType { direct, group }
-
-class DirectChatEntity extends Equatable {
-  final String id;
-  final List<String> participantIds;
-  final ConversationType type;
-  final String? lastMessage;
-  final String? lastMessageSenderId;
-  final DateTime? lastMessageTime;
-  final Map<String, int> unreadCount;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
-
+class DirectChatEntity extends ChatEntity {
   const DirectChatEntity({
-    required this.id,
-    required this.participantIds,
-    required this.type,
-    this.lastMessage,
-    this.lastMessageSenderId,
-    this.lastMessageTime,
-    this.unreadCount = const {},
-    required this.createdAt,
-    this.updatedAt,
+    required super.id,
+    required super.participantIds,
+    required super.type,
+    super.lastMessage,
+    super.lastMessageSenderId,
+    super.lastMessageTime,
+    super.unreadCount,
+    required super.createdAt,
+    super.updatedAt,
   });
-
-  @override
-  List<Object?> get props => [
-    id,
-    participantIds,
-    type,
-    lastMessage,
-    lastMessageSenderId,
-    lastMessageTime,
-    unreadCount,
-    createdAt,
-    updatedAt,
-  ];
-
-  bool get isGroup => type == ConversationType.group;
-  bool get isDirect => type == ConversationType.direct;
-
-  int getUnreadCount(String userId) {
-    return unreadCount[userId] ?? 0;
-  }
 
   DirectChatEntity copyWith({
     String? id,
