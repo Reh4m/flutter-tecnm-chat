@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_auth_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verification_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/phone_authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/phone_authentication_repository.dart';
 
 class SendPhoneVerificationCodeUseCase {
   final PhoneAuthenticationRepository repository;

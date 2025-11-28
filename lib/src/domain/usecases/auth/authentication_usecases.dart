@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/authentication_repository.dart';
 
 class LinkEmailCredentialsAndVerifyUseCase {
   final AuthenticationRepository repository;

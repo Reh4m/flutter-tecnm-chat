@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/email_authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/email_authentication_repository.dart';
 
 class SendEmailVerificationUseCase {
   final EmailAuthenticationRepository repository;

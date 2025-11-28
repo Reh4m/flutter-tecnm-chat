@@ -4,11 +4,11 @@ import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/user_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/authentication_service.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/auth/authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/auth/email_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/authentication_repository.dart';
 
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
   final FirebaseAuthenticationService firebaseAuthentication;

@@ -5,10 +5,10 @@ import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_auth_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/auth/phone_verification_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/auth/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_auth_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verification_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/phone_authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/phone_authentication_repository.dart';
 
 class PhoneAuthRepositoryImpl implements PhoneAuthenticationRepository {
   final FirebasePhoneAuthenticationService firebasePhoneAuthentication;
