@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/conversations/group_chat_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/message_model.dart';
 
 class FirebaseGroupChatService {
   final FirebaseFirestore firestore;
@@ -8,6 +9,7 @@ class FirebaseGroupChatService {
   FirebaseGroupChatService({required this.firestore});
 
   static const String _groupsCollection = 'groups';
+  static const String _messagesCollection = 'messages';
   static const int maxGroupMembers = 256;
 
   Future<GroupChatModel> createGroup(GroupChatModel group) async {
@@ -280,6 +282,78 @@ class FirebaseGroupChatService {
     } catch (e) {
       if (e is NotGroupAdminException) rethrow;
       throw GroupOperationFailedException();
+    }
+  }
+
+  Future<void> markChatAsRead({
+    required String chatId,
+    required String userId,
+  }) async {
+    try {
+      final chatDoc =
+          await firestore.collection(_groupsCollection).doc(chatId).get();
+
+      if (!chatDoc.exists) return;
+
+      await firestore.collection(_groupsCollection).doc(chatId).update({
+        'unreadCount.$userId': 0,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      final messagesSnapshot =
+          await firestore
+              .collection(_messagesCollection)
+              .where('chatId', isEqualTo: chatId)
+              .where('senderId', isNotEqualTo: userId)
+              .where('status', whereIn: ['sent', 'delivered'])
+              .get();
+
+      if (messagesSnapshot.docs.isNotEmpty) {
+        final batch = firestore.batch();
+        for (var doc in messagesSnapshot.docs) {
+          batch.update(doc.reference, {
+            'status': 'read',
+            'readBy': FieldValue.arrayUnion([userId]),
+          });
+        }
+        await batch.commit();
+      }
+    } catch (e) {
+      throw ServerException();
+    }
+  }
+
+  Future<void> updateChatLastMessage(MessageModel message) async {
+    try {
+      final chatRef = firestore
+          .collection(_groupsCollection)
+          .doc(message.conversationId);
+
+      final chatDoc = await chatRef.get();
+      if (!chatDoc.exists) return;
+
+      final chat = GroupChatModel.fromFirestore(chatDoc);
+
+      Map<String, int> newUnreadCount = Map.from(chat.unreadCount);
+      for (var participantId in chat.participantIds) {
+        if (participantId != message.senderId) {
+          newUnreadCount[participantId] =
+              (newUnreadCount[participantId] ?? 0) + 1;
+        } else {
+          // El remitente siempre tiene contador en 0
+          newUnreadCount[participantId] = 0;
+        }
+      }
+
+      await chatRef.update({
+        'lastMessage': message.content,
+        'lastMessageSenderId': message.senderId,
+        'lastMessageTime': message.timestamp,
+        'unreadCount': newUnreadCount,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw ServerException();
     }
   }
 }

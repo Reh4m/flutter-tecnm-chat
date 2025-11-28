@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/group_chat_repository.dart';
 
 class CreateGroupUseCase {
@@ -172,5 +173,28 @@ class UpdateGroupInfoUseCase {
       avatarUrl: avatarUrl,
       requestingUserId: requestingUserId,
     );
+  }
+}
+
+class MarkGroupChatAsReadUseCase {
+  final GroupChatRepository repository;
+
+  MarkGroupChatAsReadUseCase(this.repository);
+
+  Future<Either<Failure, Unit>> call({
+    required String chatId,
+    required String userId,
+  }) async {
+    return await repository.markChatAsRead(chatId: chatId, userId: userId);
+  }
+}
+
+class UpdateGroupChatLastMessageUseCase {
+  final GroupChatRepository repository;
+
+  UpdateGroupChatLastMessageUseCase(this.repository);
+
+  Future<Either<Failure, Unit>> call({required MessageEntity message}) async {
+    return await repository.updateChatLastMessage(message: message);
   }
 }

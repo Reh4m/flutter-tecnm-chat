@@ -399,6 +399,12 @@ Future<void> init() async {
   sl.registerLazySingleton<UpdateGroupInfoUseCase>(
     () => UpdateGroupInfoUseCase(sl<GroupChatRepository>()),
   );
+  sl.registerLazySingleton<MarkGroupChatAsReadUseCase>(
+    () => MarkGroupChatAsReadUseCase(sl<GroupChatRepository>()),
+  );
+  sl.registerLazySingleton<UpdateGroupChatLastMessageUseCase>(
+    () => UpdateGroupChatLastMessageUseCase(sl<GroupChatRepository>()),
+  );
 
   // Message Use Cases
   sl.registerLazySingleton<SendMessageUseCase>(

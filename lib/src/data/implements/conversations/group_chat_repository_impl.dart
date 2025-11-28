@@ -3,8 +3,10 @@ import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/conversations/group_chat_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/conversations/message_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/group_chat_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/group_chat_repository.dart';
 
 class GroupChatRepositoryImpl implements GroupChatRepository {
@@ -303,6 +305,45 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
       return Left(ServerFailure());
     } catch (e) {
       return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> markChatAsRead({
+    required String chatId,
+    required String userId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return Left(NetworkFailure());
+    }
+
+    try {
+      groupService.markChatAsRead(chatId: chatId, userId: userId);
+
+      return Future.value(const Right(unit));
+    } on ServerException {
+      return Future.value(Left(ServerFailure()));
+    } catch (e) {
+      return Future.value(Left(ServerFailure()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> updateChatLastMessage({
+    required MessageEntity message,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return Future.value(Left(NetworkFailure()));
+    }
+
+    try {
+      final messageModel = MessageModel.fromEntity(message);
+      groupService.updateChatLastMessage(messageModel);
+      return Future.value(const Right(unit));
+    } on ServerException {
+      return Future.value(Left(ServerFailure()));
+    } catch (e) {
+      return Future.value(Left(ServerFailure()));
     }
   }
 }
