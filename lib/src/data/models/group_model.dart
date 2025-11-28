@@ -11,6 +11,10 @@ class GroupModel extends GroupEntity {
     required super.memberIds,
     required super.adminIds,
     super.hidePhoneNumbers,
+    super.lastMessage,
+    super.lastMessageSenderId,
+    super.lastMessageTime,
+    super.unreadCount,
     required super.createdAt,
     super.updatedAt,
   });
@@ -27,6 +31,10 @@ class GroupModel extends GroupEntity {
       memberIds: List<String>.from(data['memberIds'] ?? []),
       adminIds: List<String>.from(data['adminIds'] ?? []),
       hidePhoneNumbers: data['hidePhoneNumbers'] ?? false,
+      lastMessage: data['lastMessage'],
+      lastMessageSenderId: data['lastMessageSenderId'],
+      lastMessageTime: (data['lastMessageTime'] as Timestamp?)?.toDate(),
+      unreadCount: Map<String, int>.from(data['unreadCount'] ?? {}),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
     );
@@ -41,6 +49,11 @@ class GroupModel extends GroupEntity {
       'memberIds': memberIds,
       'adminIds': adminIds,
       'hidePhoneNumbers': hidePhoneNumbers,
+      'lastMessage': lastMessage,
+      'lastMessageSenderId': lastMessageSenderId,
+      'lastMessageTime':
+          lastMessageTime != null ? Timestamp.fromDate(lastMessageTime!) : null,
+      'unreadCount': unreadCount,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
@@ -56,6 +69,10 @@ class GroupModel extends GroupEntity {
       memberIds: entity.memberIds,
       adminIds: entity.adminIds,
       hidePhoneNumbers: entity.hidePhoneNumbers,
+      lastMessage: entity.lastMessage,
+      lastMessageSenderId: entity.lastMessageSenderId,
+      lastMessageTime: entity.lastMessageTime,
+      unreadCount: entity.unreadCount,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );
@@ -71,6 +88,10 @@ class GroupModel extends GroupEntity {
       memberIds: memberIds,
       adminIds: adminIds,
       hidePhoneNumbers: hidePhoneNumbers,
+      lastMessage: lastMessage,
+      lastMessageSenderId: lastMessageSenderId,
+      lastMessageTime: lastMessageTime,
+      unreadCount: unreadCount,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -86,6 +107,10 @@ class GroupModel extends GroupEntity {
     List<String>? memberIds,
     List<String>? adminIds,
     bool? hidePhoneNumbers,
+    String? lastMessage,
+    String? lastMessageSenderId,
+    DateTime? lastMessageTime,
+    Map<String, int>? unreadCount,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -98,6 +123,10 @@ class GroupModel extends GroupEntity {
       memberIds: memberIds ?? this.memberIds,
       adminIds: adminIds ?? this.adminIds,
       hidePhoneNumbers: hidePhoneNumbers ?? this.hidePhoneNumbers,
+      lastMessage: lastMessage ?? this.lastMessage,
+      lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
+      lastMessageTime: lastMessageTime ?? this.lastMessageTime,
+      unreadCount: unreadCount ?? this.unreadCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

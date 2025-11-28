@@ -9,6 +9,10 @@ class GroupEntity extends Equatable {
   final List<String> memberIds;
   final List<String> adminIds;
   final bool hidePhoneNumbers;
+  final String? lastMessage;
+  final String? lastMessageSenderId;
+  final DateTime? lastMessageTime;
+  final Map<String, int> unreadCount;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -21,6 +25,10 @@ class GroupEntity extends Equatable {
     required this.memberIds,
     required this.adminIds,
     this.hidePhoneNumbers = false,
+    this.lastMessage,
+    this.lastMessageSenderId,
+    this.lastMessageTime,
+    this.unreadCount = const {},
     required this.createdAt,
     this.updatedAt,
   });
@@ -35,6 +43,10 @@ class GroupEntity extends Equatable {
     memberIds,
     adminIds,
     hidePhoneNumbers,
+    lastMessage,
+    lastMessageSenderId,
+    lastMessageTime,
+    unreadCount,
     createdAt,
     updatedAt,
   ];
@@ -53,6 +65,10 @@ class GroupEntity extends Equatable {
     List<String>? memberIds,
     List<String>? adminIds,
     bool? hidePhoneNumbers,
+    String? lastMessage,
+    String? lastMessageSenderId,
+    DateTime? lastMessageTime,
+    Map<String, int>? unreadCount,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -65,6 +81,10 @@ class GroupEntity extends Equatable {
       memberIds: memberIds ?? this.memberIds,
       adminIds: adminIds ?? this.adminIds,
       hidePhoneNumbers: hidePhoneNumbers ?? this.hidePhoneNumbers,
+      lastMessage: lastMessage ?? this.lastMessage,
+      lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
+      lastMessageTime: lastMessageTime ?? this.lastMessageTime,
+      unreadCount: unreadCount ?? this.unreadCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
