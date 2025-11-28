@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/group_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/group_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/group_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/group_chat_repository.dart';
 
 class CreateGroupUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   CreateGroupUseCase(this.repository);
 
@@ -14,7 +14,7 @@ class CreateGroupUseCase {
 }
 
 class GetGroupByIdUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   GetGroupByIdUseCase(this.repository);
 
@@ -24,7 +24,7 @@ class GetGroupByIdUseCase {
 }
 
 class GetUserGroupsStreamUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   GetUserGroupsStreamUseCase(this.repository);
 
@@ -34,7 +34,7 @@ class GetUserGroupsStreamUseCase {
 }
 
 class GetUserGroupsUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   GetUserGroupsUseCase(this.repository);
 
@@ -44,7 +44,7 @@ class GetUserGroupsUseCase {
 }
 
 class UpdateGroupUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   UpdateGroupUseCase(this.repository);
 
@@ -54,7 +54,7 @@ class UpdateGroupUseCase {
 }
 
 class DeleteGroupUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   DeleteGroupUseCase(this.repository);
 
@@ -64,7 +64,7 @@ class DeleteGroupUseCase {
 }
 
 class AddGroupMemberUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   AddGroupMemberUseCase(this.repository);
 
@@ -82,7 +82,7 @@ class AddGroupMemberUseCase {
 }
 
 class RemoveGroupMemberUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   RemoveGroupMemberUseCase(this.repository);
 
@@ -100,7 +100,7 @@ class RemoveGroupMemberUseCase {
 }
 
 class AddGroupAdminUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   AddGroupAdminUseCase(this.repository);
 
@@ -118,7 +118,7 @@ class AddGroupAdminUseCase {
 }
 
 class RemoveGroupAdminUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   RemoveGroupAdminUseCase(this.repository);
 
@@ -136,7 +136,7 @@ class RemoveGroupAdminUseCase {
 }
 
 class UpdateGroupPrivacyUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   UpdateGroupPrivacyUseCase(this.repository);
 
@@ -154,7 +154,7 @@ class UpdateGroupPrivacyUseCase {
 }
 
 class UpdateGroupInfoUseCase {
-  final GroupRepository repository;
+  final GroupChatRepository repository;
 
   UpdateGroupInfoUseCase(this.repository);
 

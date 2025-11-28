@@ -6,7 +6,7 @@ import 'package:flutter_whatsapp_clon/src/data/implements/authentication_reposit
 import 'package:flutter_whatsapp_clon/src/data/implements/contact_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/direct_chat_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/email_auth_repository_impl.dart';
-import 'package:flutter_whatsapp_clon/src/data/implements/group_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/implements/group_chat_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/media_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/phone_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user_repository_impl.dart';
@@ -15,7 +15,7 @@ import 'package:flutter_whatsapp_clon/src/data/sources/firebase/chat_media_servi
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/contact_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/direct_chat_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/email_authentication_service.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/group_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/group_chat_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user_service.dart';
@@ -23,7 +23,7 @@ import 'package:flutter_whatsapp_clon/src/domain/repositories/authentication_rep
 import 'package:flutter_whatsapp_clon/src/domain/repositories/contact_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/direct_chat_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/email_authentication_repository.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/group_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/group_chat_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/media_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/phone_authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user_repository.dart';
@@ -101,9 +101,9 @@ Future<void> init() async {
     () => FirebaseChatMediaService(storage: sl<FirebaseStorage>()),
   );
 
-  // Firebase Group Service
-  sl.registerLazySingleton<FirebaseGroupService>(
-    () => FirebaseGroupService(firestore: sl<FirebaseFirestore>()),
+  // Firebase Group Chat Service
+  sl.registerLazySingleton<FirebaseGroupChatService>(
+    () => FirebaseGroupChatService(firestore: sl<FirebaseFirestore>()),
   );
 
   /* Repositories */
@@ -167,10 +167,10 @@ Future<void> init() async {
     ),
   );
 
-  // Group Repository
-  sl.registerLazySingleton<GroupRepository>(
-    () => GroupRepositoryImpl(
-      groupService: sl<FirebaseGroupService>(),
+  // Group Chat Repository
+  sl.registerLazySingleton<GroupChatRepository>(
+    () => GroupChatRepositoryImpl(
+      groupService: sl<FirebaseGroupChatService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
@@ -368,41 +368,41 @@ Future<void> init() async {
     () => ValidateAudioSizeUseCase(sl<MediaRepository>()),
   );
 
-  // Group Use Cases
+  // Group Chat Use Cases
   sl.registerLazySingleton<CreateGroupUseCase>(
-    () => CreateGroupUseCase(sl<GroupRepository>()),
+    () => CreateGroupUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<GetGroupByIdUseCase>(
-    () => GetGroupByIdUseCase(sl<GroupRepository>()),
+    () => GetGroupByIdUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<GetUserGroupsStreamUseCase>(
-    () => GetUserGroupsStreamUseCase(sl<GroupRepository>()),
+    () => GetUserGroupsStreamUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<GetUserGroupsUseCase>(
-    () => GetUserGroupsUseCase(sl<GroupRepository>()),
+    () => GetUserGroupsUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<UpdateGroupUseCase>(
-    () => UpdateGroupUseCase(sl<GroupRepository>()),
+    () => UpdateGroupUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<DeleteGroupUseCase>(
-    () => DeleteGroupUseCase(sl<GroupRepository>()),
+    () => DeleteGroupUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<AddGroupMemberUseCase>(
-    () => AddGroupMemberUseCase(sl<GroupRepository>()),
+    () => AddGroupMemberUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<RemoveGroupMemberUseCase>(
-    () => RemoveGroupMemberUseCase(sl<GroupRepository>()),
+    () => RemoveGroupMemberUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<AddGroupAdminUseCase>(
-    () => AddGroupAdminUseCase(sl<GroupRepository>()),
+    () => AddGroupAdminUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<RemoveGroupAdminUseCase>(
-    () => RemoveGroupAdminUseCase(sl<GroupRepository>()),
+    () => RemoveGroupAdminUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<UpdateGroupPrivacyUseCase>(
-    () => UpdateGroupPrivacyUseCase(sl<GroupRepository>()),
+    () => UpdateGroupPrivacyUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<UpdateGroupInfoUseCase>(
-    () => UpdateGroupInfoUseCase(sl<GroupRepository>()),
+    () => UpdateGroupInfoUseCase(sl<GroupChatRepository>()),
   );
 }

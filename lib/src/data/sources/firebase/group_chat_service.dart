@@ -1,29 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/group_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/group_chat_model.dart';
 
-class FirebaseGroupService {
+class FirebaseGroupChatService {
   final FirebaseFirestore firestore;
 
-  FirebaseGroupService({required this.firestore});
+  FirebaseGroupChatService({required this.firestore});
 
   static const String _groupsCollection = 'groups';
   static const int maxGroupMembers = 256;
 
-  Future<GroupModel> createGroup(GroupModel group) async {
+  Future<GroupChatModel> createGroup(GroupChatModel group) async {
     try {
       final docRef = await firestore
           .collection(_groupsCollection)
           .add(group.toFirestore());
 
       final createdDoc = await docRef.get();
-      return GroupModel.fromFirestore(createdDoc);
+      return GroupChatModel.fromFirestore(createdDoc);
     } catch (e) {
       throw ServerException();
     }
   }
 
-  Future<GroupModel> getGroupById(String groupId) async {
+  Future<GroupChatModel> getGroupById(String groupId) async {
     try {
       final doc =
           await firestore.collection(_groupsCollection).doc(groupId).get();
@@ -32,14 +32,14 @@ class FirebaseGroupService {
         throw GroupNotFoundException();
       }
 
-      return GroupModel.fromFirestore(doc);
+      return GroupChatModel.fromFirestore(doc);
     } catch (e) {
       if (e is GroupNotFoundException) rethrow;
       throw ServerException();
     }
   }
 
-  Stream<List<GroupModel>> getUserGroupsStream(String userId) {
+  Stream<List<GroupChatModel>> getUserGroupsStream(String userId) {
     try {
       return firestore
           .collection(_groupsCollection)
@@ -48,7 +48,7 @@ class FirebaseGroupService {
           .snapshots()
           .map((snapshot) {
             return snapshot.docs
-                .map((doc) => GroupModel.fromFirestore(doc))
+                .map((doc) => GroupChatModel.fromFirestore(doc))
                 .toList();
           });
     } catch (e) {
@@ -56,7 +56,7 @@ class FirebaseGroupService {
     }
   }
 
-  Future<List<GroupModel>> getUserGroups(String userId) async {
+  Future<List<GroupChatModel>> getUserGroups(String userId) async {
     try {
       final querySnapshot =
           await firestore
@@ -66,14 +66,14 @@ class FirebaseGroupService {
               .get();
 
       return querySnapshot.docs
-          .map((doc) => GroupModel.fromFirestore(doc))
+          .map((doc) => GroupChatModel.fromFirestore(doc))
           .toList();
     } catch (e) {
       throw ServerException();
     }
   }
 
-  Future<GroupModel> updateGroup(GroupModel group) async {
+  Future<GroupChatModel> updateGroup(GroupChatModel group) async {
     try {
       await firestore
           .collection(_groupsCollection)
@@ -83,7 +83,7 @@ class FirebaseGroupService {
       final updatedDoc =
           await firestore.collection(_groupsCollection).doc(group.id).get();
 
-      return GroupModel.fromFirestore(updatedDoc);
+      return GroupChatModel.fromFirestore(updatedDoc);
     } catch (e) {
       throw GroupOperationFailedException();
     }
@@ -97,7 +97,7 @@ class FirebaseGroupService {
     }
   }
 
-  Future<GroupModel> addMember({
+  Future<GroupChatModel> addMember({
     required String groupId,
     required String userId,
     required String requestingUserId,
@@ -132,7 +132,7 @@ class FirebaseGroupService {
     }
   }
 
-  Future<GroupModel> removeMember({
+  Future<GroupChatModel> removeMember({
     required String groupId,
     required String userId,
     required String requestingUserId,
@@ -164,7 +164,7 @@ class FirebaseGroupService {
     }
   }
 
-  Future<GroupModel> addAdmin({
+  Future<GroupChatModel> addAdmin({
     required String groupId,
     required String userId,
     required String requestingUserId,
@@ -194,7 +194,7 @@ class FirebaseGroupService {
     }
   }
 
-  Future<GroupModel> removeAdmin({
+  Future<GroupChatModel> removeAdmin({
     required String groupId,
     required String userId,
     required String requestingUserId,
@@ -225,7 +225,7 @@ class FirebaseGroupService {
     }
   }
 
-  Future<GroupModel> updateGroupPrivacy({
+  Future<GroupChatModel> updateGroupPrivacy({
     required String groupId,
     required bool hidePhoneNumbers,
     required String requestingUserId,
@@ -249,7 +249,7 @@ class FirebaseGroupService {
     }
   }
 
-  Future<GroupModel> updateGroupInfo({
+  Future<GroupChatModel> updateGroupInfo({
     required String groupId,
     String? name,
     String? description,

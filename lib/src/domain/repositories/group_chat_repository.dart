@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/group_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/group_chat_entity.dart';
 
-abstract class GroupRepository {
+abstract class GroupChatRepository {
   Future<Either<Failure, GroupEntity>> createGroup(GroupEntity group);
   Future<Either<Failure, GroupEntity>> getGroupById(String groupId);
   Stream<Either<Failure, List<GroupEntity>>> getUserGroupsStream(String userId);

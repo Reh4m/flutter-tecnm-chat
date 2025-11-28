@@ -2,16 +2,19 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
-import 'package:flutter_whatsapp_clon/src/data/models/group_model.dart';
-import 'package:flutter_whatsapp_clon/src/data/sources/firebase/group_service.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/group_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/repositories/group_repository.dart';
+import 'package:flutter_whatsapp_clon/src/data/models/group_chat_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/group_chat_service.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/group_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/group_chat_repository.dart';
 
-class GroupRepositoryImpl implements GroupRepository {
-  final FirebaseGroupService groupService;
+class GroupChatRepositoryImpl implements GroupChatRepository {
+  final FirebaseGroupChatService groupService;
   final NetworkInfo networkInfo;
 
-  GroupRepositoryImpl({required this.groupService, required this.networkInfo});
+  GroupChatRepositoryImpl({
+    required this.groupService,
+    required this.networkInfo,
+  });
 
   @override
   Future<Either<Failure, GroupEntity>> createGroup(GroupEntity group) async {
@@ -20,8 +23,8 @@ class GroupRepositoryImpl implements GroupRepository {
     }
 
     try {
-      final groupModel = GroupModel.fromEntity(group);
-      final created = await groupService.createGroup(groupModel);
+      final groupChatModel = GroupChatModel.fromEntity(group);
+      final created = await groupService.createGroup(groupChatModel);
       return Right(created.toEntity());
     } on ServerException {
       return Left(ServerFailure());
@@ -93,8 +96,8 @@ class GroupRepositoryImpl implements GroupRepository {
     }
 
     try {
-      final groupModel = GroupModel.fromEntity(group);
-      final updated = await groupService.updateGroup(groupModel);
+      final groupChatModel = GroupChatModel.fromEntity(group);
+      final updated = await groupService.updateGroup(groupChatModel);
       return Right(updated.toEntity());
     } on GroupOperationFailedException {
       return Left(GroupOperationFailedFailure());

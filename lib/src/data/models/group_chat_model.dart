@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/group_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/group_chat_entity.dart';
 
-class GroupModel extends GroupEntity {
-  const GroupModel({
+class GroupChatModel extends GroupEntity {
+  const GroupChatModel({
     required super.id,
     required super.name,
     super.description,
@@ -19,10 +19,10 @@ class GroupModel extends GroupEntity {
     super.updatedAt,
   });
 
-  factory GroupModel.fromFirestore(DocumentSnapshot doc) {
+  factory GroupChatModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
-    return GroupModel(
+    return GroupChatModel(
       id: doc.id,
       name: data['name'] ?? '',
       description: data['description'],
@@ -59,8 +59,8 @@ class GroupModel extends GroupEntity {
     };
   }
 
-  factory GroupModel.fromEntity(GroupEntity entity) {
-    return GroupModel(
+  factory GroupChatModel.fromEntity(GroupEntity entity) {
+    return GroupChatModel(
       id: entity.id,
       name: entity.name,
       description: entity.description,
@@ -98,7 +98,7 @@ class GroupModel extends GroupEntity {
   }
 
   @override
-  GroupModel copyWith({
+  GroupChatModel copyWith({
     String? id,
     String? name,
     String? description,
@@ -114,7 +114,7 @@ class GroupModel extends GroupEntity {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return GroupModel(
+    return GroupChatModel(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
