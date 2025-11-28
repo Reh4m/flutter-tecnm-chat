@@ -8,12 +8,14 @@ class FirebaseDirectChatService {
 
   FirebaseDirectChatService({required this.firestore});
 
-  static const String _chats = 'chats';
+  static const String _chatsCollection = 'chats';
   static const String _messagesCollection = 'messages';
 
   Future<DirectChatModel> createChat(DirectChatModel chat) async {
     try {
-      final docRef = await firestore.collection(_chats).add(chat.toFirestore());
+      final docRef = await firestore
+          .collection(_chatsCollection)
+          .add(chat.toFirestore());
 
       final createdDoc = await docRef.get();
       return DirectChatModel.fromFirestore(createdDoc);
@@ -29,7 +31,7 @@ class FirebaseDirectChatService {
     try {
       final querySnapshot =
           await firestore
-              .collection(_chats)
+              .collection(_chatsCollection)
               .where('participantIds', arrayContains: userId1)
               .get();
 
@@ -49,7 +51,7 @@ class FirebaseDirectChatService {
   Stream<List<DirectChatModel>> getUserChatsStream(String userId) {
     try {
       return firestore
-          .collection(_chats)
+          .collection(_chatsCollection)
           .where('participantIds', arrayContains: userId)
           .orderBy('lastMessageTime', descending: true)
           .snapshots()
@@ -65,7 +67,8 @@ class FirebaseDirectChatService {
 
   Future<DirectChatModel> getChatById(String chatId) async {
     try {
-      final doc = await firestore.collection(_chats).doc(chatId).get();
+      final doc =
+          await firestore.collection(_chatsCollection).doc(chatId).get();
 
       if (!doc.exists) {
         throw ConversationNotFoundException();
@@ -81,11 +84,12 @@ class FirebaseDirectChatService {
   Future<DirectChatModel> updateChat(DirectChatModel chat) async {
     try {
       await firestore
-          .collection(_chats)
+          .collection(_chatsCollection)
           .doc(chat.id)
           .update(chat.toFirestore());
 
-      final updatedDoc = await firestore.collection(_chats).doc(chat.id).get();
+      final updatedDoc =
+          await firestore.collection(_chatsCollection).doc(chat.id).get();
 
       return DirectChatModel.fromFirestore(updatedDoc);
     } catch (e) {
@@ -95,7 +99,7 @@ class FirebaseDirectChatService {
 
   Future<void> deleteChat(String chatId) async {
     try {
-      await firestore.collection(_chats).doc(chatId).delete();
+      await firestore.collection(_chatsCollection).doc(chatId).delete();
     } catch (e) {
       throw ConversationOperationFailedException();
     }
@@ -106,11 +110,12 @@ class FirebaseDirectChatService {
     required String userId,
   }) async {
     try {
-      final chatDoc = await firestore.collection(_chats).doc(chatId).get();
+      final chatDoc =
+          await firestore.collection(_chatsCollection).doc(chatId).get();
 
       if (!chatDoc.exists) return;
 
-      await firestore.collection(_chats).doc(chatId).update({
+      await firestore.collection(_chatsCollection).doc(chatId).update({
         'unreadCount.$userId': 0,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -140,7 +145,9 @@ class FirebaseDirectChatService {
 
   Future<void> updateChatLastMessage(MessageModel message) async {
     try {
-      final chatRef = firestore.collection(_chats).doc(message.conversationId);
+      final chatRef = firestore
+          .collection(_chatsCollection)
+          .doc(message.conversationId);
 
       final chatDoc = await chatRef.get();
       if (!chatDoc.exists) return;
