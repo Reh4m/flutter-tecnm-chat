@@ -21,6 +21,20 @@ class FirebaseStorageService {
     }
   }
 
+  Future<String> uploadGroupProfileImage(File image, String groupId) async {
+    try {
+      final fileName = '${groupId}_profile.jpg';
+      final ref = storage.ref().child('groups').child(groupId).child(fileName);
+
+      final uploadTask = ref.putFile(image);
+      final snapshot = await uploadTask;
+
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      throw ServerException();
+    }
+  }
+
   Future<void> deleteImageByUrl(String imageUrl) async {
     try {
       final ref = storage.refFromURL(imageUrl);

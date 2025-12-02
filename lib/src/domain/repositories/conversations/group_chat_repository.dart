@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
@@ -10,6 +12,14 @@ abstract class GroupChatRepository {
   Future<Either<Failure, List<GroupEntity>>> getUserGroups(String userId);
   Future<Either<Failure, GroupEntity>> updateGroup(GroupEntity group);
   Future<Either<Failure, Unit>> deleteGroup(String groupId);
+  Future<Either<Failure, String>> uploadProfileImage(
+    File image,
+    String groupId,
+  );
+  Future<Either<Failure, GroupEntity>> updateProfileImage(
+    String chatId,
+    String imageUrl,
+  );
   Future<Either<Failure, GroupEntity>> addMember({
     required String groupId,
     required String userId,

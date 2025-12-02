@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
@@ -121,6 +123,53 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
       return const Right(unit);
     } on GroupOperationFailedException {
       return Left(GroupOperationFailedFailure());
+    } on ServerException {
+      return Left(ServerFailure());
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> uploadProfileImage(
+    File image,
+    String chatId,
+  ) async {
+    if (!await networkInfo.isConnected) {
+      return Left(NetworkFailure());
+    }
+
+    try {
+      final imageUrl = await groupService.uploadProfileImage(image, chatId);
+      return Right(imageUrl);
+    } on ProfileImageUploadException {
+      return Left(ProfileImageUploadFailure());
+    } on ServerException {
+      return Left(ServerFailure());
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, GroupEntity>> updateProfileImage(
+    String chatId,
+    String imageUrl,
+  ) async {
+    if (!await networkInfo.isConnected) {
+      return Left(NetworkFailure());
+    }
+
+    try {
+      final updatedChat = await groupService.updateProfileImage(
+        chatId,
+        imageUrl,
+      );
+      return Right(updatedChat.toEntity());
+    } on GroupNotFoundException {
+      return Left(UserNotFoundFailure());
+    } on GroupOperationFailedException {
+      return Left(UserUpdateFailedFailure());
     } on ServerException {
       return Left(ServerFailure());
     } catch (e) {

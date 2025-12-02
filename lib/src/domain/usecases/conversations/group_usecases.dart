@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
@@ -97,6 +99,29 @@ class RemoveGroupMemberUseCase {
       userId: userId,
       requestingUserId: requestingUserId,
     );
+  }
+}
+
+class UploadGroupProfileImageUseCase {
+  final GroupChatRepository repository;
+
+  UploadGroupProfileImageUseCase(this.repository);
+
+  Future<Either<Failure, String>> call(File image, String chatId) async {
+    return await repository.uploadProfileImage(image, chatId);
+  }
+}
+
+class UpdateGroupProfileImageUseCase {
+  final GroupChatRepository repository;
+
+  UpdateGroupProfileImageUseCase(this.repository);
+
+  Future<Either<Failure, GroupEntity>> call(
+    String chatId,
+    String imageUrl,
+  ) async {
+    return await repository.updateProfileImage(chatId, imageUrl);
   }
 }
 

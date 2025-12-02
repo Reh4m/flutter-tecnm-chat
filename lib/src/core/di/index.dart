@@ -107,7 +107,10 @@ Future<void> init() async {
 
   // Firebase Group Chat Service
   sl.registerLazySingleton<FirebaseGroupChatService>(
-    () => FirebaseGroupChatService(firestore: sl<FirebaseFirestore>()),
+    () => FirebaseGroupChatService(
+      firestore: sl<FirebaseFirestore>(),
+      storageService: sl<FirebaseStorageService>(),
+    ),
   );
 
   // Firebase Message Service
@@ -388,6 +391,12 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<RemoveGroupMemberUseCase>(
     () => RemoveGroupMemberUseCase(sl<GroupChatRepository>()),
+  );
+  sl.registerLazySingleton<UploadGroupProfileImageUseCase>(
+    () => UploadGroupProfileImageUseCase(sl<GroupChatRepository>()),
+  );
+  sl.registerLazySingleton<UpdateGroupProfileImageUseCase>(
+    () => UpdateGroupProfileImageUseCase(sl<GroupChatRepository>()),
   );
   sl.registerLazySingleton<AddGroupAdminUseCase>(
     () => AddGroupAdminUseCase(sl<GroupChatRepository>()),

@@ -1,12 +1,19 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/exceptions.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/conversations/group_chat_model.dart';
 import 'package:flutter_whatsapp_clon/src/data/models/conversations/message_model.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage/storage_service.dart';
 
 class FirebaseGroupChatService {
   final FirebaseFirestore firestore;
+  final FirebaseStorageService storageService;
 
-  FirebaseGroupChatService({required this.firestore});
+  FirebaseGroupChatService({
+    required this.firestore,
+    required this.storageService,
+  });
 
   static const String _groupsCollection = 'groups';
   static const String _messagesCollection = 'messages';
@@ -94,6 +101,31 @@ class FirebaseGroupChatService {
   Future<void> deleteGroup(String groupId) async {
     try {
       await firestore.collection(_groupsCollection).doc(groupId).delete();
+    } catch (e) {
+      throw GroupOperationFailedException();
+    }
+  }
+
+  Future<String> uploadProfileImage(File image, String groupId) async {
+    try {
+      return await storageService.uploadGroupProfileImage(image, groupId);
+    } catch (e) {
+      throw ProfileImageUploadException();
+    }
+  }
+
+  Future<GroupChatModel> updateProfileImage(
+    String groupId,
+    String imageUrl,
+  ) async {
+    try {
+      await firestore.collection(_groupsCollection).doc(groupId).update({
+        'avatarUrl': imageUrl,
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+
+      // Retornar el grupo actualizado
+      return await getGroupById(groupId);
     } catch (e) {
       throw GroupOperationFailedException();
     }
