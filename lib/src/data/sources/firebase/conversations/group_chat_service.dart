@@ -106,7 +106,10 @@ class FirebaseGroupChatService {
     }
   }
 
-  Future<String> uploadProfileImage(File image, String groupId) async {
+  Future<String> uploadProfileImage({
+    required File image,
+    required String groupId,
+  }) async {
     try {
       return await storageService.uploadGroupProfileImage(image, groupId);
     } catch (e) {
@@ -114,10 +117,10 @@ class FirebaseGroupChatService {
     }
   }
 
-  Future<GroupChatModel> updateProfileImage(
-    String groupId,
-    String imageUrl,
-  ) async {
+  Future<GroupChatModel> updateProfileImage({
+    required String groupId,
+    required String imageUrl,
+  }) async {
     try {
       await firestore.collection(_groupsCollection).doc(groupId).update({
         'avatarUrl': imageUrl,

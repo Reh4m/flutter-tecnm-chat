@@ -107,8 +107,11 @@ class UploadGroupProfileImageUseCase {
 
   UploadGroupProfileImageUseCase(this.repository);
 
-  Future<Either<Failure, String>> call(File image, String chatId) async {
-    return await repository.uploadProfileImage(image, chatId);
+  Future<Either<Failure, String>> call({
+    required File image,
+    required String groupId,
+  }) async {
+    return await repository.uploadProfileImage(image: image, groupId: groupId);
   }
 }
 
@@ -117,11 +120,14 @@ class UpdateGroupProfileImageUseCase {
 
   UpdateGroupProfileImageUseCase(this.repository);
 
-  Future<Either<Failure, GroupEntity>> call(
-    String chatId,
-    String imageUrl,
-  ) async {
-    return await repository.updateProfileImage(chatId, imageUrl);
+  Future<Either<Failure, GroupEntity>> call({
+    required String groupId,
+    required String imageUrl,
+  }) async {
+    return await repository.updateProfileImage(
+      groupId: groupId,
+      imageUrl: imageUrl,
+    );
   }
 }
 

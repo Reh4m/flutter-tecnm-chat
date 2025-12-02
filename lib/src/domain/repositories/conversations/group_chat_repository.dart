@@ -12,14 +12,14 @@ abstract class GroupChatRepository {
   Future<Either<Failure, List<GroupEntity>>> getUserGroups(String userId);
   Future<Either<Failure, GroupEntity>> updateGroup(GroupEntity group);
   Future<Either<Failure, Unit>> deleteGroup(String groupId);
-  Future<Either<Failure, String>> uploadProfileImage(
-    File image,
-    String groupId,
-  );
-  Future<Either<Failure, GroupEntity>> updateProfileImage(
-    String chatId,
-    String imageUrl,
-  );
+  Future<Either<Failure, String>> uploadProfileImage({
+    required File image,
+    required String groupId,
+  });
+  Future<Either<Failure, GroupEntity>> updateProfileImage({
+    required String groupId,
+    required String imageUrl,
+  });
   Future<Either<Failure, GroupEntity>> addMember({
     required String groupId,
     required String userId,

@@ -131,16 +131,19 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
   }
 
   @override
-  Future<Either<Failure, String>> uploadProfileImage(
-    File image,
-    String chatId,
-  ) async {
+  Future<Either<Failure, String>> uploadProfileImage({
+    required File image,
+    required String groupId,
+  }) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
     }
 
     try {
-      final imageUrl = await groupService.uploadProfileImage(image, chatId);
+      final imageUrl = await groupService.uploadProfileImage(
+        image: image,
+        groupId: groupId,
+      );
       return Right(imageUrl);
     } on ProfileImageUploadException {
       return Left(ProfileImageUploadFailure());
@@ -152,18 +155,18 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
   }
 
   @override
-  Future<Either<Failure, GroupEntity>> updateProfileImage(
-    String chatId,
-    String imageUrl,
-  ) async {
+  Future<Either<Failure, GroupEntity>> updateProfileImage({
+    required String groupId,
+    required String imageUrl,
+  }) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
     }
 
     try {
       final updatedChat = await groupService.updateProfileImage(
-        chatId,
-        imageUrl,
+        groupId: groupId,
+        imageUrl: imageUrl,
       );
       return Right(updatedChat.toEntity());
     } on GroupNotFoundException {
