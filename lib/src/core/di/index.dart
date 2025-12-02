@@ -249,11 +249,11 @@ Future<void> init() async {
   sl.registerLazySingleton<DeleteUserUseCase>(
     () => DeleteUserUseCase(sl<UserRepository>()),
   );
-  sl.registerLazySingleton<UploadProfileImageUseCase>(
-    () => UploadProfileImageUseCase(sl<UserRepository>()),
+  sl.registerLazySingleton<UploadUserProfileImageUseCase>(
+    () => UploadUserProfileImageUseCase(sl<UserRepository>()),
   );
-  sl.registerLazySingleton<UpdateProfileImageUseCase>(
-    () => UpdateProfileImageUseCase(sl<UserRepository>()),
+  sl.registerLazySingleton<UpdateUserProfileImageUseCase>(
+    () => UpdateUserProfileImageUseCase(sl<UserRepository>()),
   );
   sl.registerLazySingleton<UpdateNotificationSettingsUseCase>(
     () => UpdateNotificationSettingsUseCase(sl<UserRepository>()),

@@ -64,20 +64,20 @@ class DeleteUserUseCase {
   }
 }
 
-class UploadProfileImageUseCase {
+class UploadUserProfileImageUseCase {
   final UserRepository repository;
 
-  UploadProfileImageUseCase(this.repository);
+  UploadUserProfileImageUseCase(this.repository);
 
   Future<Either<Failure, String>> call(File image, String userId) async {
     return await repository.uploadProfileImage(image, userId);
   }
 }
 
-class UpdateProfileImageUseCase {
+class UpdateUserProfileImageUseCase {
   final UserRepository repository;
 
-  UpdateProfileImageUseCase(this.repository);
+  UpdateUserProfileImageUseCase(this.repository);
 
   Future<Either<Failure, UserEntity>> call(
     String userId,
