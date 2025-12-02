@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/authentication_usecases.dart';
 
 enum AuthState { initial, loading, success, error }
 

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:intl/intl.dart';
 
-class MessageBubble extends StatelessWidget {
+class DirectMessageBubble extends StatelessWidget {
   final MessageEntity message;
   final bool isMe;
   final VoidCallback? onRetry;
 
-  const MessageBubble({
+  const DirectMessageBubble({
     super.key,
     required this.message,
     required this.isMe,
@@ -15,42 +15,37 @@ class MessageBubble extends StatelessWidget {
   });
 
   String _formatTime(DateTime time) {
-    return DateFormat('HH:mm').format(time);
+    return DateFormat('hh:mm a').format(time);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final screenSize = MediaQuery.of(context).size;
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
-        ),
-        decoration: BoxDecoration(
-          color: _getBackgroundColor(theme),
-          borderRadius: BorderRadius.circular(12).copyWith(
-            bottomRight: isMe ? const Radius.circular(4) : null,
-            bottomLeft: !isMe ? const Radius.circular(4) : null,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(10),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(
-              message.content,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: _getTextColor(theme),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              constraints: BoxConstraints(maxWidth: screenSize.width * 0.75),
+              decoration: BoxDecoration(
+                color: _getBackgroundColor(theme),
+                borderRadius: BorderRadius.circular(12).copyWith(
+                  bottomRight: isMe ? const Radius.circular(4) : null,
+                  bottomLeft: !isMe ? const Radius.circular(4) : null,
+                ),
+              ),
+              child: Text(
+                message.content,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: _getTextColor(theme),
+                ),
               ),
             ),
             const SizedBox(height: 4),
@@ -70,9 +65,8 @@ class MessageBubble extends StatelessWidget {
                 ],
                 Text(
                   _formatTime(message.timestamp),
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: theme.textTheme.labelSmall?.copyWith(
                     color: _getTimeColor(theme),
-                    fontSize: 11,
                   ),
                 ),
                 if (isMe) ...[
@@ -105,16 +99,15 @@ class MessageBubble extends StatelessWidget {
     if (message.status == MessageStatus.failed && isMe) {
       return theme.colorScheme.error.withAlpha(180);
     }
-    return isMe
-        ? theme.colorScheme.onPrimary.withAlpha(180)
-        : theme.colorScheme.onSurface.withAlpha(150);
+
+    return theme.colorScheme.onSurface.withAlpha(150);
   }
 
   Widget _buildStatusIcon(ThemeData theme) {
     Color iconColor =
         message.status == MessageStatus.failed
             ? theme.colorScheme.error
-            : theme.colorScheme.onPrimary.withAlpha(180);
+            : theme.colorScheme.onSurface.withAlpha(150);
 
     switch (message.status) {
       case MessageStatus.sending:

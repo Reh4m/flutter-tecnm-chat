@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/contact_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/contact_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
 
 class ContactListItem extends StatelessWidget {
   final ContactEntity contact;

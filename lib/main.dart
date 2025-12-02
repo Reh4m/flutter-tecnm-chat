@@ -6,15 +6,15 @@ import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/presentation/config/router/index.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/email_verification_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/chat_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/contacts_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/group_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/media_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/onboarding_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/phone_authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/theme_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/user_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,10 +42,10 @@ void main() async {
         ChangeNotifierProvider(create: (_) => EmailVerificationProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ContactsProvider()),
-        ChangeNotifierProvider(create: (_) => ConversationsProvider()),
-        ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => DirectChatProvider()),
+        ChangeNotifierProvider(create: (_) => MessageProvider()),
         ChangeNotifierProvider(create: (_) => MediaProvider()),
-        ChangeNotifierProvider(create: (_) => GroupProvider()),
+        ChangeNotifierProvider(create: (_) => GroupChatProvider()),
       ],
       child: const WhatsAppClone(),
     ),

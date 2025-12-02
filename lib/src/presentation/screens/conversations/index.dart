@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/authentication_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/contacts_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/user_provider.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/widgets/conversation_list_item.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_alert_dialog.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -22,64 +22,29 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeData();
+    _initializeListeners();
   }
 
-  void _initializeData() {
+  void _initializeListeners() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = context.read<UserProvider>();
-      final conversationsProvider = context.read<ConversationsProvider>();
-      final contactsProvider = context.read<ContactsProvider>();
 
       if (userProvider.currentUser == null) {
         userProvider.loadCurrentUser();
       }
 
       final currentUser = FirebaseAuth.instance.currentUser;
+
       if (currentUser != null) {
-        conversationsProvider.startConversationsListener(currentUser.uid);
-        contactsProvider.startContactsListener(currentUser.uid);
+        _startAllListeners(currentUser.uid);
       }
     });
   }
 
-  void _handleSignOut() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => CustomAlertDialog(
-            status: AlertDialogStatus.warning,
-            title: 'Cerrar Sesión',
-            description: '¿Estás seguro de que quieres cerrar sesión?',
-            primaryButtonVariant: ButtonVariant.primary,
-            primaryButtonText: 'Cerrar Sesión',
-            primaryButtonIcon: Icons.logout,
-            onPrimaryPressed: () async {
-              Navigator.pop(context);
-              await _signOut();
-            },
-            isSecondaryButtonEnabled: true,
-            secondaryButtonVariant: ButtonVariant.outline,
-            onSecondaryPressed: () => Navigator.pop(context),
-          ),
-    );
-  }
-
-  Future<void> _signOut() async {
-    final authProvider = context.read<AuthenticationProvider>();
-    final userProvider = context.read<UserProvider>();
-    final conversationsProvider = context.read<ConversationsProvider>();
-    final contactsProvider = context.read<ContactsProvider>();
-
-    conversationsProvider.stopConversationsListener();
-    contactsProvider.stopContactsListener();
-
-    await authProvider.signOut();
-    userProvider.clearCurrentUser();
-
-    if (mounted) {
-      context.go('/phone-sign-in');
-    }
+  void _startAllListeners(String userId) {
+    context.read<DirectChatProvider>().startChatsListener(userId);
+    context.read<ContactsProvider>().startContactsListener(userId);
+    context.read<GroupChatProvider>().startGroupsListener(userId);
   }
 
   @override
@@ -103,9 +68,7 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
           ),
           PopupMenuButton<String>(
             onSelected: (value) {
-              if (value == 'logout') {
-                _handleSignOut();
-              } else if (value == 'profile') {
+              if (value == 'profile') {
                 context.push('/profile');
               }
             },
@@ -131,37 +94,31 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
                       ],
                     ),
                   ),
-                  const PopupMenuDivider(),
-                  const PopupMenuItem(
-                    value: 'logout',
-                    child: Row(
-                      children: [
-                        Icon(Icons.logout),
-                        SizedBox(width: 10),
-                        Text('Cerrar Sesión'),
-                      ],
-                    ),
-                  ),
                 ],
           ),
         ],
       ),
-      body: Consumer3<ConversationsProvider, UserProvider, ContactsProvider>(
+      body: Consumer3<DirectChatProvider, UserProvider, GroupChatProvider>(
         builder: (
           context,
-          conversationsProvider,
+          directChatProvider,
           userProvider,
-          contactsProvider,
+          groupChatProvider,
           _,
         ) {
-          if (conversationsProvider.conversationsState ==
-                  ConversationsState.loading &&
-              conversationsProvider.conversations.isEmpty) {
+          final isLoadingConversations =
+              directChatProvider.directChatState == DirectChatState.loading &&
+              directChatProvider.chats.isEmpty;
+          final isLoadingGroups =
+              groupChatProvider.groupsState == GroupChatState.loading &&
+              groupChatProvider.groups.isEmpty;
+
+          if (isLoadingConversations || isLoadingGroups) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (conversationsProvider.conversationsState ==
-              ConversationsState.error) {
+          if (directChatProvider.directChatState == DirectChatState.error ||
+              groupChatProvider.groupsState == GroupChatState.error) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -172,18 +129,51 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
                     color: theme.colorScheme.error,
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    conversationsProvider.conversationsError ??
-                        'Error desconocido',
-                    style: theme.textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
+                  if (directChatProvider.directChatState ==
+                      DirectChatState.error)
+                    Text(
+                      directChatProvider.chatsError ?? 'Error desconocido',
+                      style: theme.textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  if (groupChatProvider.groupsState == GroupChatState.error)
+                    Text(
+                      groupChatProvider.groupsError ?? 'Error desconocido',
+                      style: theme.textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
                 ],
               ),
             );
           }
 
-          final conversations = conversationsProvider.conversations;
+          final directChats = directChatProvider.chats;
+          final groupChats = groupChatProvider.groups;
+
+          // Combinar conversaciones directas y grupos
+          final conversations = <dynamic>[...directChats, ...groupChats];
+
+          // Ordenar por última actividad (último mensaje o actualización del grupo)
+          conversations.sort((a, b) {
+            final aTime =
+                a is DirectChatEntity
+                    ? a.lastMessageTime
+                    : (a as GroupEntity).lastMessageTime == null
+                    ? a.updatedAt
+                    : a.lastMessageTime;
+            final bTime =
+                b is DirectChatEntity
+                    ? b.lastMessageTime
+                    : (b as GroupEntity).lastMessageTime == null
+                    ? b.updatedAt
+                    : b.lastMessageTime;
+
+            if (aTime == null && bTime == null) return 0;
+            if (aTime == null) return 1;
+            if (bTime == null) return -1;
+
+            return bTime.compareTo(aTime); // Más reciente primero
+          });
 
           if (conversations.isEmpty) {
             return Center(
@@ -214,20 +204,24 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              // El stream se actualiza automáticamente
               await Future.delayed(const Duration(milliseconds: 500));
             },
             child: ListView.builder(
               itemCount: conversations.length,
               itemBuilder: (context, index) {
-                final conversation = conversations[index];
+                final item = conversations[index];
                 final currentUserId = userProvider.currentUser?.id ?? '';
 
                 return ConversationListItem(
-                  conversation: conversation,
+                  directChat: item is DirectChatEntity ? item : null,
+                  group: item is GroupEntity ? item : null,
                   currentUserId: currentUserId,
                   onTap: () {
-                    context.push('/chat/${conversation.id}');
+                    if (item is DirectChatEntity) {
+                      context.push('/chat/${item.id}');
+                    } else if (item is GroupEntity) {
+                      context.push('/group-chat/${item.id}');
+                    }
                   },
                 );
               },
@@ -257,20 +251,5 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final conversationsProvider = context.read<ConversationsProvider>();
-        final contactsProvider = context.read<ContactsProvider>();
-
-        conversationsProvider.stopConversationsListener();
-        contactsProvider.stopContactsListener();
-      }
-    });
-
-    super.dispose();
   }
 }

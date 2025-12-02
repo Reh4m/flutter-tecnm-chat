@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/user_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/user/user_usecases.dart';
 
 enum UserState { initial, loading, success, error }
 
@@ -20,8 +20,8 @@ class UserProvider extends ChangeNotifier {
   final UpdateUserUseCase _updateUserUseCase = sl<UpdateUserUseCase>();
   final UpdateNotificationSettingsUseCase _updateNotificationSettingsUseCase =
       sl<UpdateNotificationSettingsUseCase>();
-  final UploadProfileImageUseCase _uploadProfileImageUseCase =
-      sl<UploadProfileImageUseCase>();
+  final UploadUserProfileImageUseCase _uploadProfileImageUseCase =
+      sl<UploadUserProfileImageUseCase>();
 
   UserState _currentUserState = UserState.initial;
   UserEntity? _currentUser;
@@ -106,13 +106,10 @@ class UserProvider extends ChangeNotifier {
     if (_currentUser == null) return false;
 
     _setOperationState(UserState.loading);
-    notifyListeners();
 
     String? imageUrl;
 
     if (profileImageFile != null) {
-      notifyListeners();
-
       final uploadResult = await _uploadProfileImageUseCase(
         profileImageFile,
         _currentUser!.id,
@@ -147,8 +144,6 @@ class UserProvider extends ChangeNotifier {
       (user) {
         _currentUser = user;
         _setOperationState(UserState.success);
-        _setOperationState(UserState.success);
-        notifyListeners();
         return true;
       },
     );
@@ -176,7 +171,6 @@ class UserProvider extends ChangeNotifier {
       (user) {
         _currentUser = user;
         _setOperationState(UserState.success);
-        notifyListeners();
         return true;
       },
     );

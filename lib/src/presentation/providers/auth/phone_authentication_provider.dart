@@ -8,9 +8,9 @@ import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_auth_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/phone_verification_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/authentication_usecases.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/phone_authentication_usecases.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/phone_authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/user/user_usecases.dart';
 
 enum PhoneAuthState {
   initial,
@@ -33,8 +33,8 @@ class PhoneAuthenticationProvider extends ChangeNotifier {
   final LinkEmailCredentialsAndVerifyUseCase
   _linkEmailCredentialsAndVerifyUseCase =
       sl<LinkEmailCredentialsAndVerifyUseCase>();
-  final UploadProfileImageUseCase _uploadProfileImageUseCase =
-      sl<UploadProfileImageUseCase>();
+  final UploadUserProfileImageUseCase _uploadProfileImageUseCase =
+      sl<UploadUserProfileImageUseCase>();
 
   PhoneAuthState _state = PhoneAuthState.initial;
   String? _errorMessage;

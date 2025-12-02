@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
 import 'package:flutter_whatsapp_clon/src/core/utils/phone_validator.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/contacts_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_text_field.dart';
@@ -245,7 +245,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
     final user = provider.searchedUser!;
 
     return Card(
-      elevation: 2,
+      elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -285,6 +285,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
             ),
             const SizedBox(height: 20),
             CustomButton(
+              variant: ButtonVariant.outline,
               text: 'Agregar Contacto',
               onPressed: _handleAddContact,
               width: double.infinity,

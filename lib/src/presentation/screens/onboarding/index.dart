@@ -86,7 +86,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _fadeController.reverse().then((_) {
       provider.completeOnboarding().then((_) {
         if (mounted) {
-          context.go('/login');
+          context.go('/phone-sign-in');
         }
       });
     });

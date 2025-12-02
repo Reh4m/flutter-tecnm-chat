@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/contacts_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/user_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/contacts/widgets/contact_list_item.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:go_router/go_router.dart';
@@ -37,12 +37,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
           ),
         ],
       ),
-      body: Consumer3<ContactsProvider, UserProvider, ConversationsProvider>(
+      body: Consumer3<ContactsProvider, UserProvider, DirectChatProvider>(
         builder: (
           context,
           contactsProvider,
           userProvider,
-          conversationsProvider,
+          directChatProvider,
           _,
         ) {
           if (contactsProvider.contactsState == ContactsState.loading &&
@@ -120,7 +120,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                         FirebaseAuth.instance.currentUser?.uid;
                     if (currentUserId == null) return;
 
-                    final conversation = await conversationsProvider
+                    final conversation = await directChatProvider
                         .getOrCreateDirectConversation(
                           userId1: currentUserId,
                           userId2: contact.contactUserId,

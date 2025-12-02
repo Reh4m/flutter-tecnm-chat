@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/conversation_entity.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations_provider.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ConversationListItem extends StatelessWidget {
-  final ConversationEntity conversation;
+  final DirectChatEntity? directChat;
+  final GroupEntity? group;
   final String currentUserId;
   final VoidCallback onTap;
 
   const ConversationListItem({
     super.key,
-    required this.conversation,
+    this.directChat,
+    this.group,
     required this.currentUserId,
     required this.onTap,
   });
@@ -23,7 +28,7 @@ class ConversationListItem extends StatelessWidget {
     final difference = now.difference(time);
 
     if (difference.inDays == 0) {
-      return DateFormat('HH:mm').format(time);
+      return DateFormat('hh:mm a').format(time);
     } else if (difference.inDays == 1) {
       return 'Ayer';
     } else if (difference.inDays < 7) {
@@ -33,66 +38,134 @@ class ConversationListItem extends StatelessWidget {
     }
   }
 
+  String _lastGroupMessagePreview(BuildContext context) {
+    if (group!.lastMessage == null || group!.lastMessage!.isEmpty) {
+      return 'Sin mensajes';
+    }
+
+    final groupParticpants = context
+        .select<GroupChatProvider, Map<String, UserEntity>>(
+          (p) => p.groupParticipants[group!.id] ?? {},
+        );
+
+    final sender = groupParticpants[group!.lastMessageSenderId];
+
+    if (sender == null) {
+      return group!.lastMessage!;
+    }
+
+    final senderName = sender.id == currentUserId ? 'Tú' : sender.name;
+
+    return '$senderName: ${group!.lastMessage}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final unreadCount = conversation.getUnreadCount(currentUserId);
 
-    return Consumer<ConversationsProvider>(
-      builder: (context, conversationsProvider, _) {
+    if (group != null) {
+      return _buildGroupItem(context, theme);
+    } else if (directChat != null) {
+      return _buildConversationItem(theme);
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildGroupItem(BuildContext context, ThemeData theme) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: CircleAvatar(
+        radius: 28,
+        backgroundColor: theme.colorScheme.secondary.withAlpha(50),
+        backgroundImage:
+            group!.avatarUrl != null && group!.avatarUrl!.isNotEmpty
+                ? NetworkImage(group!.avatarUrl!)
+                : null,
+        child:
+            group!.avatarUrl == null || group!.avatarUrl!.isEmpty
+                ? Icon(
+                  Icons.group,
+                  color: theme.colorScheme.secondary,
+                  size: 28,
+                )
+                : null,
+      ),
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              group!.name,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      subtitle: Text(
+        _lastGroupMessagePreview(context),
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurface.withAlpha(150),
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            _formatTime(group!.lastMessageTime ?? group!.createdAt),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withAlpha(150),
+            ),
+          ),
+        ],
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildConversationItem(ThemeData theme) {
+    final unreadCount = directChat!.getUnreadCount(currentUserId);
+
+    return Consumer<DirectChatProvider>(
+      builder: (context, directChatProvider, _) {
         Widget leadingWidget;
         String title;
 
-        if (conversation.isDirect) {
-          final otherUserId = conversationsProvider.getOtherUserId(
-            conversation,
-            currentUserId,
-          );
-          final otherUser =
-              otherUserId != null
-                  ? conversationsProvider.getConversationUser(otherUserId)
-                  : null;
+        final otherUserId = directChatProvider.getParticipantId(
+          directChat!,
+          currentUserId,
+        );
+        final otherUser =
+            otherUserId != null
+                ? directChatProvider.getParticipantInfo(otherUserId)
+                : null;
 
-          title = otherUser?.name ?? 'Usuario';
+        title = otherUser?.name ?? 'Usuario';
 
-          leadingWidget = CircleAvatar(
-            radius: 28,
-            backgroundColor: theme.colorScheme.primary.withAlpha(50),
-            backgroundImage:
-                otherUser?.photoUrl != null && otherUser!.photoUrl!.isNotEmpty
-                    ? NetworkImage(otherUser.photoUrl!)
-                    : null,
-            child:
-                otherUser?.photoUrl == null || otherUser!.photoUrl!.isEmpty
-                    ? Text(
-                      otherUser?.initials ?? '?',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                    : null,
-          );
-        } else {
-          title = conversation.groupName ?? 'Grupo';
-
-          leadingWidget = CircleAvatar(
-            radius: 28,
-            backgroundColor: theme.colorScheme.secondary.withAlpha(50),
-            backgroundImage:
-                conversation.groupAvatarUrl != null
-                    ? NetworkImage(conversation.groupAvatarUrl!)
-                    : null,
-            child:
-                conversation.groupAvatarUrl == null
-                    ? Icon(
-                      Icons.group,
-                      color: theme.colorScheme.secondary,
-                      size: 28,
-                    )
-                    : null,
-          );
-        }
+        leadingWidget = CircleAvatar(
+          radius: 28,
+          backgroundColor: theme.colorScheme.primary.withAlpha(50),
+          backgroundImage:
+              otherUser?.photoUrl != null && otherUser!.photoUrl!.isNotEmpty
+                  ? NetworkImage(otherUser.photoUrl!)
+                  : null,
+          child:
+              otherUser?.photoUrl == null || otherUser!.photoUrl!.isEmpty
+                  ? Text(
+                    otherUser?.initials ?? '?',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                  : null,
+        );
 
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(
@@ -109,7 +182,7 @@ class ConversationListItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
-            conversation.lastMessage ?? 'Sin mensajes',
+            directChat!.lastMessage ?? 'Sin mensajes',
             style: theme.textTheme.bodyMedium?.copyWith(
               color:
                   unreadCount > 0
@@ -125,7 +198,7 @@ class ConversationListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                _formatTime(conversation.lastMessageTime),
+                _formatTime(directChat!.lastMessageTime),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color:
                       unreadCount > 0

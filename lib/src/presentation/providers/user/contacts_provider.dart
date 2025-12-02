@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/contact_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/user_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/contact_usecases.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/user_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/contact_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/user/contact_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/user/user_usecases.dart';
 
 enum ContactsState { initial, loading, success, error }
 

@@ -4,48 +4,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/message_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/conversation_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/direct_chat_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/message_use_cases.dart';
 
-enum ChatState { initial, loading, success, error }
+enum MessageState { initial, loading, success, error }
 
-class ChatProvider extends ChangeNotifier {
+class MessageProvider extends ChangeNotifier {
   final GetConversationMessagesStreamUseCase _getMessagesStreamUseCase =
       sl<GetConversationMessagesStreamUseCase>();
-  final SendMessageUseCase _sendMessageUseCase = sl<SendMessageUseCase>();
   final MarkMessageAsReadUseCase _markMessageAsReadUseCase =
       sl<MarkMessageAsReadUseCase>();
-  final MarkConversationAsReadUseCase _markConversationAsReadUseCase =
-      sl<MarkConversationAsReadUseCase>();
+  final MarkDirectChatAsReadUseCase _markDirectChatAsReadUseCase =
+      sl<MarkDirectChatAsReadUseCase>();
   final DeleteMessageUseCase _deleteMessageUseCase = sl<DeleteMessageUseCase>();
   final UpdateMessageStatusUseCase _updateMessageStatusUseCase =
       sl<UpdateMessageStatusUseCase>();
   final MarkAllMessagesAsDeliveredUseCase _markAllMessagesAsDeliveredUseCase =
       sl<MarkAllMessagesAsDeliveredUseCase>();
 
-  ChatState _messagesState = ChatState.initial;
+  MessageState _messagesState = MessageState.initial;
   List<MessageEntity> _messages = [];
   String? _messagesError;
   StreamSubscription? _messagesSubscription;
 
-  ChatState _operationState = ChatState.initial;
+  MessageState _operationState = MessageState.initial;
   String? _operationError;
 
   String? _currentConversationId;
   Timer? _statusCheckTimer;
 
-  ChatState get messagesState => _messagesState;
+  MessageState get messagesState => _messagesState;
   List<MessageEntity> get messages => _messages;
   String? get messagesError => _messagesError;
 
-  ChatState get operationState => _operationState;
+  MessageState get operationState => _operationState;
   String? get operationError => _operationError;
 
   String? get currentConversationId => _currentConversationId;
 
   void startMessagesListener(String conversationId, {int limit = 50}) {
     _currentConversationId = conversationId;
-    _setMessagesState(ChatState.loading);
+    _setMessagesState(MessageState.loading);
 
     _statusCheckTimer?.cancel();
 
@@ -58,7 +58,7 @@ class ChatProvider extends ChangeNotifier {
           (failure) => _setMessagesError(_mapFailureToMessage(failure)),
           (messages) {
             _messages = messages;
-            _setMessagesState(ChatState.success);
+            _setMessagesState(MessageState.success);
 
             _markMessagesAsDeliveredOnLoad(conversationId);
 
@@ -117,42 +117,6 @@ class ChatProvider extends ChangeNotifier {
     _currentConversationId = null;
   }
 
-  Future<bool> sendMessage(MessageEntity message) async {
-    _setOperationState(ChatState.loading);
-
-    // Crear mensaje con estado 'sending'
-    final messageToSend = message.copyWith(status: MessageStatus.sending);
-
-    final result = await _sendMessageUseCase(messageToSend);
-
-    return result.fold(
-      (failure) {
-        _setOperationError(_mapFailureToMessage(failure));
-
-        // Marcar como fallido si hay error
-        if (message.id.isNotEmpty) {
-          _updateMessageStatusUseCase(
-            messageId: message.id,
-            status: MessageStatus.failed,
-          );
-        }
-
-        return false;
-      },
-      (sentMessage) {
-        _setOperationState(ChatState.success);
-
-        // Actualizar a 'sent' después de enviar exitosamente
-        _updateMessageStatusUseCase(
-          messageId: sentMessage.id,
-          status: MessageStatus.sent,
-        );
-
-        return true;
-      },
-    );
-  }
-
   Future<bool> markMessageAsRead({
     required String messageId,
     required String userId,
@@ -166,7 +130,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<bool> deleteMessage(String messageId) async {
-    _setOperationState(ChatState.loading);
+    _setOperationState(MessageState.loading);
 
     final result = await _deleteMessageUseCase(messageId);
 
@@ -176,7 +140,7 @@ class ChatProvider extends ChangeNotifier {
         return false;
       },
       (_) {
-        _setOperationState(ChatState.success);
+        _setOperationState(MessageState.success);
         return true;
       },
     );
@@ -186,8 +150,8 @@ class ChatProvider extends ChangeNotifier {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     if (currentUserId == null) return;
 
-    await _markConversationAsReadUseCase(
-      conversationId: conversationId,
+    await _markDirectChatAsReadUseCase(
+      chatId: conversationId,
       userId: currentUserId,
     );
 
@@ -202,20 +166,9 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> retryFailedMessage(MessageEntity message) async {
-    // Actualizar estado a 'sending'
-    await _updateMessageStatusUseCase(
-      messageId: message.id,
-      status: MessageStatus.sending,
-    );
-
-    // Intentar reenviar
-    return await sendMessage(message);
-  }
-
-  void _setMessagesState(ChatState newState) {
+  void _setMessagesState(MessageState newState) {
     _messagesState = newState;
-    if (newState != ChatState.error) {
+    if (newState != MessageState.error) {
       _messagesError = null;
     }
     notifyListeners();
@@ -223,12 +176,12 @@ class ChatProvider extends ChangeNotifier {
 
   void _setMessagesError(String message) {
     _messagesError = message;
-    _setMessagesState(ChatState.error);
+    _setMessagesState(MessageState.error);
   }
 
-  void _setOperationState(ChatState newState) {
+  void _setOperationState(MessageState newState) {
     _operationState = newState;
-    if (newState != ChatState.error) {
+    if (newState != MessageState.error) {
       _operationError = null;
     }
     notifyListeners();
@@ -236,7 +189,7 @@ class ChatProvider extends ChangeNotifier {
 
   void _setOperationError(String message) {
     _operationError = message;
-    _setOperationState(ChatState.error);
+    _setOperationState(MessageState.error);
   }
 
   String _mapFailureToMessage(Failure failure) {

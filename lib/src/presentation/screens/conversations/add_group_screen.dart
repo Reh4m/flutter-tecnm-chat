@@ -1,12 +1,17 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
-import 'package:flutter_whatsapp_clon/src/domain/entities/group_entity.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/contacts_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/group_provider.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/utils/image_picker_service.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_text_field.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/editable_avatar.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/loading_overlay.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +28,8 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
 
+  File? _profileImage;
+
   final Set<String> _selectedContactIds = {};
   bool _hidePhoneNumbers = false;
 
@@ -31,6 +38,19 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSelectImage() async {
+    await ImagePickerService.showImageSourceDialog(
+      context,
+      onImageSelected: (file) {
+        if (file != null) {
+          setState(() {
+            _profileImage = file;
+          });
+        }
+      },
+    );
   }
 
   Future<void> _handleCreateGroup() async {
@@ -52,17 +72,22 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
 
     final group = GroupEntity(
       id: '',
+      participantIds: memberIds,
+      type: ConversationType.group,
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
       createdBy: currentUserId,
-      memberIds: memberIds,
       adminIds: [currentUserId],
       hidePhoneNumbers: _hidePhoneNumbers,
       createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
-    final groupProvider = context.read<GroupProvider>();
-    final createdGroup = await groupProvider.createGroup(group);
+    final groupChatProvider = context.read<GroupChatProvider>();
+    final createdGroup = await groupChatProvider.createGroup(
+      group: group,
+      profileImageFile: _profileImage,
+    );
 
     if (!mounted) return;
 
@@ -77,7 +102,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
       _showToast(
         title: 'Error',
         description:
-            groupProvider.operationError ?? 'No se pudo crear el grupo',
+            groupChatProvider.operationError ?? 'No se pudo crear el grupo',
         type: ToastNotificationType.error,
       );
     }
@@ -109,9 +134,10 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
           ),
         ),
       ),
-      body: Consumer2<GroupProvider, ContactsProvider>(
-        builder: (context, groupProvider, contactsProvider, _) {
-          final isLoading = groupProvider.operationState == GroupState.loading;
+      body: Consumer2<GroupChatProvider, ContactsProvider>(
+        builder: (context, groupChatProvider, contactsProvider, _) {
+          final isLoading =
+              groupChatProvider.operationState == GroupChatState.loading;
 
           return LoadingOverlay(
             isLoading: isLoading,
@@ -123,7 +149,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildGroupIcon(theme),
+                    Center(child: _buildAvatar(theme)),
                     const SizedBox(height: 24),
                     CustomTextField(
                       label: 'Nombre del grupo',
@@ -176,41 +202,15 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
     );
   }
 
-  Widget _buildGroupIcon(ThemeData theme) {
-    return Center(
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: theme.colorScheme.secondary.withAlpha(50),
-            child: Icon(
-              Icons.group,
-              size: 50,
-              color: theme.colorScheme.secondary,
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.secondary,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: theme.scaffoldBackgroundColor,
-                  width: 3,
-                ),
-              ),
-              child: Icon(
-                Icons.camera_alt,
-                size: 20,
-                color: theme.colorScheme.onSecondary,
-              ),
-            ),
-          ),
-        ],
-      ),
+  Widget _buildAvatar(ThemeData theme) {
+    return EditableAvatar(
+      imageFile: _profileImage,
+      initials:
+          _nameController.text.isNotEmpty
+              ? _nameController.text[0].toUpperCase()
+              : '?',
+      radius: 60,
+      onTap: _handleSelectImage,
     );
   }
 
