@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
@@ -19,6 +20,8 @@ class ConversationsListScreen extends StatefulWidget {
 }
 
 class _ConversationsListScreenState extends State<ConversationsListScreen> {
+  FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +36,7 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
         userProvider.loadCurrentUser();
       }
 
-      final currentUser = FirebaseAuth.instance.currentUser;
+      final currentUser = _firebaseAuth.currentUser;
 
       if (currentUser != null) {
         _startAllListeners(currentUser.uid);

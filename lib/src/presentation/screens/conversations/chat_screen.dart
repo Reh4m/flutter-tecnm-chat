@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
@@ -22,6 +23,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
 
+  FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
         widget.conversationId,
       );
 
-      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+      final currentUserId = _firebaseAuth.currentUser?.uid;
       if (currentUserId != null) {
         context.read<DirectChatProvider>().markChatAsRead(
           chatId: widget.conversationId,
@@ -48,7 +51,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final currentUserId = _firebaseAuth.currentUser?.uid;
     if (currentUserId == null) return;
 
     final message = MessageEntity(
@@ -140,7 +143,7 @@ class _ChatScreenState extends State<ChatScreen> {
               );
             }
 
-            final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+            final currentUserId = _firebaseAuth.currentUser?.uid ?? '';
 
             final otherUserId = directChatProvider.getParticipantId(
               conversation,
@@ -252,8 +255,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 }
 
-                final currentUserId =
-                    FirebaseAuth.instance.currentUser?.uid ?? '';
+                final currentUserId = _firebaseAuth.currentUser?.uid ?? '';
 
                 return ListView.builder(
                   controller: _scrollController,

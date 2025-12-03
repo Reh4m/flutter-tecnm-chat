@@ -11,12 +11,14 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/auth/user_sign_up_enti
 import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/authentication_repository.dart';
 
 class AuthenticationRepositoryImpl implements AuthenticationRepository {
+  final FirebaseAuth firebaseAuth;
   final FirebaseAuthenticationService firebaseAuthentication;
   final FirebaseEmailAuthenticationService firebaseEmailAuthentication;
   final FirebaseUserService firebaseUserService;
   final NetworkInfo networkInfo;
 
   AuthenticationRepositoryImpl({
+    required this.firebaseAuth,
     required this.firebaseAuthentication,
     required this.firebaseEmailAuthentication,
     required this.firebaseUserService,
@@ -32,7 +34,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      final currentUser = FirebaseAuth.instance.currentUser;
+      final currentUser = firebaseAuth.currentUser;
 
       if (currentUser == null) {
         return Left(UserNotFoundFailure());
@@ -84,7 +86,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      final currentUser = FirebaseAuth.instance.currentUser;
+      final currentUser = firebaseAuth.currentUser;
 
       if (currentUser == null) {
         return Left(UserNotFoundFailure());
@@ -152,7 +154,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      final currentUser = FirebaseAuth.instance.currentUser;
+      final currentUser = firebaseAuth.currentUser;
 
       if (currentUser == null) {
         return const Right(false);
@@ -216,7 +218,7 @@ class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     try {
-      await FirebaseAuth.instance.signOut();
+      await firebaseAuth.signOut();
 
       return const Right(unit);
     } catch (e) {

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/direct_chat_usecases.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/message_
 enum MessageState { initial, loading, success, error }
 
 class MessageProvider extends ChangeNotifier {
+  final FirebaseAuth firebaseAuth = di.sl<FirebaseAuth>();
   final GetConversationMessagesStreamUseCase _getMessagesStreamUseCase =
       sl<GetConversationMessagesStreamUseCase>();
   final MarkMessageAsReadUseCase _markMessageAsReadUseCase =
@@ -81,7 +83,7 @@ class MessageProvider extends ChangeNotifier {
   }
 
   Future<void> _checkAndUpdateMessageStatuses(String conversationId) async {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final currentUserId = firebaseAuth.currentUser?.uid;
 
     if (currentUserId == null) return;
 
@@ -99,7 +101,7 @@ class MessageProvider extends ChangeNotifier {
   }
 
   Future<void> _markMessagesAsDeliveredOnLoad(String conversationId) async {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final currentUserId = firebaseAuth.currentUser?.uid;
 
     if (currentUserId == null) return;
 
@@ -147,7 +149,7 @@ class MessageProvider extends ChangeNotifier {
   }
 
   Future<void> markMessagesAsReadInConversation(String conversationId) async {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final currentUserId = firebaseAuth.currentUser?.uid;
     if (currentUserId == null) return;
 
     await _markDirectChatAsReadUseCase(

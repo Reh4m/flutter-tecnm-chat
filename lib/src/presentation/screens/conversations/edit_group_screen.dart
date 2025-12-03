@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
@@ -28,6 +29,8 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
   final _descriptionController = TextEditingController();
 
   File? _newProfileImage;
+
+  FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
 
   @override
   void initState() {
@@ -70,7 +73,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
   Future<void> _handleSaveGroup() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final currentUserId = _firebaseAuth.currentUser?.uid;
     if (currentUserId == null) return;
 
     final groupChatProvider = context.read<GroupChatProvider>();

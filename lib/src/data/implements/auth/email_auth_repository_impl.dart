@@ -10,11 +10,13 @@ import 'package:flutter_whatsapp_clon/src/domain/entities/auth/password_reset_en
 import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/email_authentication_repository.dart';
 
 class EmailAuthRepositoryImpl implements EmailAuthenticationRepository {
+  final FirebaseAuth firebaseAuth;
   final FirebaseEmailAuthenticationService firebaseEmailAuthentication;
   final FirebaseUserService firebaseUserService;
   final NetworkInfo networkInfo;
 
   EmailAuthRepositoryImpl({
+    required this.firebaseAuth,
     required this.firebaseEmailAuthentication,
     required this.firebaseUserService,
     required this.networkInfo,
@@ -46,7 +48,7 @@ class EmailAuthRepositoryImpl implements EmailAuthenticationRepository {
     }
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = firebaseAuth.currentUser;
 
       if (user == null) {
         return Left(UserNotFoundFailure());
@@ -54,7 +56,7 @@ class EmailAuthRepositoryImpl implements EmailAuthenticationRepository {
 
       await user.reload();
 
-      final updatedUser = FirebaseAuth.instance.currentUser;
+      final updatedUser = firebaseAuth.currentUser;
 
       return Right(updatedUser?.emailVerified ?? false);
     } catch (e) {

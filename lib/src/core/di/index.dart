@@ -130,6 +130,7 @@ Future<void> init() async {
   // Authentication Repository
   sl.registerLazySingleton<AuthenticationRepository>(
     () => AuthenticationRepositoryImpl(
+      firebaseAuth: sl<FirebaseAuth>(),
       firebaseAuthentication: sl<FirebaseAuthenticationService>(),
       firebaseEmailAuthentication: sl<FirebaseEmailAuthenticationService>(),
       firebaseUserService: sl<FirebaseUserService>(),
@@ -140,6 +141,7 @@ Future<void> init() async {
   // Email Authentication Repository
   sl.registerLazySingleton<EmailAuthenticationRepository>(
     () => EmailAuthRepositoryImpl(
+      firebaseAuth: sl<FirebaseAuth>(),
       firebaseEmailAuthentication: sl<FirebaseEmailAuthenticationService>(),
       firebaseUserService: sl<FirebaseUserService>(),
       networkInfo: sl<NetworkInfo>(),

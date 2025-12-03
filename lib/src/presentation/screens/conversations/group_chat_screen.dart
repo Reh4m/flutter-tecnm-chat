@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
@@ -23,6 +24,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
 
+  FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
+
   @override
   void initState() {
     super.initState();
@@ -37,7 +40,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
       context.read<MessageProvider>().startMessagesListener(widget.groupId);
 
-      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+      final currentUserId = _firebaseAuth.currentUser?.uid;
 
       final hasMessages = groupChatProvider.currentGroup?.lastMessage != null;
 
@@ -54,7 +57,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final currentUserId = _firebaseAuth.currentUser?.uid;
     if (currentUserId == null) return;
 
     final message = MessageEntity(
@@ -244,8 +247,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   );
                 }
 
-                final currentUserId =
-                    FirebaseAuth.instance.currentUser?.uid ?? '';
+                final currentUserId = _firebaseAuth.currentUser?.uid ?? '';
 
                 final groupParticipants =
                     groupChatProvider.groupParticipants[widget.groupId] ?? {};

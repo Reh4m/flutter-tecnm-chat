@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
 import 'package:flutter_whatsapp_clon/src/core/utils/phone_validator.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
@@ -23,6 +24,8 @@ class _AddContactScreenState extends State<AddContactScreen> {
   final _emailController = TextEditingController();
 
   bool _searchByPhone = true;
+
+  FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
 
   @override
   void dispose() {
@@ -69,7 +72,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
 
     if (user == null) return;
 
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final currentUserId = _firebaseAuth.currentUser?.uid;
     if (currentUserId == null) return;
 
     final success = await provider.addContact(

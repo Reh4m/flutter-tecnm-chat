@@ -3,13 +3,16 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/onboarding_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 FutureOr<String?> authGuard(BuildContext context, GoRouterState state) async {
-  final user = FirebaseAuth.instance.currentUser;
+  final firebaseAuth = di.sl<FirebaseAuth>();
+
+  final user = firebaseAuth.currentUser;
   final onboardingProvider = context.read<OnboardingProvider>();
   final hasSeenOnboarding = onboardingProvider.hasSeenOnboarding;
 
@@ -36,7 +39,7 @@ FutureOr<String?> authGuard(BuildContext context, GoRouterState state) async {
   if (user != null) {
     // Recargar datos del usuario
     await user.reload();
-    final updatedUser = FirebaseAuth.instance.currentUser;
+    final updatedUser = firebaseAuth.currentUser;
 
     if (updatedUser == null) {
       return '/phone-sign-in';
