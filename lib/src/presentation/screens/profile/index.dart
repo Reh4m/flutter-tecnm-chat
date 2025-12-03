@@ -18,21 +18,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _loadProfile();
-  }
-
-  void _loadProfile() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = context.read<UserProvider>();
-      if (userProvider.currentUser == null) {
-        userProvider.loadCurrentUser();
-      }
-    });
-  }
-
   void _handleSignOut() {
     showDialog(
       context: context,
@@ -81,10 +66,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final directChatProvider = context.read<DirectChatProvider>();
         final contactsProvider = context.read<ContactsProvider>();
         final groupChatProvider = context.read<GroupChatProvider>();
+        final userProvider = context.read<UserProvider>();
 
         directChatProvider.stopChatsListener();
         contactsProvider.stopContactsListener();
         groupChatProvider.stopGroupsListener();
+        userProvider.clearCurrentUser();
       }
     });
 

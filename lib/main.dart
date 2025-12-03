@@ -40,7 +40,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
         ChangeNotifierProvider(create: (_) => PhoneAuthenticationProvider()),
         ChangeNotifierProvider(create: (_) => EmailVerificationProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()..initialize()),
         ChangeNotifierProvider(create: (_) => ContactsProvider()),
         ChangeNotifierProvider(create: (_) => DirectChatProvider()),
         ChangeNotifierProvider(create: (_) => MessageProvider()),

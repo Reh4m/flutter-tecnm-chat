@@ -1,6 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
@@ -20,8 +18,6 @@ class ConversationsListScreen extends StatefulWidget {
 }
 
 class _ConversationsListScreenState extends State<ConversationsListScreen> {
-  FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
-
   @override
   void initState() {
     super.initState();
@@ -32,14 +28,10 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = context.read<UserProvider>();
 
-      if (userProvider.currentUser == null) {
-        userProvider.loadCurrentUser();
-      }
-
-      final currentUser = _firebaseAuth.currentUser;
-
-      if (currentUser != null) {
-        _startAllListeners(currentUser.uid);
+      if (userProvider.currentUser != null) {
+        _startAllListeners(userProvider.currentUser!.id);
+      } else {
+        userProvider.addListener(_onUserLoaded);
       }
     });
   }
@@ -48,6 +40,27 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
     context.read<DirectChatProvider>().startChatsListener(userId);
     context.read<ContactsProvider>().startContactsListener(userId);
     context.read<GroupChatProvider>().startGroupsListener(userId);
+  }
+
+  void _onUserLoaded() {
+    final userProvider = context.read<UserProvider>();
+
+    if (userProvider.currentUser != null) {
+      userProvider.removeListener(_onUserLoaded);
+      _startAllListeners(userProvider.currentUser!.id);
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final userProvider = context.read<UserProvider>();
+
+        userProvider.removeListener(_onUserLoaded);
+      }
+    });
+    super.dispose();
   }
 
   @override
