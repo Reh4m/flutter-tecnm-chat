@@ -1,13 +1,12 @@
 import 'package:blobs/blobs.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
-import 'package:flutter_whatsapp_clon/src/core/utils/phone_validator.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/phone_authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_text_field.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_phone_number_field.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/loading_overlay.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
 
 class PhoneSignInScreen extends StatefulWidget {
@@ -20,6 +19,8 @@ class PhoneSignInScreen extends StatefulWidget {
 class _PhoneSignInScreenState extends State<PhoneSignInScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
+
+  PhoneNumber? _currentNumber;
 
   @override
   void initState() {
@@ -38,13 +39,18 @@ class _PhoneSignInScreenState extends State<PhoneSignInScreen> {
   Future<void> _handleSendCode() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    if (_currentNumber == null) {
+      _showToast(
+        title: 'Error',
+        description: 'Por favor, ingresa un número de teléfono válido',
+        type: ToastNotificationType.success,
+      );
+      return;
+    }
+
     final provider = context.read<PhoneAuthenticationProvider>();
 
-    final formattedPhone = PhoneValidators.formatPhoneNumber(
-      _phoneController.text.trim(),
-    );
-
-    await provider.sendVerificationCode(formattedPhone);
+    await provider.sendVerificationCode(_currentNumber!.phoneNumber!);
 
     if (!mounted) return;
 
@@ -119,7 +125,7 @@ class _PhoneSignInScreenState extends State<PhoneSignInScreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          'Ingresa tu número',
+          '¡Bienvenido!',
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.onSurface,
@@ -127,7 +133,7 @@ class _PhoneSignInScreenState extends State<PhoneSignInScreen> {
         ),
         const SizedBox(height: 10),
         Text(
-          'Te enviaremos un código de verificación',
+          'Inicia sesión o registrate con tu número de teléfono',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface,
           ),
@@ -140,34 +146,38 @@ class _PhoneSignInScreenState extends State<PhoneSignInScreen> {
   Widget _buildForm(ThemeData theme) {
     return Form(
       key: _formKey,
-      child: CustomTextField(
-        label: 'Número de teléfono',
-        hint: '+52 123 456 7890',
-        controller: _phoneController,
-        keyboardType: TextInputType.phone,
-        textInputAction: TextInputAction.done,
-        validator: FormValidators.validatePhoneNumber,
-        onChanged: (value) {
-          if (value.isNotEmpty && !value.startsWith('+')) {
-            _phoneController.text = '+$value';
-            _phoneController.selection = TextSelection.fromPosition(
-              TextPosition(offset: _phoneController.text.length),
-            );
-          }
-        },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Número de Teléfono',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 10),
+          CustomPhoneNumberField(
+            label: 'Número de Teléfono',
+            controller: _phoneController,
+            initialValue: PhoneNumber(isoCode: 'MX'),
+            hint: '123 456 7890',
+            onInputChanged: (PhoneNumber number) {
+              _currentNumber = number;
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSendButton(PhoneAuthState state) {
     return CustomButton(
-      text: 'Enviar Código',
+      text: 'Continuar',
       onPressed: state == PhoneAuthState.loading ? null : _handleSendCode,
       isLoading: state == PhoneAuthState.loading,
       width: double.infinity,
       height: 56,
-      icon: const Icon(Icons.send_rounded),
-      iconPosition: ButtonIconPosition.right,
     );
   }
 }

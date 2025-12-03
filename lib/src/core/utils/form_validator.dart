@@ -19,7 +19,7 @@ class FormValidators {
 
     final cleanedValue = value.replaceAll(RegExp(r'[\s\-\(\)]'), '');
 
-    final phoneRegex = RegExp(r'^\+?\d{7,15}$');
+    final phoneRegex = RegExp(r'^\d{10}$');
     if (!phoneRegex.hasMatch(cleanedValue)) {
       return 'Número de teléfono inválido';
     }

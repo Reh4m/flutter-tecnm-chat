@@ -2,13 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
-import 'package:flutter_whatsapp_clon/src/core/utils/phone_validator.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_phone_number_field.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_text_field.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/loading_overlay.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
 
 class AddContactScreen extends StatefulWidget {
@@ -25,6 +26,8 @@ class _AddContactScreenState extends State<AddContactScreen> {
 
   bool _searchByPhone = true;
 
+  PhoneNumber? _currentNumber;
+
   FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
 
   @override
@@ -37,14 +40,20 @@ class _AddContactScreenState extends State<AddContactScreen> {
   Future<void> _handleSearch() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    if (_searchByPhone && _currentNumber == null) {
+      _showToast(
+        title: 'Error',
+        description: 'Por favor, ingresa un número de teléfono válido',
+        type: ToastNotificationType.error,
+      );
+      return;
+    }
+
     final provider = context.read<ContactsProvider>();
     provider.clearSearch();
 
     if (_searchByPhone) {
-      final formattedPhone = PhoneValidators.formatPhoneNumber(
-        _phoneController.text.trim(),
-      );
-      await provider.searchUserByPhone(formattedPhone);
+      await provider.searchUserByPhone(_currentNumber!.phoneNumber!);
     } else {
       await provider.searchUserByEmail(_emailController.text.trim());
     }
@@ -227,12 +236,14 @@ class _AddContactScreenState extends State<AddContactScreen> {
       key: _formKey,
       child:
           _searchByPhone
-              ? CustomTextField(
+              ? CustomPhoneNumberField(
                 label: 'Número de teléfono',
-                hint: '+52 123 456 7890',
                 controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                validator: FormValidators.validatePhoneNumber,
+                initialValue: PhoneNumber(isoCode: 'MX'),
+                hint: '123 456 7890',
+                onInputChanged: (PhoneNumber number) {
+                  _currentNumber = number;
+                },
               )
               : CustomTextField(
                 label: 'Email institucional',

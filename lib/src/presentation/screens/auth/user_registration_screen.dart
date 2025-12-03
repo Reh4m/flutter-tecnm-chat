@@ -288,8 +288,6 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
       isLoading: state == PhoneAuthState.loading,
       width: double.infinity,
       height: 56,
-      icon: const Icon(Icons.arrow_forward, size: 20),
-      iconPosition: ButtonIconPosition.right,
     );
   }
 }

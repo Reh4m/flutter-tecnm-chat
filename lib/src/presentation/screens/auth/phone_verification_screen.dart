@@ -283,7 +283,6 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
       isLoading: state == PhoneAuthState.loading,
       width: double.infinity,
       height: 56,
-      icon: const Icon(Icons.check, size: 20),
     );
   }
 

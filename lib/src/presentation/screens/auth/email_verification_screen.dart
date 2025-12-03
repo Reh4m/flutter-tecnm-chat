@@ -394,8 +394,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               (_canResend && !isLoading) ? _resendVerificationEmail : null,
           variant: ButtonVariant.outline,
           width: double.infinity,
-          icon: const Icon(Icons.send, size: 20),
-          iconPosition: ButtonIconPosition.right,
         ),
       ],
     );
