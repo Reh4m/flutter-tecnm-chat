@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/theme_provider.dart';
@@ -41,7 +40,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _signOut() async {
-    final authProvider = context.read<AuthenticationProvider>();
     final userProvider = context.read<UserProvider>();
     final directChatProvider = context.read<DirectChatProvider>();
     final contactsProvider = context.read<ContactsProvider>();
@@ -51,8 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     contactsProvider.stopContactsListener();
     groupChatProvider.stopGroupsListener();
 
-    await authProvider.signOut();
-    userProvider.clearCurrentUser();
+    await userProvider.signOut();
 
     if (mounted) {
       context.go('/phone-sign-in');

@@ -6,6 +6,7 @@ import 'package:flutter_whatsapp_clon/src/core/constants/error_messages.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user/user_usecases.dart';
 
 enum UserState { initial, loading, success, error }
@@ -23,6 +24,7 @@ class UserProvider extends ChangeNotifier {
       sl<UpdateNotificationSettingsUseCase>();
   final UploadUserProfileImageUseCase _uploadProfileImageUseCase =
       sl<UploadUserProfileImageUseCase>();
+  final SignOutUseCase _signOutUseCase = sl<SignOutUseCase>();
 
   UserState _currentUserState = UserState.initial;
   UserEntity? _currentUser;
@@ -193,6 +195,20 @@ class UserProvider extends ChangeNotifier {
         _currentUser = user;
         _setOperationState(UserState.success);
         return true;
+      },
+    );
+  }
+
+  Future<void> signOut() async {
+    _setCurrentUserState(UserState.loading);
+
+    final result = await _signOutUseCase();
+
+    result.fold(
+      (failure) => _setCurrentUserError(_mapFailureToMessage(failure)),
+      (_) {
+        clearCurrentUser();
+        _setCurrentUserState(UserState.initial);
       },
     );
   }

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/firebase_options.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/presentation/config/router/index.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/email_verification_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
@@ -37,7 +36,6 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider(prefs)),
         ChangeNotifierProvider(create: (_) => OnboardingProvider(prefs)),
-        ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
         ChangeNotifierProvider(create: (_) => PhoneAuthenticationProvider()),
         ChangeNotifierProvider(create: (_) => EmailVerificationProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()..initialize()),
