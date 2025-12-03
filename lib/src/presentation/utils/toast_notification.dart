@@ -11,6 +11,8 @@ class ToastNotification {
     required String description,
     ToastNotificationType type = ToastNotificationType.success,
   }) {
+    final theme = Theme.of(context);
+
     toastification.show(
       context: context,
       type: _mapToToastificationType(type),
@@ -19,7 +21,7 @@ class ToastNotification {
       title: Text(
         title,
         style: TextStyle(
-          color: Theme.of(context).colorScheme.onPrimary,
+          color: theme.colorScheme.onPrimary,
           fontSize: 16.0,
           fontWeight: FontWeight.w600,
         ),
@@ -27,7 +29,7 @@ class ToastNotification {
       description: Text(
         description,
         style: TextStyle(
-          color: Theme.of(context).colorScheme.onPrimary,
+          color: theme.colorScheme.onPrimary,
           fontSize: 14.0,
           fontWeight: FontWeight.w400,
         ),
@@ -39,8 +41,8 @@ class ToastNotification {
         return FadeTransition(opacity: animation, child: child);
       },
       icon: _buildNotificationIcon(type),
-      backgroundColor: Theme.of(context).colorScheme.onSurface,
-      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      backgroundColor: ColorPalette.greyDarken3,
+      foregroundColor: theme.colorScheme.onPrimary,
       padding: const EdgeInsets.all(15.0),
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
       borderRadius: BorderRadius.circular(8.0),
