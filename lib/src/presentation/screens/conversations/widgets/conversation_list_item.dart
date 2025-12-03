@@ -73,6 +73,8 @@ class ConversationListItem extends StatelessWidget {
   }
 
   Widget _buildGroupItem(BuildContext context, ThemeData theme) {
+    final unreadCount = group!.getUnreadCount(currentUserId);
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: CircleAvatar(
@@ -120,9 +122,31 @@ class ConversationListItem extends StatelessWidget {
           Text(
             _formatTime(group!.lastMessageTime ?? group!.createdAt),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withAlpha(150),
+              color:
+                  unreadCount > 0
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withAlpha(150),
+              fontWeight: unreadCount > 0 ? FontWeight.bold : FontWeight.normal,
             ),
           ),
+          if (unreadCount > 0) ...[
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                unreadCount > 99 ? '99+' : unreadCount.toString(),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
       onTap: onTap,
@@ -134,7 +158,6 @@ class ConversationListItem extends StatelessWidget {
 
     return Consumer<DirectChatProvider>(
       builder: (context, directChatProvider, _) {
-        Widget leadingWidget;
         String title;
 
         final otherUserId = directChatProvider.getParticipantId(
@@ -148,31 +171,29 @@ class ConversationListItem extends StatelessWidget {
 
         title = otherUser?.name ?? 'Usuario';
 
-        leadingWidget = CircleAvatar(
-          radius: 28,
-          backgroundColor: theme.colorScheme.primary.withAlpha(50),
-          backgroundImage:
-              otherUser?.photoUrl != null && otherUser!.photoUrl!.isNotEmpty
-                  ? NetworkImage(otherUser.photoUrl!)
-                  : null,
-          child:
-              otherUser?.photoUrl == null || otherUser!.photoUrl!.isEmpty
-                  ? Text(
-                    otherUser?.initials ?? '?',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                  : null,
-        );
-
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 8,
           ),
-          leading: leadingWidget,
+          leading: CircleAvatar(
+            radius: 28,
+            backgroundColor: theme.colorScheme.primary.withAlpha(50),
+            backgroundImage:
+                otherUser?.photoUrl != null && otherUser!.photoUrl!.isNotEmpty
+                    ? NetworkImage(otherUser.photoUrl!)
+                    : null,
+            child:
+                otherUser?.photoUrl == null || otherUser!.photoUrl!.isEmpty
+                    ? Text(
+                      otherUser?.initials ?? '?',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                    : null,
+          ),
           title: Text(
             title,
             style: theme.textTheme.titleMedium?.copyWith(
