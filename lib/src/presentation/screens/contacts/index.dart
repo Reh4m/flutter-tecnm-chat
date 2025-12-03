@@ -1,6 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
@@ -17,8 +15,6 @@ class ContactsScreen extends StatefulWidget {
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
-  FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -40,14 +36,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
           ),
         ],
       ),
-      body: Consumer3<ContactsProvider, UserProvider, DirectChatProvider>(
-        builder: (
-          context,
-          contactsProvider,
-          userProvider,
-          directChatProvider,
-          _,
-        ) {
+      body: Consumer2<ContactsProvider, DirectChatProvider>(
+        builder: (context, contactsProvider, directChatProvider, _) {
           if (contactsProvider.contactsState == ContactsState.loading &&
               contactsProvider.contacts.isEmpty) {
             return const Center(child: CircularProgressIndicator());
@@ -119,7 +109,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   contact: contact,
                   contactUser: contactUser,
                   onTap: () async {
-                    final currentUserId = _firebaseAuth.currentUser?.uid;
+                    final currentUserId =
+                        context.read<UserProvider>().currentUser?.id;
                     if (currentUserId == null) return;
 
                     final conversation = await directChatProvider

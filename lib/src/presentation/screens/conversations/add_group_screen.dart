@@ -1,13 +1,12 @@
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/core/utils/form_validator.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/image_picker_service.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
@@ -33,8 +32,6 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
 
   final Set<String> _selectedContactIds = {};
   bool _hidePhoneNumbers = false;
-
-  FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
 
   @override
   void dispose() {
@@ -68,7 +65,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
       return;
     }
 
-    final currentUserId = _firebaseAuth.currentUser?.uid;
+    final currentUserId = context.read<UserProvider>().currentUser?.id;
     if (currentUserId == null) return;
 
     final memberIds = [currentUserId, ..._selectedContactIds];

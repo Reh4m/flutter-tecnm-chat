@@ -1,6 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
@@ -23,8 +21,6 @@ class GroupDetailsScreen extends StatefulWidget {
 }
 
 class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
-  FirebaseAuth get _firebaseAuth => di.sl<FirebaseAuth>();
-
   @override
   void initState() {
     super.initState();
@@ -39,7 +35,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   }
 
   Future<void> _togglePrivacy(bool value) async {
-    final currentUserId = _firebaseAuth.currentUser?.uid;
+    final currentUserId = context.read<UserProvider>().currentUser?.id;
     if (currentUserId == null) return;
 
     final groupChatProvider = context.read<GroupChatProvider>();
@@ -63,7 +59,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   }
 
   Future<void> _removeMember(String userId) async {
-    final currentUserId = _firebaseAuth.currentUser?.uid;
+    final currentUserId = context.read<UserProvider>().currentUser?.id;
     if (currentUserId == null) return;
 
     final groupChatProvider = context.read<GroupChatProvider>();
@@ -198,7 +194,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   }
 
   Future<void> _addMember(String userId) async {
-    final currentUserId = _firebaseAuth.currentUser?.uid;
+    final currentUserId = context.read<UserProvider>().currentUser?.id;
     if (currentUserId == null) return;
 
     final groupChatProvider = context.read<GroupChatProvider>();
@@ -249,7 +245,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   }
 
   Future<void> _leaveGroup() async {
-    final currentUserId = _firebaseAuth.currentUser?.uid;
+    final currentUserId = context.read<UserProvider>().currentUser?.id;
     if (currentUserId == null) return;
 
     final groupChatProvider = context.read<GroupChatProvider>();
@@ -557,7 +553,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     bool isAdmin,
     Map<String, UserEntity> participants,
   ) {
-    final currentUserId = _firebaseAuth.currentUser?.uid ?? '';
+    final currentUserId = context.read<UserProvider>().currentUser?.id;
+
+    if (currentUserId == null) {
+      return const SizedBox.shrink();
+    }
 
     bool canSeePhoneNumbers = false;
 
