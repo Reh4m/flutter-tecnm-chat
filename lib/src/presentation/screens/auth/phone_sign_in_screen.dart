@@ -149,14 +149,6 @@ class _PhoneSignInScreenState extends State<PhoneSignInScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Número de Teléfono',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 10),
           CustomPhoneNumberField(
             label: 'Número de Teléfono',
             controller: _phoneController,
