@@ -1,4 +1,5 @@
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 
 class GroupEntity extends ChatEntity {
   final String name;
@@ -20,6 +21,7 @@ class GroupEntity extends ChatEntity {
     this.hidePhoneNumbers = false,
     super.lastMessage,
     super.lastMessageSenderId,
+    super.lastMessageType,
     super.lastMessageTime,
     super.unreadCount,
     required super.createdAt,
@@ -55,6 +57,7 @@ class GroupEntity extends ChatEntity {
     bool? hidePhoneNumbers,
     String? lastMessage,
     String? lastMessageSenderId,
+    MessageType? lastMessageType,
     DateTime? lastMessageTime,
     Map<String, int>? unreadCount,
     DateTime? createdAt,
@@ -72,6 +75,7 @@ class GroupEntity extends ChatEntity {
       hidePhoneNumbers: hidePhoneNumbers ?? this.hidePhoneNumbers,
       lastMessage: lastMessage ?? this.lastMessage,
       lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
+      lastMessageType: lastMessageType ?? this.lastMessageType,
       lastMessageTime: lastMessageTime ?? this.lastMessageTime,
       unreadCount: unreadCount ?? this.unreadCount,
       createdAt: createdAt ?? this.createdAt,

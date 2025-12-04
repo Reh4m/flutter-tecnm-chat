@@ -77,11 +77,11 @@ class FirebaseChatMediaService {
     required File document,
     required String conversationId,
     required String senderId,
-    required String extension,
+    required String fileExtension,
   }) async {
     try {
       final fileName =
-          '${DateTime.now().millisecondsSinceEpoch}_$senderId.$extension';
+          '${DateTime.now().millisecondsSinceEpoch}_$senderId.$fileExtension';
       final ref = storage
           .ref()
           .child('chat_media')

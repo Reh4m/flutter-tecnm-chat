@@ -57,6 +57,10 @@ dependencies:
   pin_code_fields: ^8.0.1
   permission_handler: ^12.0.1
   intl_phone_number_input: ^0.7.5
+  file_picker: ^10.3.7
+  video_player: ^2.10.1
+  url_launcher: ^6.3.2
+  audioplayers: ^6.5.1
 
 dev_dependencies:
   flutter_test:

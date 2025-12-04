@@ -114,7 +114,7 @@ class MediaRepositoryImpl implements MediaRepository {
     required File document,
     required String conversationId,
     required String senderId,
-    required String extension,
+    required String fileExtension,
   }) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());
@@ -125,7 +125,7 @@ class MediaRepositoryImpl implements MediaRepository {
         document: document,
         conversationId: conversationId,
         senderId: senderId,
-        extension: extension,
+        fileExtension: fileExtension,
       );
       return Right(url);
     } on MediaUploadException {

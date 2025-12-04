@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/user/user_entity.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/messages/audio_message_widget.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/messages/document_message_widget.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/messages/image_message_widget.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/messages/video_message_widget.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/viewers/full_screen_image_viewer.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/viewers/full_screen_video_viewer.dart';
 import 'package:intl/intl.dart';
 
 class GroupMessageBubble extends StatelessWidget {
@@ -19,6 +25,32 @@ class GroupMessageBubble extends StatelessWidget {
 
   String _formatTime(DateTime time) {
     return DateFormat('hh:mm a').format(time);
+  }
+
+  void _openImageViewer(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => FullScreenImageViewer(
+              imageUrl: message.mediaUrl!,
+              caption: message.content.isNotEmpty ? message.content : null,
+            ),
+      ),
+    );
+  }
+
+  void _openVideoViewer(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => FullScreenVideoViewer(
+              videoUrl: message.mediaUrl!,
+              caption: message.content.isNotEmpty ? message.content : null,
+            ),
+      ),
+    );
   }
 
   @override
@@ -58,10 +90,7 @@ class GroupMessageBubble extends StatelessWidget {
                   isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
+                  padding: _getMessagePadding(),
                   constraints: BoxConstraints(
                     maxWidth: screenSize.width * 0.75,
                   ),
@@ -78,7 +107,9 @@ class GroupMessageBubble extends StatelessWidget {
                             ? CrossAxisAlignment.end
                             : CrossAxisAlignment.start,
                     children: [
-                      if (!isMe) ...[
+                      if (!isMe &&
+                          (message.type == MessageType.text ||
+                              message.type == MessageType.emoji)) ...[
                         Text(
                           sender?.name ?? 'Unknown',
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -88,12 +119,7 @@ class GroupMessageBubble extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                       ],
-                      Text(
-                        message.content,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: _getTextColor(theme),
-                        ),
-                      ),
+                      _buildMessageContent(context, theme),
                     ],
                   ),
                 ),
@@ -132,10 +158,133 @@ class GroupMessageBubble extends StatelessWidget {
     );
   }
 
+  EdgeInsets _getMessagePadding() {
+    if (message.type == MessageType.text || message.type == MessageType.emoji) {
+      return const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
+    }
+    return EdgeInsets.zero;
+  }
+
+  Widget _buildMessageContent(BuildContext context, ThemeData theme) {
+    switch (message.type) {
+      case MessageType.text:
+      case MessageType.emoji:
+        return Text(
+          message.content,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: _getTextColor(theme),
+            fontSize: message.type == MessageType.emoji ? 32 : null,
+          ),
+        );
+
+      case MessageType.image:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!isMe)
+              Padding(
+                padding: const EdgeInsets.only(left: 12, top: 8, bottom: 4),
+                child: Text(
+                  sender?.name ?? 'Unknown',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ImageMessageWidget(
+              imageUrl: message.mediaUrl!,
+              caption: message.content.isNotEmpty ? message.content : null,
+              isMe: isMe,
+              onTap: () => _openImageViewer(context),
+            ),
+          ],
+        );
+
+      case MessageType.video:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!isMe)
+              Padding(
+                padding: const EdgeInsets.only(left: 12, top: 8, bottom: 4),
+                child: Text(
+                  sender?.name ?? 'Unknown',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            VideoMessageWidget(
+              videoUrl: message.mediaUrl!,
+              thumbnailUrl: message.thumbnailUrl,
+              caption: message.content.isNotEmpty ? message.content : null,
+              isMe: isMe,
+              onTap: () => _openVideoViewer(context),
+            ),
+          ],
+        );
+
+      case MessageType.audio:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!isMe)
+              Padding(
+                padding: const EdgeInsets.only(left: 12, top: 8, bottom: 4),
+                child: Text(
+                  sender?.name ?? 'Unknown',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            AudioMessageWidget(
+              audioUrl: message.mediaUrl!,
+              caption: message.content.isNotEmpty ? message.content : null,
+              isMe: isMe,
+            ),
+          ],
+        );
+
+      case MessageType.document:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!isMe)
+              Padding(
+                padding: const EdgeInsets.only(left: 12, top: 8, bottom: 4),
+                child: Text(
+                  sender?.name ?? 'Unknown',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            DocumentMessageWidget(
+              documentUrl: message.mediaUrl!,
+              fileName: message.content,
+              caption: null,
+              isMe: isMe,
+            ),
+          ],
+        );
+    }
+  }
+
   Color _getBackgroundColor(ThemeData theme) {
     if (message.status == MessageStatus.failed && isMe) {
       return theme.colorScheme.error.withAlpha(30);
     }
+
+    // Para multimedia, usar fondo transparente o más sutil
+    if (message.type != MessageType.text && message.type != MessageType.emoji) {
+      return Colors.transparent;
+    }
+
     return isMe ? theme.colorScheme.primary : theme.colorScheme.surface;
   }
 

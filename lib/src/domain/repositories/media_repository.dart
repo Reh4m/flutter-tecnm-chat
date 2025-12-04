@@ -22,7 +22,7 @@ abstract class MediaRepository {
     required File document,
     required String conversationId,
     required String senderId,
-    required String extension,
+    required String fileExtension,
   });
   Future<Either<Failure, String>> uploadVideoThumbnail({
     required File thumbnail,

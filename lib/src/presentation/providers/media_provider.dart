@@ -148,7 +148,7 @@ class MediaProvider extends ChangeNotifier {
     required File document,
     required String conversationId,
     required String senderId,
-    required String extension,
+    required String fileExtension,
   }) async {
     _setState(MediaState.uploading);
 
@@ -156,7 +156,7 @@ class MediaProvider extends ChangeNotifier {
       document: document,
       conversationId: conversationId,
       senderId: senderId,
-      extension: extension,
+      fileExtension: fileExtension,
     );
 
     return result.fold(

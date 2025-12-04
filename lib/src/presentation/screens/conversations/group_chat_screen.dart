@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/media_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/widgets/chat_input.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/widgets/group_message_bubble.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/index.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/utils/image_picker_service.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -78,6 +83,135 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             chatProvider.operationError ?? 'No se pudo enviar el mensaje',
         type: ToastNotificationType.error,
       );
+    }
+  }
+
+  Future<void> _handleAttachmentTap() async {
+    await ImagePickerService.showMediaPickerDialog(
+      context,
+      onMediaSelected: (file, mediaType) async {
+        if (file == null) return;
+
+        // Mostrar preview
+        final result = await Navigator.push<Map<String, dynamic>>(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) =>
+                    MediaPreviewScreen(file: file, mediaType: mediaType),
+          ),
+        );
+
+        if (result == null) return;
+
+        final File selectedFile = result['file'];
+        final String caption = result['caption'] ?? '';
+
+        // Subir archivo según su tipo
+        await _uploadAndSendMedia(
+          file: selectedFile,
+          mediaType: mediaType,
+          caption: caption,
+        );
+      },
+    );
+  }
+
+  Future<void> _uploadAndSendMedia({
+    required File file,
+    required MediaType mediaType,
+    required String caption,
+  }) async {
+    final currentUserId = context.read<UserProvider>().currentUser?.id;
+    if (currentUserId == null) return;
+
+    final mediaProvider = context.read<MediaProvider>();
+    String? mediaUrl;
+
+    // Subir el archivo según su tipo
+    switch (mediaType) {
+      case MediaType.image:
+        mediaUrl = await mediaProvider.uploadImage(
+          image: file,
+          conversationId: widget.groupId,
+          senderId: currentUserId,
+        );
+        break;
+      case MediaType.video:
+        mediaUrl = await mediaProvider.uploadVideo(
+          video: file,
+          conversationId: widget.groupId,
+          senderId: currentUserId,
+        );
+        break;
+      case MediaType.audio:
+        mediaUrl = await mediaProvider.uploadAudio(
+          audio: file,
+          conversationId: widget.groupId,
+          senderId: currentUserId,
+        );
+        break;
+      case MediaType.document:
+        final fileExtension = ImagePickerService.getFileExtension(file);
+        mediaUrl = await mediaProvider.uploadDocument(
+          document: file,
+          conversationId: widget.groupId,
+          senderId: currentUserId,
+          fileExtension: fileExtension,
+        );
+        break;
+    }
+
+    if (mediaUrl == null && mounted) {
+      _showToast(
+        title: 'Error',
+        description: mediaProvider.error ?? 'No se pudo subir el archivo',
+        type: ToastNotificationType.error,
+      );
+      return;
+    }
+
+    // Crear y enviar mensaje
+    final messageType = _getMessageType(mediaType);
+    final messageContent =
+        mediaType == MediaType.document
+            ? ImagePickerService.getFileName(file)
+            : caption;
+
+    final message = MessageEntity(
+      id: '',
+      conversationId: widget.groupId,
+      senderId: currentUserId,
+      type: messageType,
+      content: messageContent,
+      mediaUrl: mediaUrl,
+      timestamp: DateTime.now(),
+      status: MessageStatus.sending,
+    );
+
+    final chatProvider = context.read<GroupChatProvider>();
+    final success = await chatProvider.sendMessage(message);
+
+    if (!success && mounted) {
+      _showToast(
+        title: 'Error',
+        description:
+            chatProvider.operationError ?? 'No se pudo enviar el mensaje',
+        type: ToastNotificationType.error,
+      );
+    }
+  }
+
+  MessageType _getMessageType(MediaType mediaType) {
+    switch (mediaType) {
+      case MediaType.image:
+        return MessageType.image;
+      case MediaType.video:
+        return MessageType.video;
+      case MediaType.audio:
+        return MessageType.audio;
+      case MediaType.document:
+        return MessageType.document;
     }
   }
 
@@ -275,9 +409,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           ChatInput(
             controller: _messageController,
             onSend: _sendMessage,
-            onAttachment: () {
-              // TODO: Implementar envío de archivos
-            },
+            onAttachment: _handleAttachmentTap,
           ),
         ],
       ),

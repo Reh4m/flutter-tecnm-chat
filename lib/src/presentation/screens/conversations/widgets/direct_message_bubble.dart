@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/messages/audio_message_widget.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/messages/document_message_widget.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/messages/image_message_widget.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/messages/video_message_widget.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/viewers/full_screen_image_viewer.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/media/viewers/full_screen_video_viewer.dart';
 import 'package:intl/intl.dart';
 
 class DirectMessageBubble extends StatelessWidget {
@@ -18,6 +24,32 @@ class DirectMessageBubble extends StatelessWidget {
     return DateFormat('hh:mm a').format(time);
   }
 
+  void _openImageViewer(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => FullScreenImageViewer(
+              imageUrl: message.mediaUrl!,
+              caption: message.content.isNotEmpty ? message.content : null,
+            ),
+      ),
+    );
+  }
+
+  void _openVideoViewer(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => FullScreenVideoViewer(
+              videoUrl: message.mediaUrl!,
+              caption: message.content.isNotEmpty ? message.content : null,
+            ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -32,7 +64,7 @@ class DirectMessageBubble extends StatelessWidget {
               isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: _getMessagePadding(),
               constraints: BoxConstraints(maxWidth: screenSize.width * 0.75),
               decoration: BoxDecoration(
                 color: _getBackgroundColor(theme),
@@ -41,12 +73,7 @@ class DirectMessageBubble extends StatelessWidget {
                   bottomLeft: !isMe ? const Radius.circular(4) : null,
                 ),
               ),
-              child: Text(
-                message.content,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: _getTextColor(theme),
-                ),
-              ),
+              child: _buildMessageContent(context, theme),
             ),
             const SizedBox(height: 4),
             Row(
@@ -81,10 +108,69 @@ class DirectMessageBubble extends StatelessWidget {
     );
   }
 
+  EdgeInsets _getMessagePadding() {
+    if (message.type == MessageType.text || message.type == MessageType.emoji) {
+      return const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
+    }
+    return EdgeInsets.zero;
+  }
+
+  Widget _buildMessageContent(BuildContext context, ThemeData theme) {
+    switch (message.type) {
+      case MessageType.text:
+      case MessageType.emoji:
+        return Text(
+          message.content,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: _getTextColor(theme),
+            fontSize: message.type == MessageType.emoji ? 32 : null,
+          ),
+        );
+
+      case MessageType.image:
+        return ImageMessageWidget(
+          imageUrl: message.mediaUrl!,
+          caption: message.content.isNotEmpty ? message.content : null,
+          isMe: isMe,
+          onTap: () => _openImageViewer(context),
+        );
+
+      case MessageType.video:
+        return VideoMessageWidget(
+          videoUrl: message.mediaUrl!,
+          thumbnailUrl: message.thumbnailUrl,
+          caption: message.content.isNotEmpty ? message.content : null,
+          isMe: isMe,
+          onTap: () => _openVideoViewer(context),
+        );
+
+      case MessageType.audio:
+        return AudioMessageWidget(
+          audioUrl: message.mediaUrl!,
+          caption: message.content.isNotEmpty ? message.content : null,
+          isMe: isMe,
+        );
+
+      case MessageType.document:
+        return DocumentMessageWidget(
+          documentUrl: message.mediaUrl!,
+          fileName: message.content,
+          caption: null,
+          isMe: isMe,
+        );
+    }
+  }
+
   Color _getBackgroundColor(ThemeData theme) {
     if (message.status == MessageStatus.failed && isMe) {
       return theme.colorScheme.error.withAlpha(30);
     }
+
+    // Para multimedia, usar fondo transparente o más sutil
+    if (message.type != MessageType.text && message.type != MessageType.emoji) {
+      return Colors.transparent;
+    }
+
     return isMe ? theme.colorScheme.primary : theme.colorScheme.surface;
   }
 

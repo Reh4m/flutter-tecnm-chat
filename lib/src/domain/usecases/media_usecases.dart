@@ -66,13 +66,13 @@ class UploadChatDocumentUseCase {
     required File document,
     required String conversationId,
     required String senderId,
-    required String extension,
+    required String fileExtension,
   }) async {
     return await repository.uploadChatDocument(
       document: document,
       conversationId: conversationId,
       senderId: senderId,
-      extension: extension,
+      fileExtension: fileExtension,
     );
   }
 }

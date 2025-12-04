@@ -168,6 +168,7 @@ class FirebaseDirectChatService {
       await chatRef.update({
         'lastMessage': message.content,
         'lastMessageSenderId': message.senderId,
+        'lastMessageType': message.type.name,
         'lastMessageTime': message.timestamp,
         'unreadCount': newUnreadCount,
         'updatedAt': FieldValue.serverTimestamp(),

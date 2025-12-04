@@ -1,4 +1,5 @@
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/chat_entity.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 
 class DirectChatEntity extends ChatEntity {
   const DirectChatEntity({
@@ -7,6 +8,7 @@ class DirectChatEntity extends ChatEntity {
     required super.type,
     super.lastMessage,
     super.lastMessageSenderId,
+    super.lastMessageType,
     super.lastMessageTime,
     super.unreadCount,
     required super.createdAt,
@@ -19,6 +21,7 @@ class DirectChatEntity extends ChatEntity {
     ConversationType? type,
     String? lastMessage,
     String? lastMessageSenderId,
+    MessageType? lastMessageType,
     DateTime? lastMessageTime,
     Map<String, int>? unreadCount,
     DateTime? createdAt,
@@ -30,6 +33,7 @@ class DirectChatEntity extends ChatEntity {
       type: type ?? this.type,
       lastMessage: lastMessage ?? this.lastMessage,
       lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
+      lastMessageType: lastMessageType ?? this.lastMessageType,
       lastMessageTime: lastMessageTime ?? this.lastMessageTime,
       unreadCount: unreadCount ?? this.unreadCount,
       createdAt: createdAt ?? this.createdAt,

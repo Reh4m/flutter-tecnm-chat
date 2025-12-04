@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 
 enum ConversationType { direct, group }
 
@@ -9,6 +10,7 @@ class ChatEntity extends Equatable {
 
   final String? lastMessage;
   final String? lastMessageSenderId;
+  final MessageType? lastMessageType;
   final DateTime? lastMessageTime;
   final Map<String, int> unreadCount;
 
@@ -21,6 +23,7 @@ class ChatEntity extends Equatable {
     required this.participantIds,
     this.lastMessage,
     this.lastMessageSenderId,
+    this.lastMessageType,
     this.lastMessageTime,
     this.unreadCount = const {},
     required this.createdAt,
@@ -34,6 +37,7 @@ class ChatEntity extends Equatable {
     participantIds,
     lastMessage,
     lastMessageSenderId,
+    lastMessageType,
     lastMessageTime,
     unreadCount,
     createdAt,
