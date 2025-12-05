@@ -4,13 +4,13 @@ class LightTheme {
   static const Color backgroundColor = Color(0xFFF6F6F4);
   static const Color cardBackgroundColor = Color(0xFFFFFFFF);
 
-  static const Color primaryColor = Color(0xFFFE6D73);
-  static const Color primaryColorDark = Color(0xFFA4133C);
-  static const Color primaryColorLight = Color(0xFFFFF0F3);
+  static const Color primaryColor = Color(0xFF588157);
+  static const Color primaryColorDark = Color(0xFF344E41);
+  static const Color primaryColorLight = Color(0xFFE9f5DB);
   static const Color onPrimaryColor = Color(0xFFFFFFFF);
-  static const Color primaryColorFixed = Color(0xFFB91C1C);
-  static const Color primaryColorDim = Color(0xFF9F1239);
-  static const Color inversePrimaryColor = Color(0xFFB91C1C);
+  static const Color primaryColorFixed = Color(0xFF588157);
+  static const Color primaryColorDim = Color(0xFF52B788);
+  static const Color inversePrimaryColor = Color(0xFFDAD7CD);
 
   static const Color secondaryColor = Color(0xFF227C9D);
   static const Color secondaryColorLight = Color(0xFFCAF0F8);
