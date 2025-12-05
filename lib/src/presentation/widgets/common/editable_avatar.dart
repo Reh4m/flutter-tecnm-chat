@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class EditableAvatar extends StatelessWidget {
   final String? imageUrl;
   final File? imageFile;
-  final String initials;
+  final String? initials;
   final double radius;
   final VoidCallback onTap;
   final bool showEditIcon;
@@ -15,7 +15,7 @@ class EditableAvatar extends StatelessWidget {
     super.key,
     this.imageUrl,
     this.imageFile,
-    required this.initials,
+    this.initials,
     this.radius = 60,
     required this.onTap,
     this.showEditIcon = true,
@@ -29,6 +29,7 @@ class EditableAvatar extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(radius),
       child: Stack(
         children: [
           Container(
@@ -54,13 +55,6 @@ class EditableAvatar extends StatelessWidget {
                     color: theme.scaffoldBackgroundColor,
                     width: 3,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(20),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
                 child: Icon(
                   Icons.camera_alt,
@@ -85,13 +79,19 @@ class EditableAvatar extends StatelessWidget {
 
   Widget? _getChild(ThemeData theme) {
     if (imageFile == null && (imageUrl == null || imageUrl!.isEmpty)) {
-      return Text(
-        initials,
-        style: theme.textTheme.headlineLarge?.copyWith(
-          color: theme.colorScheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
-      );
+      return initials != null
+          ? Text(
+            initials!,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          )
+          : Icon(
+            Icons.person,
+            size: radius,
+            color: theme.colorScheme.onPrimary,
+          );
     }
     return null;
   }

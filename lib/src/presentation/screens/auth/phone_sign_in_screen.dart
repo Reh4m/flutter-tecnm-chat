@@ -1,4 +1,3 @@
-import 'package:blobs/blobs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/phone_authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/utils/toast_notification.dart';
@@ -86,21 +85,25 @@ class _PhoneSignInScreenState extends State<PhoneSignInScreen> {
       body: Selector<PhoneAuthenticationProvider, PhoneAuthState>(
         selector: (_, provider) => provider.state,
         builder: (_, state, __) {
+          final isLoading = state == PhoneAuthState.loading;
+
           return LoadingOverlay(
-            isLoading: state == PhoneAuthState.loading,
+            isLoading: isLoading,
             message: 'Enviando código...',
             child: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 60),
-                    _buildHeader(theme),
-                    const SizedBox(height: 20),
-                    _buildForm(theme),
-                    const SizedBox(height: 20),
-                    _buildSendButton(state),
-                  ],
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle(theme),
+                      const SizedBox(height: 20),
+                      _buildForm(theme, isLoading),
+                      const SizedBox(height: 20),
+                      _buildSendButton(isLoading),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -110,64 +113,46 @@ class _PhoneSignInScreenState extends State<PhoneSignInScreen> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme) {
+  Widget _buildTitle(ThemeData theme) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Blob.random(
-          size: 130,
-          minGrowth: 10,
-          styles: BlobStyles(color: theme.primaryColorLight),
-          child: Icon(
-            Icons.phone_android_rounded,
-            size: 60,
-            color: theme.colorScheme.primary,
-          ),
-        ),
-        const SizedBox(height: 20),
         Text(
           '¡Bienvenido!',
-          style: theme.textTheme.headlineMedium?.copyWith(
+          style: theme.textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 5),
         Text(
-          'Inicia sesión o registrate con tu número de teléfono',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface,
-          ),
-          textAlign: TextAlign.center,
+          'Inicia sesión o registrate con tu número de teléfono.',
+          style: theme.textTheme.bodyMedium,
         ),
       ],
     );
   }
 
-  Widget _buildForm(ThemeData theme) {
+  Widget _buildForm(ThemeData theme, bool isLoading) {
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomPhoneNumberField(
-            label: 'Número de Teléfono',
-            controller: _phoneController,
-            initialValue: PhoneNumber(isoCode: 'MX'),
-            hint: '123 456 7890',
-            onInputChanged: (PhoneNumber number) {
-              _currentNumber = number;
-            },
-          ),
-        ],
+      child: CustomPhoneNumberField(
+        label: 'Número de teléfono',
+        controller: _phoneController,
+        initialValue: PhoneNumber(isoCode: 'MX'),
+        hint: '123 456 7890',
+        enabled: !isLoading,
+        onInputChanged: (PhoneNumber number) {
+          _currentNumber = number;
+        },
       ),
     );
   }
 
-  Widget _buildSendButton(PhoneAuthState state) {
+  Widget _buildSendButton(bool isLoading) {
     return CustomButton(
       text: 'Continuar',
-      onPressed: state == PhoneAuthState.loading ? null : _handleSendCode,
-      isLoading: state == PhoneAuthState.loading,
+      onPressed: _handleSendCode,
+      isLoading: isLoading,
       width: double.infinity,
       height: 56,
     );

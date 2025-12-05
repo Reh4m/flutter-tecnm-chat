@@ -110,28 +110,28 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
         body: Selector<PhoneAuthenticationProvider, PhoneAuthState>(
           selector: (_, provider) => provider.state,
           builder: (_, state, __) {
+            final isLoading = state == PhoneAuthState.loading;
+
             return LoadingOverlay(
-              isLoading: state == PhoneAuthState.loading,
+              isLoading: isLoading,
               message: 'Completando registro...',
               child: SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      _buildHeader(theme),
-                      const SizedBox(height: 40),
-                      _buildAvatar(theme),
-                      const SizedBox(height: 20),
-                      _buildTitle(theme),
-                      const SizedBox(height: 10),
-                      _buildDescription(theme),
-                      const SizedBox(height: 20),
-                      _buildForm(theme),
-                      const SizedBox(height: 20),
-                      _buildContinueButton(state),
-                      const SizedBox(height: 20),
-                    ],
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildAvatar(theme),
+                        const SizedBox(height: 20),
+                        _buildTitle(theme),
+                        const SizedBox(height: 20),
+                        _buildForm(theme, isLoading),
+                        const SizedBox(height: 20),
+                        _buildContinueButton(isLoading),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -142,76 +142,36 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
     );
   }
 
-  Widget _buildHeader(ThemeData theme) {
-    return Row(
+  Widget _buildAvatar(ThemeData theme) {
+    return Center(
+      child: EditableAvatar(
+        imageFile: _profileImage,
+        radius: 60,
+        onTap: _handleSelectImage,
+      ),
+    );
+  }
+
+  Widget _buildTitle(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Paso 2 de 3',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.w500,
+          'Completa tu perfil',
+          style: theme.textTheme.headlineLarge?.copyWith(
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const Spacer(),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: theme.primaryColorLight,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.check, size: 16, color: theme.colorScheme.primary),
-              const SizedBox(width: 5),
-              Text(
-                'Teléfono verificado',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+        const SizedBox(height: 5),
+        Text(
+          'Ingresa tus datos para completar el registro.',
+          style: theme.textTheme.bodyMedium,
         ),
       ],
     );
   }
 
-  Widget _buildAvatar(ThemeData theme) {
-    return EditableAvatar(
-      imageFile: _profileImage,
-      initials:
-          _nameController.text.isNotEmpty
-              ? _nameController.text[0].toUpperCase()
-              : '?',
-      radius: 60,
-      onTap: _handleSelectImage,
-    );
-  }
-
-  Widget _buildTitle(ThemeData theme) {
-    return Text(
-      'Completa tu perfil',
-      style: theme.textTheme.headlineMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: theme.colorScheme.onSurface,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  Widget _buildDescription(ThemeData theme) {
-    return Text(
-      'Ingresa tus datos para completar el registro',
-      style: theme.textTheme.bodyMedium?.copyWith(
-        color: theme.colorScheme.onSurface,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  Widget _buildForm(ThemeData theme) {
+  Widget _buildForm(ThemeData theme, bool isLoading) {
     return Form(
       key: _formKey,
       child: Column(
@@ -222,6 +182,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
             controller: _nameController,
             keyboardType: TextInputType.name,
             textInputAction: TextInputAction.next,
+            enabled: !isLoading,
             validator: FormValidators.validateName,
           ),
           const SizedBox(height: 20),
@@ -231,6 +192,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.done,
+            enabled: !isLoading,
             validator: FormValidators.validateEmail,
           ),
           const SizedBox(height: 20),
@@ -240,6 +202,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
             controller: _passwordController,
             obscureText: _obscurePassword,
             textInputAction: TextInputAction.next,
+            enabled: !isLoading,
             validator: FormValidators.validatePassword,
             suffixIcon: IconButton(
               icon: Icon(
@@ -257,6 +220,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
             controller: _confirmPasswordController,
             obscureText: _obscureConfirmPassword,
             textInputAction: TextInputAction.done,
+            enabled: !isLoading,
             validator:
                 (value) => FormValidators.validateConfirmPassword(
                   value,
@@ -280,12 +244,11 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
     );
   }
 
-  Widget _buildContinueButton(PhoneAuthState state) {
+  Widget _buildContinueButton(bool isLoading) {
     return CustomButton(
       text: 'Continuar',
-      onPressed:
-          state == PhoneAuthState.loading ? null : _handleCompleteRegistration,
-      isLoading: state == PhoneAuthState.loading,
+      onPressed: _handleCompleteRegistration,
+      isLoading: isLoading,
       width: double.infinity,
       height: 56,
     );

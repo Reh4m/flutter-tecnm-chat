@@ -8,6 +8,7 @@ class CustomPhoneNumberField extends StatelessWidget {
   final TextEditingController controller;
   final List<String> countries;
   final PhoneNumber initialValue;
+  final bool enabled;
   final void Function(PhoneNumber)? onInputChanged;
 
   const CustomPhoneNumberField({
@@ -17,6 +18,7 @@ class CustomPhoneNumberField extends StatelessWidget {
     required this.initialValue,
     this.hint,
     this.countries = const ['MX', 'CO'],
+    this.enabled = true,
     this.onInputChanged,
   });
 
@@ -47,6 +49,7 @@ class CustomPhoneNumberField extends StatelessWidget {
             setSelectorButtonAsPrefixIcon: true,
           ),
           onInputChanged: onInputChanged,
+          isEnabled: enabled,
           inputDecoration: InputDecoration(
             hintText: hint,
             hintStyle: theme.textTheme.bodyLarge?.copyWith(
