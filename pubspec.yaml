@@ -61,6 +61,7 @@ dependencies:
   video_player: ^2.10.1
   url_launcher: ^6.3.2
   audioplayers: ^6.5.1
+  google_fonts: ^6.3.2
 
 dev_dependencies:
   flutter_test:
