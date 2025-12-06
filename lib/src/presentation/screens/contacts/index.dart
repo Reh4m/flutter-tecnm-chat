@@ -33,126 +33,130 @@ class _ContactsScreenState extends State<ContactsScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Contactos',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: Implementar búsqueda
-            },
-          ),
-        ],
-      ),
-      body: Consumer2<ContactsProvider, DirectChatProvider>(
-        builder: (context, contactsProvider, directChatProvider, _) {
-          if (contactsProvider.contactsState == ContactsState.loading &&
-              contactsProvider.contacts.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: SafeArea(
+        child: Consumer2<ContactsProvider, DirectChatProvider>(
+          builder: (context, contactsProvider, directChatProvider, _) {
+            if (contactsProvider.contactsState == ContactsState.loading &&
+                contactsProvider.contacts.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (contactsProvider.contactsState == ContactsState.error) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: theme.colorScheme.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    contactsProvider.contactsError ?? 'Error desconocido',
-                    style: theme.textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final contacts = contactsProvider.contacts;
-
-          if (contacts.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.person_add_outlined,
-                    size: 80,
-                    color: theme.colorScheme.primary.withAlpha(100),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No tienes contactos',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    'Agrega contactos para empezar a chatear',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withAlpha(150),
+            if (contactsProvider.contactsState == ContactsState.error) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: theme.colorScheme.error,
                     ),
+                    const SizedBox(height: 16),
+                    Text(
+                      contactsProvider.contactsError ?? 'Error desconocido',
+                      style: theme.textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final contacts = contactsProvider.contacts;
+
+            if (contacts.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.person_add_outlined,
+                      size: 80,
+                      color: theme.colorScheme.primary.withAlpha(100),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No tienes contactos',
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'Agrega contactos para empezar a chatear',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withAlpha(150),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  _buildTitle(theme),
+                  const SizedBox(height: 5),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: contacts.length,
+                    itemBuilder: (context, index) {
+                      final contact = contacts[index];
+                      final contactUser = contactsProvider.getContactUser(
+                        contact.contactUserId,
+                      );
+
+                      return ContactListItem(
+                        contact: contact,
+                        contactUser: contactUser,
+                        onTap: () async {
+                          final currentUserId =
+                              context.read<UserProvider>().currentUser?.id;
+                          if (currentUserId == null) return;
+
+                          final conversation = await directChatProvider
+                              .getOrCreateDirectConversation(
+                                userId1: currentUserId,
+                                userId2: contact.contactUserId,
+                              );
+
+                          if (conversation != null && mounted) {
+                            context.push('/chat/${conversation.id}');
+                          } else if (mounted) {
+                            _showToast(
+                              title: 'Error',
+                              description: 'No se pudo crear la conversación',
+                              type: ToastNotificationType.error,
+                            );
+                          }
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
             );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              await Future.delayed(const Duration(milliseconds: 500));
-            },
-            child: ListView.builder(
-              itemCount: contacts.length,
-              itemBuilder: (context, index) {
-                final contact = contacts[index];
-                final contactUser = contactsProvider.getContactUser(
-                  contact.contactUserId,
-                );
-
-                return ContactListItem(
-                  contact: contact,
-                  contactUser: contactUser,
-                  onTap: () async {
-                    final currentUserId =
-                        context.read<UserProvider>().currentUser?.id;
-                    if (currentUserId == null) return;
-
-                    final conversation = await directChatProvider
-                        .getOrCreateDirectConversation(
-                          userId1: currentUserId,
-                          userId2: contact.contactUserId,
-                        );
-
-                    if (conversation != null && mounted) {
-                      context.push('/chat/${conversation.id}');
-                    } else if (mounted) {
-                      _showToast(
-                        title: 'Error',
-                        description: 'No se pudo crear la conversación',
-                        type: ToastNotificationType.error,
-                      );
-                    }
-                  },
-                );
-              },
-            ),
-          );
-        },
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push('/add-contact');
-        },
-        child: const Icon(Icons.person_add),
+        onPressed: () => context.push('/add-contact'),
+        child: const Icon(Icons.person_add_outlined),
+      ),
+    );
+  }
+
+  Widget _buildTitle(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Text(
+        'Contactos',
+        style: theme.textTheme.headlineLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

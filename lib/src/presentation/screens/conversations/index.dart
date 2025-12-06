@@ -16,203 +16,162 @@ class ConversationsListScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Chats',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: Implementar búsqueda
-            },
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'profile') {
-                context.push('/profile');
-              }
-            },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'profile',
-                    child: Row(
-                      children: [
-                        Icon(Icons.person),
-                        SizedBox(width: 10),
-                        Text('Perfil'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'settings',
-                    child: Row(
-                      children: [
-                        Icon(Icons.settings),
-                        SizedBox(width: 10),
-                        Text('Ajustes'),
-                      ],
-                    ),
-                  ),
-                ],
-          ),
-        ],
-      ),
-      body: Consumer3<DirectChatProvider, UserProvider, GroupChatProvider>(
-        builder: (
-          context,
-          directChatProvider,
-          userProvider,
-          groupChatProvider,
-          _,
-        ) {
-          final isLoadingConversations =
-              directChatProvider.directChatState == DirectChatState.loading &&
-              directChatProvider.chats.isEmpty;
-          final isLoadingGroups =
-              groupChatProvider.groupsState == GroupChatState.loading &&
-              groupChatProvider.groups.isEmpty;
+      body: SafeArea(
+        child: Consumer3<DirectChatProvider, UserProvider, GroupChatProvider>(
+          builder: (
+            context,
+            directChatProvider,
+            userProvider,
+            groupChatProvider,
+            _,
+          ) {
+            final isLoadingConversations =
+                directChatProvider.directChatState == DirectChatState.loading &&
+                directChatProvider.chats.isEmpty;
+            final isLoadingGroups =
+                groupChatProvider.groupsState == GroupChatState.loading &&
+                groupChatProvider.groups.isEmpty;
 
-          if (isLoadingConversations || isLoadingGroups) {
-            return const Center(child: CircularProgressIndicator());
-          }
+            if (isLoadingConversations || isLoadingGroups) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (directChatProvider.directChatState == DirectChatState.error ||
-              groupChatProvider.groupsState == GroupChatState.error) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: theme.colorScheme.error,
-                  ),
-                  const SizedBox(height: 16),
-                  if (directChatProvider.directChatState ==
-                      DirectChatState.error)
+            if (directChatProvider.directChatState == DirectChatState.error ||
+                groupChatProvider.groupsState == GroupChatState.error) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: theme.colorScheme.error,
+                    ),
+                    const SizedBox(height: 16),
+                    if (directChatProvider.directChatState ==
+                        DirectChatState.error)
+                      Text(
+                        directChatProvider.chatsError ?? 'Error desconocido',
+                        style: theme.textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    if (groupChatProvider.groupsState == GroupChatState.error)
+                      Text(
+                        groupChatProvider.groupsError ?? 'Error desconocido',
+                        style: theme.textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                  ],
+                ),
+              );
+            }
+
+            final directChats = directChatProvider.chats;
+            final groupChats = groupChatProvider.groups;
+
+            // Combinar conversaciones directas y grupos
+            final conversations = <dynamic>[...directChats, ...groupChats];
+
+            // Ordenar por última actividad (último mensaje o actualización del grupo)
+            conversations.sort((a, b) {
+              final aTime =
+                  a is DirectChatEntity
+                      ? a.lastMessageTime
+                      : (a as GroupEntity).lastMessageTime == null
+                      ? a.updatedAt
+                      : a.lastMessageTime;
+              final bTime =
+                  b is DirectChatEntity
+                      ? b.lastMessageTime
+                      : (b as GroupEntity).lastMessageTime == null
+                      ? b.updatedAt
+                      : b.lastMessageTime;
+
+              if (aTime == null && bTime == null) return 0;
+              if (aTime == null) return 1;
+              if (bTime == null) return -1;
+
+              return bTime.compareTo(aTime); // Más reciente primero
+            });
+
+            if (conversations.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.chat_bubble_outline,
+                      size: 80,
+                      color: theme.colorScheme.primary.withAlpha(100),
+                    ),
+                    const SizedBox(height: 16),
                     Text(
-                      directChatProvider.chatsError ?? 'Error desconocido',
-                      style: theme.textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
+                      'No hay conversaciones',
+                      style: theme.textTheme.titleMedium,
                     ),
-                  if (groupChatProvider.groupsState == GroupChatState.error)
+                    const SizedBox(height: 5),
                     Text(
-                      groupChatProvider.groupsError ?? 'Error desconocido',
-                      style: theme.textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
+                      'Inicia un chat con tus contactos',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withAlpha(150),
+                      ),
                     ),
-                ],
-              ),
-            );
-          }
+                  ],
+                ),
+              );
+            }
 
-          final directChats = directChatProvider.chats;
-          final groupChats = groupChatProvider.groups;
-
-          // Combinar conversaciones directas y grupos
-          final conversations = <dynamic>[...directChats, ...groupChats];
-
-          // Ordenar por última actividad (último mensaje o actualización del grupo)
-          conversations.sort((a, b) {
-            final aTime =
-                a is DirectChatEntity
-                    ? a.lastMessageTime
-                    : (a as GroupEntity).lastMessageTime == null
-                    ? a.updatedAt
-                    : a.lastMessageTime;
-            final bTime =
-                b is DirectChatEntity
-                    ? b.lastMessageTime
-                    : (b as GroupEntity).lastMessageTime == null
-                    ? b.updatedAt
-                    : b.lastMessageTime;
-
-            if (aTime == null && bTime == null) return 0;
-            if (aTime == null) return 1;
-            if (bTime == null) return -1;
-
-            return bTime.compareTo(aTime); // Más reciente primero
-          });
-
-          if (conversations.isEmpty) {
-            return Center(
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.chat_bubble_outline,
-                    size: 80,
-                    color: theme.colorScheme.primary.withAlpha(100),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No hay conversaciones',
-                    style: theme.textTheme.titleMedium,
-                  ),
+                  const SizedBox(height: 20),
+                  _buildTitle(theme),
                   const SizedBox(height: 5),
-                  Text(
-                    'Inicia un chat con tus contactos',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withAlpha(150),
-                    ),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: conversations.length,
+                    itemBuilder: (context, index) {
+                      final item = conversations[index];
+                      final currentUserId = userProvider.currentUser?.id ?? '';
+
+                      return ConversationListItem(
+                        directChat: item is DirectChatEntity ? item : null,
+                        group: item is GroupEntity ? item : null,
+                        currentUserId: currentUserId,
+                        onTap: () {
+                          if (item is DirectChatEntity) {
+                            context.push('/chat/${item.id}');
+                          } else if (item is GroupEntity) {
+                            context.push('/group-chat/${item.id}');
+                          }
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
             );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              await Future.delayed(const Duration(milliseconds: 500));
-            },
-            child: ListView.builder(
-              itemCount: conversations.length,
-              itemBuilder: (context, index) {
-                final item = conversations[index];
-                final currentUserId = userProvider.currentUser?.id ?? '';
-
-                return ConversationListItem(
-                  directChat: item is DirectChatEntity ? item : null,
-                  group: item is GroupEntity ? item : null,
-                  currentUserId: currentUserId,
-                  onTap: () {
-                    if (item is DirectChatEntity) {
-                      context.push('/chat/${item.id}');
-                    } else if (item is GroupEntity) {
-                      context.push('/group-chat/${item.id}');
-                    }
-                  },
-                );
-              },
-            ),
-          );
-        },
+          },
+        ),
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            heroTag: 'create_group',
-            mini: true,
-            onPressed: () {
-              context.push('/create-group');
-            },
-            child: const Icon(Icons.group_add),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton(
-            heroTag: 'new_chat',
-            onPressed: () {
-              context.push('/contacts');
-            },
-            child: const Icon(Icons.chat),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/create-group'),
+        child: const Icon(Icons.group_add_outlined),
+      ),
+    );
+  }
+
+  Widget _buildTitle(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Text(
+        'Chats',
+        style: theme.textTheme.headlineLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

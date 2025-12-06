@@ -60,6 +60,10 @@ class AppTheme {
       dividerHeight: 0.5,
       dividerColor: ColorPalette.greyLighten1,
     ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: LightTheme.primaryColor,
+      foregroundColor: LightTheme.onPrimaryColor,
+    ),
     textTheme: AppTextTheme.light,
   );
 
@@ -101,6 +105,10 @@ class AppTheme {
       indicatorSize: TabBarIndicatorSize.label,
       dividerHeight: 0.5,
       dividerColor: ColorPalette.greyDarken3,
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: LightTheme.primaryColor,
+      foregroundColor: LightTheme.onPrimaryColor,
     ),
     textTheme: AppTextTheme.dark,
   );

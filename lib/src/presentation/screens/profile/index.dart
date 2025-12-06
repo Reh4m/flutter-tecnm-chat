@@ -49,106 +49,158 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Perfil',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              context.push('/edit-profile');
-            },
-          ),
-        ],
-      ),
-      body: Consumer2<UserProvider, ThemeProvider>(
-        builder: (context, userProvider, themeProvider, _) {
-          if (userProvider.currentUserState == UserState.loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      // appBar: AppBar(
+      //   title: Text(
+      //     'Perfil',
+      //     style: theme.textTheme.titleLarge?.copyWith(
+      //       fontWeight: FontWeight.bold,
+      //     ),
+      //   ),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.edit),
+      //       onPressed: () {
+      //         context.push('/edit-profile');
+      //       },
+      //     ),
+      //   ],
+      // ),
+      body: SafeArea(
+        child: Consumer2<UserProvider, ThemeProvider>(
+          builder: (context, userProvider, themeProvider, _) {
+            if (userProvider.currentUserState == UserState.loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (userProvider.currentUserState == UserState.error) {
-            return Center(
+            if (userProvider.currentUserState == UserState.error) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: theme.colorScheme.error,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      userProvider.currentUserError ?? 'Error al cargar perfil',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final user = userProvider.currentUser;
+
+            if (user == null) {
+              return const Center(child: Text('Usuario no encontrado'));
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: theme.colorScheme.error,
+                  const SizedBox(height: 20),
+                  _buildTitle(theme),
+                  const SizedBox(height: 5),
+                  _buildProfileHeader(
+                    theme,
+                    user.name,
+                    user.photoUrl,
+                    user.bio,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    userProvider.currentUserError ?? 'Error al cargar perfil',
-                    style: theme.textTheme.bodyMedium,
+                  const SizedBox(height: 24),
+                  _buildInfoSection(
+                    theme,
+                    user.email,
+                    user.phoneNumber,
+                    user.bio,
                   ),
+                  const SizedBox(height: 24),
+                  _buildSettingsSection(theme, themeProvider),
+                  const SizedBox(height: 24),
+                  _buildSignOutButton(),
                 ],
               ),
             );
-          }
-
-          final user = userProvider.currentUser;
-
-          if (user == null) {
-            return const Center(child: Text('Usuario no encontrado'));
-          }
-
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 32),
-                _buildProfileHeader(theme, user.name, user.photoUrl),
-                const SizedBox(height: 32),
-                _buildInfoSection(
-                  theme,
-                  user.email,
-                  user.phoneNumber,
-                  user.bio,
-                ),
-                const SizedBox(height: 24),
-                _buildSettingsSection(theme, themeProvider),
-                const SizedBox(height: 24),
-                _buildSignOutButton(),
-                const SizedBox(height: 32),
-              ],
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildProfileHeader(ThemeData theme, String name, String? photoUrl) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: theme.colorScheme.primary.withAlpha(50),
-          backgroundImage:
-              photoUrl != null && photoUrl.isNotEmpty
-                  ? NetworkImage(photoUrl)
-                  : null,
-          child:
-              photoUrl == null || photoUrl.isEmpty
-                  ? Icon(
-                    Icons.person,
-                    size: 60,
-                    color: theme.colorScheme.primary,
-                  )
-                  : null,
+  Widget _buildTitle(ThemeData theme) {
+    return Text(
+      'Perfil',
+      style: theme.textTheme.headlineLarge?.copyWith(
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(
+    ThemeData theme,
+    String name,
+    String? photoUrl,
+    String? bio,
+  ) {
+    return InkWell(
+      onTap: () => context.push('/edit-profile'),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
         ),
-        const SizedBox(height: 16),
-        Text(
-          name,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 25,
+              backgroundColor: theme.colorScheme.primary.withAlpha(50),
+              backgroundImage:
+                  photoUrl != null && photoUrl.isNotEmpty
+                      ? NetworkImage(photoUrl)
+                      : null,
+              child:
+                  photoUrl == null || photoUrl.isEmpty
+                      ? Icon(
+                        Icons.person,
+                        size: 25,
+                        color: theme.colorScheme.primary,
+                      )
+                      : null,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (bio != null && bio.isNotEmpty) ...[
+                    Text(
+                      bio,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withAlpha(150),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -159,7 +211,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String? bio,
   ) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -223,7 +274,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildSettingsSection(ThemeData theme, ThemeProvider themeProvider) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -258,15 +308,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSignOutButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: CustomButton(
-        text: 'Cerrar Sesión',
-        variant: ButtonVariant.outline,
-        onPressed: _handleSignOut,
-        width: double.infinity,
-        icon: const Icon(Icons.logout, size: 20),
-      ),
+    return CustomButton(
+      text: 'Cerrar Sesión',
+      variant: ButtonVariant.outline,
+      onPressed: _handleSignOut,
+      width: double.infinity,
+      icon: const Icon(Icons.logout, size: 20),
     );
   }
 }
