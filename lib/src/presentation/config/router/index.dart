@@ -9,12 +9,12 @@ import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/cha
 import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/edit_group_screen.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/group_chat_screen.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/group_details_screen.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/index.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/contacts/add_contact_screen.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/contacts/index.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/onboarding/index.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/profile/edit_profile_screen.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/profile/index.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/root_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
@@ -42,10 +42,7 @@ class AppRouter {
         path: '/email-verification',
         builder: (context, state) => const EmailVerificationScreen(),
       ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const ConversationsListScreen(),
-      ),
+      GoRoute(path: '/home', builder: (context, state) => const RootScreen()),
       GoRoute(
         path: '/contacts',
         builder: (context, state) => const ContactsScreen(),

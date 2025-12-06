@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/theme_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_alert_dialog.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/widgets/common/custom_button.dart';
@@ -40,39 +37,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _signOut() async {
-    final userProvider = context.read<UserProvider>();
-    final directChatProvider = context.read<DirectChatProvider>();
-    final contactsProvider = context.read<ContactsProvider>();
-    final groupChatProvider = context.read<GroupChatProvider>();
-
-    directChatProvider.stopChatsListener();
-    contactsProvider.stopContactsListener();
-    groupChatProvider.stopGroupsListener();
-
-    await userProvider.signOut();
+    await context.read<UserProvider>().signOut();
 
     if (mounted) {
       context.go('/phone-sign-in');
     }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final directChatProvider = context.read<DirectChatProvider>();
-        final contactsProvider = context.read<ContactsProvider>();
-        final groupChatProvider = context.read<GroupChatProvider>();
-        final userProvider = context.read<UserProvider>();
-
-        directChatProvider.stopChatsListener();
-        contactsProvider.stopContactsListener();
-        groupChatProvider.stopGroupsListener();
-        userProvider.clearCurrentUser();
-      }
-    });
-
-    super.dispose();
   }
 
   @override

@@ -15,6 +15,19 @@ class ContactsScreen extends StatefulWidget {
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
+  void _showToast({
+    required String title,
+    required String description,
+    required ToastNotificationType type,
+  }) {
+    ToastNotification.show(
+      context,
+      title: title,
+      description: description,
+      type: type,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -81,7 +94,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     'No tienes contactos',
                     style: theme.textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 5),
                   Text(
                     'Agrega contactos para empezar a chatear',
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -141,19 +154,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
         },
         child: const Icon(Icons.person_add),
       ),
-    );
-  }
-
-  void _showToast({
-    required String title,
-    required String description,
-    required ToastNotificationType type,
-  }) {
-    ToastNotification.show(
-      context,
-      title: title,
-      description: description,
-      type: type,
     );
   }
 }

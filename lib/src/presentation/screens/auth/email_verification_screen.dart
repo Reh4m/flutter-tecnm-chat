@@ -243,7 +243,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Verifica tu Email',
+          'Verifica tu email',
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),

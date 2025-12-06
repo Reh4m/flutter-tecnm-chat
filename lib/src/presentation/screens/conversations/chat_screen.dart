@@ -382,7 +382,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           'No hay mensajes',
                           style: theme.textTheme.titleMedium,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 5),
                         Text(
                           'Envía un mensaje para comenzar',
                           style: theme.textTheme.bodyMedium?.copyWith(

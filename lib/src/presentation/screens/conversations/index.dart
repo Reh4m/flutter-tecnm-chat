@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/direct_chat_entity.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/group_chat_entity.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
@@ -9,59 +8,8 @@ import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/wid
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class ConversationsListScreen extends StatefulWidget {
+class ConversationsListScreen extends StatelessWidget {
   const ConversationsListScreen({super.key});
-
-  @override
-  State<ConversationsListScreen> createState() =>
-      _ConversationsListScreenState();
-}
-
-class _ConversationsListScreenState extends State<ConversationsListScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _initializeListeners();
-  }
-
-  void _initializeListeners() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = context.read<UserProvider>();
-
-      if (userProvider.currentUser != null) {
-        _startAllListeners(userProvider.currentUser!.id);
-      } else {
-        userProvider.addListener(_onUserLoaded);
-      }
-    });
-  }
-
-  void _startAllListeners(String userId) {
-    context.read<DirectChatProvider>().startChatsListener(userId);
-    context.read<ContactsProvider>().startContactsListener(userId);
-    context.read<GroupChatProvider>().startGroupsListener(userId);
-  }
-
-  void _onUserLoaded() {
-    final userProvider = context.read<UserProvider>();
-
-    if (userProvider.currentUser != null) {
-      userProvider.removeListener(_onUserLoaded);
-      _startAllListeners(userProvider.currentUser!.id);
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final userProvider = context.read<UserProvider>();
-
-        userProvider.removeListener(_onUserLoaded);
-      }
-    });
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +154,7 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
                     'No hay conversaciones',
                     style: theme.textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 5),
                   Text(
                     'Inicia un chat con tus contactos',
                     style: theme.textTheme.bodyMedium?.copyWith(
