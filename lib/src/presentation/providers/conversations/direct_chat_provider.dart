@@ -17,8 +17,6 @@ class DirectChatProvider extends ChangeNotifier {
       sl<GetUserDirectChatsStreamUseCase>();
   final GetOrCreateDirectChatUseCase _getOrCreateChatUseCase =
       sl<GetOrCreateDirectChatUseCase>();
-  final MarkDirectChatAsReadUseCase _markChatAsReadUseCase =
-      sl<MarkDirectChatAsReadUseCase>();
   final DeleteDirectChatUseCase _deleteChatUseCase =
       sl<DeleteDirectChatUseCase>();
   final GetUserByIdUseCase _getUserByIdUseCase = sl<GetUserByIdUseCase>();
@@ -114,18 +112,6 @@ class DirectChatProvider extends ChangeNotifier {
         return conversation;
       },
     );
-  }
-
-  Future<bool> markChatAsRead({
-    required String chatId,
-    required String userId,
-  }) async {
-    final result = await _markChatAsReadUseCase(chatId: chatId, userId: userId);
-
-    return result.fold((failure) {
-      _setOperationError(_mapFailureToMessage(failure));
-      return false;
-    }, (_) => true);
   }
 
   Future<bool> sendMessage(MessageEntity message) async {

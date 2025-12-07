@@ -6,7 +6,6 @@ import 'package:flutter_whatsapp_clon/src/core/di/index.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/core/errors/failures.dart';
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
-import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/direct_chat_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/message_use_cases.dart';
 
 enum MessageState { initial, loading, success, error }
@@ -17,8 +16,8 @@ class MessageProvider extends ChangeNotifier {
       sl<GetConversationMessagesStreamUseCase>();
   final MarkMessageAsReadUseCase _markMessageAsReadUseCase =
       sl<MarkMessageAsReadUseCase>();
-  final MarkDirectChatAsReadUseCase _markDirectChatAsReadUseCase =
-      sl<MarkDirectChatAsReadUseCase>();
+  final MarkConversationAsReadUseCase _markConversationAsReadUseCase =
+      sl<MarkConversationAsReadUseCase>();
   final DeleteMessageUseCase _deleteMessageUseCase = sl<DeleteMessageUseCase>();
   final UpdateMessageStatusUseCase _updateMessageStatusUseCase =
       sl<UpdateMessageStatusUseCase>();
@@ -65,6 +64,8 @@ class MessageProvider extends ChangeNotifier {
             _markMessagesAsDeliveredOnLoad(conversationId);
 
             _startStatusCheckTimer(conversationId);
+
+            _markMessagesAsReadInConversation(conversationId);
           },
         );
       },
@@ -148,24 +149,14 @@ class MessageProvider extends ChangeNotifier {
     );
   }
 
-  Future<void> markMessagesAsReadInConversation(String conversationId) async {
+  Future<void> _markMessagesAsReadInConversation(String conversationId) async {
     final currentUserId = firebaseAuth.currentUser?.uid;
     if (currentUserId == null) return;
 
-    await _markDirectChatAsReadUseCase(
-      chatId: conversationId,
+    await _markConversationAsReadUseCase(
+      conversationId: conversationId,
       userId: currentUserId,
     );
-
-    for (final message in _messages) {
-      if (message.senderId != currentUserId &&
-          message.status != MessageStatus.read) {
-        await _markMessageAsReadUseCase(
-          messageId: message.id,
-          userId: currentUserId,
-        );
-      }
-    }
   }
 
   void _setMessagesState(MessageState newState) {

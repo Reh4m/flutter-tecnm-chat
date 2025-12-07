@@ -26,8 +26,6 @@ class GroupChatProvider extends ChangeNotifier {
       sl<UpdateGroupPrivacyUseCase>();
   final UpdateGroupInfoUseCase _updateGroupInfoUseCase =
       sl<UpdateGroupInfoUseCase>();
-  final MarkGroupChatAsReadUseCase _markChatAsReadUseCase =
-      sl<MarkGroupChatAsReadUseCase>();
   final SendMessageUseCase _sendMessageUseCase = sl<SendMessageUseCase>();
   final UpdateMessageStatusUseCase _updateMessageStatusUseCase =
       sl<UpdateMessageStatusUseCase>();
@@ -172,18 +170,6 @@ class GroupChatProvider extends ChangeNotifier {
         _setGroupDetailState(GroupChatState.success);
       },
     );
-  }
-
-  Future<bool> markChatAsRead({
-    required String chatId,
-    required String userId,
-  }) async {
-    final result = await _markChatAsReadUseCase(chatId: chatId, userId: userId);
-
-    return result.fold((failure) {
-      _setOperationError(_mapFailureToMessage(failure));
-      return false;
-    }, (_) => true);
   }
 
   Future<bool> sendMessage(MessageEntity message) async {

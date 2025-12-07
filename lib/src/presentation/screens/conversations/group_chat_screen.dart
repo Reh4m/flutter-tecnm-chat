@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
@@ -35,22 +36,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   void _initializeChat() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final groupChatProvider = context.read<GroupChatProvider>();
-
-      groupChatProvider.loadGroupById(widget.groupId);
-
-      context.read<MessageProvider>().startMessagesListener(widget.groupId);
-
-      final currentUserId = context.read<UserProvider>().currentUser?.id;
-
-      final hasMessages = groupChatProvider.currentGroup?.lastMessage != null;
-
-      if (currentUserId != null && hasMessages) {
-        groupChatProvider.markChatAsRead(
-          chatId: widget.groupId,
-          userId: currentUserId,
-        );
-      }
+      di.sl<GroupChatProvider>().loadGroupById(widget.groupId);
+      di.sl<MessageProvider>().startMessagesListener(widget.groupId);
     });
   }
 
@@ -242,6 +229,17 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      di.sl<MessageProvider>().stopMessagesListener();
+      di.sl<GroupChatProvider>().clearCurrentGroup();
+    });
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -414,18 +412,5 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    _scrollController.dispose();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<MessageProvider>().stopMessagesListener();
-        context.read<GroupChatProvider>().clearCurrentGroup();
-      }
-    });
-    super.dispose();
   }
 }

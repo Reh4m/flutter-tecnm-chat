@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
@@ -34,17 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _initializeChat() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<MessageProvider>().startMessagesListener(
-        widget.conversationId,
-      );
-
-      final currentUserId = context.read<UserProvider>().currentUser?.id;
-      if (currentUserId != null) {
-        context.read<DirectChatProvider>().markChatAsRead(
-          chatId: widget.conversationId,
-          userId: currentUserId,
-        );
-      }
+      di.sl<MessageProvider>().startMessagesListener(widget.conversationId);
     });
   }
 
@@ -240,9 +231,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _messageController.dispose();
     _scrollController.dispose();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<MessageProvider>().stopMessagesListener();
-      }
+      di.sl<MessageProvider>().stopMessagesListener();
     });
     super.dispose();
   }
