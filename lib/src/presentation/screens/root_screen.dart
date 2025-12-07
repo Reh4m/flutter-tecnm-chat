@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
@@ -43,7 +44,7 @@ class _RootScreenState extends State<RootScreen> {
 
   void _initializeListeners() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = context.read<UserProvider>();
+      final userProvider = di.sl<UserProvider>();
 
       if (userProvider.currentUser != null) {
         _startAllListeners(userProvider.currentUser!.id);
@@ -54,9 +55,9 @@ class _RootScreenState extends State<RootScreen> {
   }
 
   void _startAllListeners(String userId) {
-    context.read<DirectChatProvider>().startChatsListener(userId);
-    context.read<ContactsProvider>().startContactsListener(userId);
-    context.read<GroupChatProvider>().startGroupsListener(userId);
+    di.sl<DirectChatProvider>().startChatsListener(userId);
+    di.sl<ContactsProvider>().startContactsListener(userId);
+    di.sl<GroupChatProvider>().startGroupsListener(userId);
   }
 
   void _onUserLoaded() {
@@ -70,21 +71,15 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final userProvider = context.read<UserProvider>();
-        final directChatProvider = context.read<DirectChatProvider>();
-        final contactsProvider = context.read<ContactsProvider>();
-        final groupChatProvider = context.read<GroupChatProvider>();
-
-        directChatProvider.stopChatsListener();
-        contactsProvider.stopContactsListener();
-        groupChatProvider.stopGroupsListener();
-        userProvider.removeListener(_onUserLoaded);
-        userProvider.clearCurrentUser();
-      }
-    });
     _pageController.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      di.sl<DirectChatProvider>().stopChatsListener();
+      di.sl<ContactsProvider>().stopContactsListener();
+      di.sl<GroupChatProvider>().stopGroupsListener();
+      final userProvider = di.sl<UserProvider>();
+      userProvider.removeListener(_onUserLoaded);
+      userProvider.clearCurrentUser();
+    });
     super.dispose();
   }
 
