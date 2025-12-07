@@ -9,7 +9,6 @@ class FirebaseDirectChatService {
   FirebaseDirectChatService({required this.firestore});
 
   static const String _chatsCollection = 'chats';
-  static const String _messagesCollection = 'messages';
 
   Future<DirectChatModel> createChat(DirectChatModel chat) async {
     try {
@@ -102,44 +101,6 @@ class FirebaseDirectChatService {
       await firestore.collection(_chatsCollection).doc(chatId).delete();
     } catch (e) {
       throw ConversationOperationFailedException();
-    }
-  }
-
-  Future<void> markChatAsRead({
-    required String chatId,
-    required String userId,
-  }) async {
-    try {
-      final chatDoc =
-          await firestore.collection(_chatsCollection).doc(chatId).get();
-
-      if (!chatDoc.exists) return;
-
-      await firestore.collection(_chatsCollection).doc(chatId).update({
-        'unreadCount.$userId': 0,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      final messagesSnapshot =
-          await firestore
-              .collection(_messagesCollection)
-              .where('conversationId', isEqualTo: chatId)
-              .where('senderId', isNotEqualTo: userId)
-              .where('status', whereIn: ['sent', 'delivered'])
-              .get();
-
-      if (messagesSnapshot.docs.isNotEmpty) {
-        final batch = firestore.batch();
-        for (var doc in messagesSnapshot.docs) {
-          batch.update(doc.reference, {
-            'status': 'read',
-            'readBy': FieldValue.arrayUnion([userId]),
-          });
-        }
-        await batch.commit();
-      }
-    } catch (e) {
-      throw ServerException();
     }
   }
 

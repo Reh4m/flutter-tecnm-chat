@@ -21,6 +21,11 @@ abstract class MessageRepository {
     required String userId,
   });
 
+  Future<Either<Failure, Unit>> markConversationAsRead({
+    required String conversationId,
+    required String userId,
+  });
+
   Future<Either<Failure, Unit>> deleteMessage(String messageId);
 
   Future<Either<Failure, MessageEntity>> getMessageById(String messageId);

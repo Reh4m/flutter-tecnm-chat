@@ -207,19 +207,6 @@ class UpdateGroupInfoUseCase {
   }
 }
 
-class MarkGroupChatAsReadUseCase {
-  final GroupChatRepository repository;
-
-  MarkGroupChatAsReadUseCase(this.repository);
-
-  Future<Either<Failure, Unit>> call({
-    required String chatId,
-    required String userId,
-  }) async {
-    return await repository.markChatAsRead(chatId: chatId, userId: userId);
-  }
-}
-
 class UpdateGroupChatLastMessageUseCase {
   final GroupChatRepository repository;
 

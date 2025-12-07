@@ -361,26 +361,6 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> markChatAsRead({
-    required String chatId,
-    required String userId,
-  }) async {
-    if (!await networkInfo.isConnected) {
-      return Left(NetworkFailure());
-    }
-
-    try {
-      groupService.markChatAsRead(chatId: chatId, userId: userId);
-
-      return Future.value(const Right(unit));
-    } on ServerException {
-      return Future.value(Left(ServerFailure()));
-    } catch (e) {
-      return Future.value(Left(ServerFailure()));
-    }
-  }
-
-  @override
   Future<Either<Failure, Unit>> updateChatLastMessage({
     required MessageEntity message,
   }) async {

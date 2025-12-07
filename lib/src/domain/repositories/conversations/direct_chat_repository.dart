@@ -15,10 +15,6 @@ abstract class DirectChatRepository {
   Future<Either<Failure, DirectChatEntity>> getChatById(String chatId);
   Future<Either<Failure, DirectChatEntity>> updateChat(DirectChatEntity chat);
   Future<Either<Failure, Unit>> deleteChat(String chatId);
-  Future<Either<Failure, Unit>> markChatAsRead({
-    required String chatId,
-    required String userId,
-  });
   Future<Either<Failure, Unit>> updateChatLastMessage({
     required MessageEntity message,
   });

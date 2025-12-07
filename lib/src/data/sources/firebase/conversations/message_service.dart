@@ -9,6 +9,8 @@ class FirebaseMessageService {
   FirebaseMessageService({required this.firestore});
 
   static const String _messagesCollection = 'messages';
+  static const String _chatsCollection = 'chats';
+  static const String _groupsCollection = 'groups';
 
   Future<MessageModel> sendMessage(MessageModel message) async {
     try {
@@ -71,6 +73,60 @@ class FirebaseMessageService {
         batch.update(doc.reference, {'status': 'delivered'});
       }
 
+      await batch.commit();
+    } catch (e) {
+      throw ServerException();
+    }
+  }
+
+  Future<void> markConversationAsRead({
+    required String conversationId,
+    required String userId,
+  }) async {
+    try {
+      final directChatRef = firestore
+          .collection(_chatsCollection)
+          .doc(conversationId);
+      final directChatDoc = await directChatRef.get();
+
+      if (directChatDoc.exists) {
+        await directChatRef.update({
+          'unreadCount.$userId': 0,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        final groupRef = firestore
+            .collection(_groupsCollection)
+            .doc(conversationId);
+        final groupDoc = await groupRef.get();
+
+        if (groupDoc.exists) {
+          await groupRef.update({
+            'unreadCount.$userId': 0,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        } else {
+          return;
+        }
+      }
+
+      final messagesSnapshot =
+          await firestore
+              .collection(_messagesCollection)
+              .where('conversationId', isEqualTo: conversationId)
+              .where('senderId', isNotEqualTo: userId)
+              .where('status', whereIn: ['sent', 'delivered'])
+              .get();
+
+      if (messagesSnapshot.docs.isEmpty) return;
+
+      final batch = firestore.batch();
+      for (var doc in messagesSnapshot.docs) {
+        batch.update(doc.reference, {
+          'status': 'read',
+          'readBy': FieldValue.arrayUnion([userId]),
+        });
+      }
       await batch.commit();
     } catch (e) {
       throw ServerException();

@@ -16,7 +16,6 @@ class FirebaseGroupChatService {
   });
 
   static const String _groupsCollection = 'groups';
-  static const String _messagesCollection = 'messages';
   static const int maxGroupMembers = 256;
 
   Future<GroupChatModel> createGroup(GroupChatModel group) async {
@@ -317,44 +316,6 @@ class FirebaseGroupChatService {
     } catch (e) {
       if (e is NotGroupAdminException) rethrow;
       throw GroupOperationFailedException();
-    }
-  }
-
-  Future<void> markChatAsRead({
-    required String chatId,
-    required String userId,
-  }) async {
-    try {
-      final chatDoc =
-          await firestore.collection(_groupsCollection).doc(chatId).get();
-
-      if (!chatDoc.exists) return;
-
-      await firestore.collection(_groupsCollection).doc(chatId).update({
-        'unreadCount.$userId': 0,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      final messagesSnapshot =
-          await firestore
-              .collection(_messagesCollection)
-              .where('conversationId', isEqualTo: chatId)
-              .where('senderId', isNotEqualTo: userId)
-              .where('status', whereIn: ['sent', 'delivered'])
-              .get();
-
-      if (messagesSnapshot.docs.isNotEmpty) {
-        final batch = firestore.batch();
-        for (var doc in messagesSnapshot.docs) {
-          batch.update(doc.reference, {
-            'status': 'read',
-            'readBy': FieldValue.arrayUnion([userId]),
-          });
-        }
-        await batch.commit();
-      }
-    } catch (e) {
-      throw ServerException();
     }
   }
 

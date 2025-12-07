@@ -338,9 +338,6 @@ Future<void> init() async {
   sl.registerLazySingleton<DeleteDirectChatUseCase>(
     () => DeleteDirectChatUseCase(sl<DirectChatRepository>()),
   );
-  sl.registerLazySingleton<MarkDirectChatAsReadUseCase>(
-    () => MarkDirectChatAsReadUseCase(sl<DirectChatRepository>()),
-  );
   sl.registerLazySingleton<UpdateDirectChatLastMessageUseCase>(
     () => UpdateDirectChatLastMessageUseCase(sl<DirectChatRepository>()),
   );
@@ -420,9 +417,6 @@ Future<void> init() async {
   sl.registerLazySingleton<UpdateGroupInfoUseCase>(
     () => UpdateGroupInfoUseCase(sl<GroupChatRepository>()),
   );
-  sl.registerLazySingleton<MarkGroupChatAsReadUseCase>(
-    () => MarkGroupChatAsReadUseCase(sl<GroupChatRepository>()),
-  );
   sl.registerLazySingleton<UpdateGroupChatLastMessageUseCase>(
     () => UpdateGroupChatLastMessageUseCase(sl<GroupChatRepository>()),
   );
@@ -442,6 +436,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<DeleteMessageUseCase>(
     () => DeleteMessageUseCase(sl<MessageRepository>()),
+  );
+  sl.registerLazySingleton<MarkConversationAsReadUseCase>(
+    () => MarkConversationAsReadUseCase(sl<MessageRepository>()),
   );
   sl.registerLazySingleton<GetMessageByIdUseCase>(
     () => GetMessageByIdUseCase(sl<MessageRepository>()),

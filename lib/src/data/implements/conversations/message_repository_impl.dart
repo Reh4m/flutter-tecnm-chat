@@ -105,6 +105,29 @@ class MessageRepositoryImpl implements MessageRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> markConversationAsRead({
+    required String conversationId,
+    required String userId,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return Left(NetworkFailure());
+    }
+
+    try {
+      messageService.markConversationAsRead(
+        conversationId: conversationId,
+        userId: userId,
+      );
+
+      return Future.value(const Right(unit));
+    } on ServerException {
+      return Future.value(Left(ServerFailure()));
+    } catch (e) {
+      return Future.value(Left(ServerFailure()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> deleteMessage(String messageId) async {
     if (!await networkInfo.isConnected) {
       return Left(NetworkFailure());

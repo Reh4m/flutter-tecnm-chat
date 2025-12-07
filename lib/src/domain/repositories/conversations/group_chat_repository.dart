@@ -52,10 +52,6 @@ abstract class GroupChatRepository {
     String? avatarUrl,
     required String requestingUserId,
   });
-  Future<Either<Failure, Unit>> markChatAsRead({
-    required String chatId,
-    required String userId,
-  });
   Future<Either<Failure, Unit>> updateChatLastMessage({
     required MessageEntity message,
   });

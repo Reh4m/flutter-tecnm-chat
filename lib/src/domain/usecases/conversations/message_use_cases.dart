@@ -62,6 +62,22 @@ class MarkAllMessagesAsDeliveredUseCase {
   }
 }
 
+class MarkConversationAsReadUseCase {
+  final MessageRepository repository;
+
+  MarkConversationAsReadUseCase(this.repository);
+
+  Future<Either<Failure, Unit>> call({
+    required String conversationId,
+    required String userId,
+  }) async {
+    return await repository.markConversationAsRead(
+      conversationId: conversationId,
+      userId: userId,
+    );
+  }
+}
+
 class DeleteMessageUseCase {
   final MessageRepository repository;
 
