@@ -33,13 +33,6 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
   final Set<String> _selectedContactIds = {};
   bool _hidePhoneNumbers = false;
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
   Future<void> _handleSelectImage() async {
     await ImagePickerService.showImageSourceDialog(
       context,
@@ -119,6 +112,13 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
       description: description,
       type: type,
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   @override

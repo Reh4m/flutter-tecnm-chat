@@ -355,7 +355,6 @@ class GroupChatProvider extends ChangeNotifier {
     _currentGroup = null;
     _groupDetailState = GroupChatState.initial;
     _groupDetailError = null;
-    notifyListeners();
   }
 
   void _setGroupsState(GroupChatState newState) {

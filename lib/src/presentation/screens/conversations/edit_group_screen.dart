@@ -26,31 +26,29 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
 
+  late final GroupChatProvider _groupChatProvider;
+
   File? _newProfileImage;
 
   @override
   void initState() {
     super.initState();
-    _loadGroupData();
+    _initializeProviders();
   }
 
-  void _loadGroupData() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final groupProvider = context.read<GroupChatProvider>();
-      final group = groupProvider.currentGroup;
+  void _initializeProviders() {
+    _groupChatProvider = context.read<GroupChatProvider>();
 
-      if (group != null) {
-        _nameController.text = group.name;
-        _descriptionController.text = group.description ?? '';
-      }
-    });
+    _loadGroupInfo();
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
+  void _loadGroupInfo() {
+    final currentGroup = _groupChatProvider.currentGroup;
+
+    if (currentGroup != null) {
+      _nameController.text = currentGroup.name;
+      _descriptionController.text = currentGroup.description ?? '';
+    }
   }
 
   Future<void> _handleSelectImage() async {
@@ -72,10 +70,8 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
     final currentUserId = context.read<UserProvider>().currentUser?.id;
     if (currentUserId == null) return;
 
-    final groupChatProvider = context.read<GroupChatProvider>();
-
-    final success = await groupChatProvider.updateGroupInfoWithImage(
-      groupId: groupChatProvider.currentGroup!.id,
+    final success = await _groupChatProvider.updateGroupInfoWithImage(
+      groupId: _groupChatProvider.currentGroup!.id,
       name: _nameController.text.trim(),
       description:
           _descriptionController.text.trim().isEmpty
@@ -98,7 +94,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
       _showToast(
         title: 'Error',
         description:
-            groupChatProvider.operationError ??
+            _groupChatProvider.operationError ??
             'No se pudo actualizar el grupo',
         type: ToastNotificationType.error,
       );
@@ -116,6 +112,13 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
       description: description,
       type: type,
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   @override

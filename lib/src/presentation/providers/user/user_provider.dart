@@ -221,8 +221,6 @@ class UserProvider extends ChangeNotifier {
   void clearCurrentUser() {
     _currentUser = null;
     stopCurrentUserListener();
-    stopAuthStateListener();
-    _setCurrentUserState(UserState.initial);
     clearUserProfile();
   }
 

@@ -21,19 +21,6 @@ class GroupDetailsScreen extends StatefulWidget {
 }
 
 class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _loadGroupDetails();
-  }
-
-  void _loadGroupDetails() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final groupChatProvider = context.read<GroupChatProvider>();
-      groupChatProvider.loadGroupById(widget.groupId);
-    });
-  }
-
   Future<void> _togglePrivacy(bool value) async {
     final currentUserId = context.read<UserProvider>().currentUser?.id;
     if (currentUserId == null) return;

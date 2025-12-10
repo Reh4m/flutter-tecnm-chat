@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/domain/entities/conversations/message_entity.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
@@ -28,16 +27,28 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
 
+  late final MessageProvider _messageProvider;
+  late final GroupChatProvider _groupChatProvider;
+  late final UserProvider _userProvider;
+  late final MediaProvider _mediaProvider;
+
   @override
   void initState() {
     super.initState();
-    _initializeChat();
+    _initializeProviders();
   }
 
-  void _initializeChat() {
+  void _initializeProviders() {
+    _messageProvider = context.read<MessageProvider>();
+    _groupChatProvider = context.read<GroupChatProvider>();
+    _userProvider = context.read<UserProvider>();
+    _mediaProvider = context.read<MediaProvider>();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      di.sl<GroupChatProvider>().loadGroupById(widget.groupId);
-      di.sl<MessageProvider>().startMessagesListener(widget.groupId);
+      if (mounted) {
+        _groupChatProvider.loadGroupById(widget.groupId);
+        _messageProvider.startMessagesListener(widget.groupId);
+      }
     });
   }
 
@@ -45,7 +56,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
-    final currentUserId = context.read<UserProvider>().currentUser?.id;
+    final currentUserId = _userProvider.currentUser?.id;
     if (currentUserId == null) return;
 
     final message = MessageEntity(
@@ -60,14 +71,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     _messageController.clear();
 
-    final chatProvider = context.read<GroupChatProvider>();
-    final success = await chatProvider.sendMessage(message);
+    final success = await _groupChatProvider.sendMessage(message);
 
     if (!success && mounted) {
       _showToast(
         title: 'Error',
         description:
-            chatProvider.operationError ?? 'No se pudo enviar el mensaje',
+            _groupChatProvider.operationError ?? 'No se pudo enviar el mensaje',
         type: ToastNotificationType.error,
       );
     }
@@ -109,30 +119,29 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     required MediaType mediaType,
     required String caption,
   }) async {
-    final currentUserId = context.read<UserProvider>().currentUser?.id;
+    final currentUserId = _userProvider.currentUser?.id;
     if (currentUserId == null) return;
 
-    final mediaProvider = context.read<MediaProvider>();
     String? mediaUrl;
 
     // Subir el archivo según su tipo
     switch (mediaType) {
       case MediaType.image:
-        mediaUrl = await mediaProvider.uploadImage(
+        mediaUrl = await _mediaProvider.uploadImage(
           image: file,
           conversationId: widget.groupId,
           senderId: currentUserId,
         );
         break;
       case MediaType.video:
-        mediaUrl = await mediaProvider.uploadVideo(
+        mediaUrl = await _mediaProvider.uploadVideo(
           video: file,
           conversationId: widget.groupId,
           senderId: currentUserId,
         );
         break;
       case MediaType.audio:
-        mediaUrl = await mediaProvider.uploadAudio(
+        mediaUrl = await _mediaProvider.uploadAudio(
           audio: file,
           conversationId: widget.groupId,
           senderId: currentUserId,
@@ -140,7 +149,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         break;
       case MediaType.document:
         final fileExtension = ImagePickerService.getFileExtension(file);
-        mediaUrl = await mediaProvider.uploadDocument(
+        mediaUrl = await _mediaProvider.uploadDocument(
           document: file,
           conversationId: widget.groupId,
           senderId: currentUserId,
@@ -152,7 +161,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     if (mediaUrl == null && mounted) {
       _showToast(
         title: 'Error',
-        description: mediaProvider.error ?? 'No se pudo subir el archivo',
+        description: _mediaProvider.error ?? 'No se pudo subir el archivo',
         type: ToastNotificationType.error,
       );
       return;
@@ -176,14 +185,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       status: MessageStatus.sending,
     );
 
-    final chatProvider = context.read<GroupChatProvider>();
-    final success = await chatProvider.sendMessage(message);
+    final success = await _groupChatProvider.sendMessage(message);
 
     if (!success && mounted) {
       _showToast(
         title: 'Error',
         description:
-            chatProvider.operationError ?? 'No se pudo enviar el mensaje',
+            _groupChatProvider.operationError ?? 'No se pudo enviar el mensaje',
         type: ToastNotificationType.error,
       );
     }
@@ -203,8 +211,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   Future<void> _retryMessage(MessageEntity message) async {
-    final chatProvider = context.read<GroupChatProvider>();
-    final success = await chatProvider.retryFailedMessage(message);
+    final success = await _groupChatProvider.retryFailedMessage(message);
 
     if (!success && mounted) {
       _showToast(
@@ -230,12 +237,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   @override
   void dispose() {
+    _messageProvider.stopMessagesListener();
+    _groupChatProvider.clearCurrentGroup();
+
     _messageController.dispose();
     _scrollController.dispose();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      di.sl<MessageProvider>().stopMessagesListener();
-      di.sl<GroupChatProvider>().clearCurrentGroup();
-    });
+
     super.dispose();
   }
 
@@ -375,8 +382,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                   );
                 }
 
-                final currentUserId =
-                    context.read<UserProvider>().currentUser?.id;
+                final currentUserId = _userProvider.currentUser?.id;
 
                 final groupParticipants =
                     groupChatProvider.groupParticipants[widget.groupId] ?? {};

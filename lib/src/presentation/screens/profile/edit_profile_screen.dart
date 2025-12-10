@@ -24,24 +24,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _nameController = TextEditingController();
   final _bioController = TextEditingController();
 
+  late final UserProvider _userProvider;
+
   File? _newProfileImage;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _initializeProviders();
   }
 
-  void _loadUserData() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = context.read<UserProvider>();
-      final user = userProvider.currentUser;
+  void _initializeProviders() {
+    _userProvider = context.read<UserProvider>();
 
-      if (user != null) {
-        _nameController.text = user.name;
-        _bioController.text = user.bio ?? '';
-      }
-    });
+    _loadUserInfo();
+  }
+
+  void _loadUserInfo() {
+    final currentUser = _userProvider.currentUser;
+
+    if (currentUser != null) {
+      _nameController.text = currentUser.name;
+      _bioController.text = currentUser.bio ?? '';
+    }
   }
 
   Future<void> _handleSelectImage() async {
@@ -57,18 +62,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _bioController.dispose();
-    super.dispose();
-  }
-
   Future<void> _handleSaveProfile() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final userProvider = context.read<UserProvider>();
-    final currentUser = userProvider.currentUser;
+    final currentUser = _userProvider.currentUser;
 
     if (currentUser == null) return;
 
@@ -78,7 +75,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       updatedAt: DateTime.now(),
     );
 
-    final success = await userProvider.updateCurrentUserWithImage(
+    final success = await _userProvider.updateCurrentUserWithImage(
       updatedUser: updatedUser,
       profileImageFile: _newProfileImage,
     );
@@ -96,7 +93,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _showToast(
         title: 'Error',
         description:
-            userProvider.operationError ?? 'No se pudo actualizar el perfil',
+            _userProvider.operationError ?? 'No se pudo actualizar el perfil',
         type: ToastNotificationType.error,
       );
     }
@@ -113,6 +110,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       description: description,
       type: type,
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _bioController.dispose();
+    super.dispose();
   }
 
   @override
@@ -174,8 +178,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildProfileImage(ThemeData theme, UserProvider userProvider) {
-    final user = userProvider.currentUser;
-    final isLoading = userProvider.currentUserState == UserState.loading;
+    final user = _userProvider.currentUser;
+    final isLoading = _userProvider.currentUserState == UserState.loading;
 
     return EditableAvatar(
       imageUrl: _newProfileImage == null ? user?.photoUrl : null,

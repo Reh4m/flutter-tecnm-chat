@@ -39,14 +39,6 @@ import 'package:flutter_whatsapp_clon/src/domain/usecases/media_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/message_use_cases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/phone_authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user/user_usecases.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/email_verification_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/phone_authentication_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/media_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
-import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
@@ -449,18 +441,4 @@ Future<void> init() async {
   sl.registerLazySingleton<GetConversationMessagesStreamUseCase>(
     () => GetConversationMessagesStreamUseCase(sl<MessageRepository>()),
   );
-
-  // Providers
-  sl.registerLazySingleton<PhoneAuthenticationProvider>(
-    () => PhoneAuthenticationProvider(),
-  );
-  sl.registerLazySingleton<EmailVerificationProvider>(
-    () => EmailVerificationProvider(),
-  );
-  sl.registerLazySingleton<UserProvider>(() => UserProvider()..initialize());
-  sl.registerLazySingleton<ContactsProvider>(() => ContactsProvider());
-  sl.registerLazySingleton<DirectChatProvider>(() => DirectChatProvider());
-  sl.registerLazySingleton<GroupChatProvider>(() => GroupChatProvider());
-  sl.registerLazySingleton<MessageProvider>(() => MessageProvider());
-  sl.registerLazySingleton<MediaProvider>(() => MediaProvider());
 }

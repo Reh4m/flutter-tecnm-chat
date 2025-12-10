@@ -14,15 +14,11 @@ class MessageProvider extends ChangeNotifier {
   final FirebaseAuth firebaseAuth = di.sl<FirebaseAuth>();
   final GetConversationMessagesStreamUseCase _getMessagesStreamUseCase =
       sl<GetConversationMessagesStreamUseCase>();
-  final MarkMessageAsReadUseCase _markMessageAsReadUseCase =
-      sl<MarkMessageAsReadUseCase>();
   final MarkConversationAsReadUseCase _markConversationAsReadUseCase =
       sl<MarkConversationAsReadUseCase>();
-  final DeleteMessageUseCase _deleteMessageUseCase = sl<DeleteMessageUseCase>();
-  final UpdateMessageStatusUseCase _updateMessageStatusUseCase =
-      sl<UpdateMessageStatusUseCase>();
   final MarkAllMessagesAsDeliveredUseCase _markAllMessagesAsDeliveredUseCase =
       sl<MarkAllMessagesAsDeliveredUseCase>();
+  final DeleteMessageUseCase _deleteMessageUseCase = sl<DeleteMessageUseCase>();
 
   MessageState _messagesState = MessageState.initial;
   List<MessageEntity> _messages = [];
@@ -33,7 +29,7 @@ class MessageProvider extends ChangeNotifier {
   String? _operationError;
 
   String? _currentConversationId;
-  Timer? _statusCheckTimer;
+  bool _isDisposed = false;
 
   MessageState get messagesState => _messagesState;
   List<MessageEntity> get messages => _messages;
@@ -45,63 +41,44 @@ class MessageProvider extends ChangeNotifier {
   String? get currentConversationId => _currentConversationId;
 
   void startMessagesListener(String conversationId, {int limit = 50}) {
-    _currentConversationId = conversationId;
+    if (_currentConversationId != null) {
+      stopMessagesListener();
+    }
+
     _setMessagesState(MessageState.loading);
 
-    _statusCheckTimer?.cancel();
+    _currentConversationId = conversationId;
 
     _messagesSubscription = _getMessagesStreamUseCase(
       conversationId: conversationId,
       limit: limit,
     ).listen(
       (either) {
+        if (_isDisposed) return;
+
         either.fold(
           (failure) => _setMessagesError(_mapFailureToMessage(failure)),
           (messages) {
             _messages = messages;
-            _setMessagesState(MessageState.success);
 
             _markMessagesAsDeliveredOnLoad(conversationId);
-
-            _startStatusCheckTimer(conversationId);
-
             _markMessagesAsReadInConversation(conversationId);
+
+            _setMessagesState(MessageState.success);
           },
         );
       },
       onError: (error) {
-        _setMessagesError('Error de conexión: $error');
+        if (!_isDisposed) {
+          _setMessagesError('Error de conexión: $error');
+        }
       },
     );
   }
 
-  void _startStatusCheckTimer(String conversationId) {
-    _statusCheckTimer?.cancel();
-
-    _statusCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      _checkAndUpdateMessageStatuses(conversationId);
-    });
-  }
-
-  Future<void> _checkAndUpdateMessageStatuses(String conversationId) async {
-    final currentUserId = firebaseAuth.currentUser?.uid;
-
-    if (currentUserId == null) return;
-
-    // Actualizar mensajes en estado 'sending' a 'sent'
-    for (final message in _messages) {
-      if (message.senderId == currentUserId) {
-        if (message.status == MessageStatus.sending) {
-          await _updateMessageStatusUseCase(
-            messageId: message.id,
-            status: MessageStatus.sent,
-          );
-        }
-      }
-    }
-  }
-
   Future<void> _markMessagesAsDeliveredOnLoad(String conversationId) async {
+    if (_isDisposed) return;
+
     final currentUserId = firebaseAuth.currentUser?.uid;
 
     if (currentUserId == null) return;
@@ -112,24 +89,22 @@ class MessageProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> _markMessagesAsReadInConversation(String conversationId) async {
+    if (_isDisposed) return;
+
+    final currentUserId = firebaseAuth.currentUser?.uid;
+    if (currentUserId == null) return;
+
+    await _markConversationAsReadUseCase(
+      conversationId: conversationId,
+      userId: currentUserId,
+    );
+  }
+
   void stopMessagesListener() {
     _messagesSubscription?.cancel();
     _messagesSubscription = null;
-    _statusCheckTimer?.cancel();
-    _statusCheckTimer = null;
     _currentConversationId = null;
-  }
-
-  Future<bool> markMessageAsRead({
-    required String messageId,
-    required String userId,
-  }) async {
-    final result = await _markMessageAsReadUseCase(
-      messageId: messageId,
-      userId: userId,
-    );
-
-    return result.fold((failure) => false, (_) => true);
   }
 
   Future<bool> deleteMessage(String messageId) async {
@@ -146,16 +121,6 @@ class MessageProvider extends ChangeNotifier {
         _setOperationState(MessageState.success);
         return true;
       },
-    );
-  }
-
-  Future<void> _markMessagesAsReadInConversation(String conversationId) async {
-    final currentUserId = firebaseAuth.currentUser?.uid;
-    if (currentUserId == null) return;
-
-    await _markConversationAsReadUseCase(
-      conversationId: conversationId,
-      userId: currentUserId,
     );
   }
 
@@ -210,8 +175,8 @@ class MessageProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     stopMessagesListener();
-    _statusCheckTimer?.cancel();
     super.dispose();
   }
 }

@@ -49,22 +49,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(
-      //     'Perfil',
-      //     style: theme.textTheme.titleLarge?.copyWith(
-      //       fontWeight: FontWeight.bold,
-      //     ),
-      //   ),
-      //   actions: [
-      //     IconButton(
-      //       icon: const Icon(Icons.edit),
-      //       onPressed: () {
-      //         context.push('/edit-profile');
-      //       },
-      //     ),
-      //   ],
-      // ),
       body: SafeArea(
         child: Consumer2<UserProvider, ThemeProvider>(
           builder: (context, userProvider, themeProvider, _) {
