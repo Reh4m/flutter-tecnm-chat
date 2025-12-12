@@ -217,7 +217,7 @@ class CallRepositoryImpl implements CallRepository {
       );
 
       // Finalizar WebRTC
-      if (webrtcService.currentCallUuid == callId) {
+      if (webrtcService.currentCallUuid == callUuid) {
         await webrtcService.hangUp(deleteCallFromServer: false);
       }
 

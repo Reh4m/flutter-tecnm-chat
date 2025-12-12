@@ -122,7 +122,7 @@ class _CallScreenState extends State<CallScreen> {
                 child: SafeArea(child: _buildUserInfo(theme)),
               ),
 
-              if (callProvider.state == CallProviderState.calling &&
+              if (callProvider.state == CallProviderState.inCall &&
                   isVideoCalling &&
                   callProvider.isVideoEnable &&
                   callProvider.localStream != null)
