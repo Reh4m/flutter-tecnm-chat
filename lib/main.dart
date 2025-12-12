@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_whatsapp_clon/firebase_options.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
@@ -7,6 +8,7 @@ import 'package:flutter_whatsapp_clon/src/presentation/config/router/index.dart'
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/email_verification_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/call_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/notification_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
@@ -15,9 +17,15 @@ import 'package:flutter_whatsapp_clon/src/presentation/providers/onboarding_prov
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/phone_authentication_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/theme_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/utils/notification_handler.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +35,8 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await FirebaseAppCheck.instance.activate();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await di.init();
 
@@ -46,6 +56,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MessageProvider()),
         ChangeNotifierProvider(create: (_) => MediaProvider()),
         ChangeNotifierProvider(create: (_) => CallProvider()),
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider()..initialize(),
+        ),
       ],
       child: const WhatsAppClone(),
     ),
@@ -59,13 +72,15 @@ class WhatsAppClone extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (_, themeProvider, __) {
-        return MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          title: 'Flutter WhatsApp Clone',
-          theme: themeProvider.lightTheme,
-          darkTheme: themeProvider.darkTheme,
-          themeMode: themeProvider.currentThemeMode,
-          routerConfig: AppRouter.router,
+        return NotificationHandler(
+          child: MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'Flutter WhatsApp Clone',
+            theme: themeProvider.lightTheme,
+            darkTheme: themeProvider.darkTheme,
+            themeMode: themeProvider.currentThemeMode,
+            routerConfig: AppRouter.router,
+          ),
         );
       },
     );

@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/auth/authentication_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/conversations/call_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/implements/conversations/notification_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user/contact_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/conversations/direct_chat_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/auth/email_auth_repository_impl.dart';
@@ -15,6 +18,7 @@ import 'package:flutter_whatsapp_clon/src/data/implements/auth/phone_auth_reposi
 import 'package:flutter_whatsapp_clon/src/data/implements/user/user_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/auth/authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/call_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/notification_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage/chat_media_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user/contact_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/direct_chat_service.dart';
@@ -27,6 +31,7 @@ import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user/user_servic
 import 'package:flutter_whatsapp_clon/src/data/sources/webrtc/webrtc_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/call_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/notification_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user/contact_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/direct_chat_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/email_authentication_repository.dart';
@@ -37,6 +42,7 @@ import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/phone_authent
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user/user_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/authentication_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/call_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/notification_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user/contact_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/direct_chat_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/email_authentication_usecases.dart';
@@ -60,6 +66,12 @@ Future<void> init() async {
   sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   sl.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
   sl.registerLazySingleton<FirebaseDatabase>(() => FirebaseDatabase.instance);
+  sl.registerLazySingleton<FirebaseMessaging>(() => FirebaseMessaging.instance);
+
+  // Flutter Local Notifications
+  sl.registerLazySingleton<FlutterLocalNotificationsPlugin>(
+    () => FlutterLocalNotificationsPlugin(),
+  );
 
   /* Core */
   // Network
@@ -133,6 +145,15 @@ Future<void> init() async {
   // Firebase Call Service
   sl.registerLazySingleton<FirebaseCallService>(
     () => FirebaseCallService(firestore: sl<FirebaseFirestore>()),
+  );
+
+  // Firebase Notification Service
+  sl.registerLazySingleton<FirebaseNotificationService>(
+    () => FirebaseNotificationService(
+      firebaseMessaging: sl<FirebaseMessaging>(),
+      firestore: sl<FirebaseFirestore>(),
+      localNotifications: sl<FlutterLocalNotificationsPlugin>(),
+    ),
   );
 
   /* Repositories */
@@ -219,6 +240,14 @@ Future<void> init() async {
     () => CallRepositoryImpl(
       webrtcService: sl<WebRTCService>(),
       callService: sl<FirebaseCallService>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Notification Repository
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(
+      notificationService: sl<FirebaseNotificationService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
@@ -547,5 +576,51 @@ Future<void> init() async {
 
   sl.registerLazySingleton<DisposeWebRTCUseCase>(
     () => DisposeWebRTCUseCase(sl<CallRepository>()),
+  );
+
+  // Notification Use Cases
+  sl.registerLazySingleton<InitializeNotificationsUseCase>(
+    () => InitializeNotificationsUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<RequestNotificationPermissionUseCase>(
+    () => RequestNotificationPermissionUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<GetAndSaveTokenUseCase>(
+    () => GetAndSaveTokenUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<RemoveNotificationTokenUseCase>(
+    () => RemoveNotificationTokenUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<GetInitialMessageUseCase>(
+    () => GetInitialMessageUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<ShowLocalNotificationUseCase>(
+    () => ShowLocalNotificationUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<SubscribeToGroupNotificationsUseCase>(
+    () => SubscribeToGroupNotificationsUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<UnsubscribeFromGroupNotificationsUseCase>(
+    () =>
+        UnsubscribeFromGroupNotificationsUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<GetTokenRefreshStreamUseCase>(
+    () => GetTokenRefreshStreamUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<GetForegroundMessageStreamUseCase>(
+    () => GetForegroundMessageStreamUseCase(sl<NotificationRepository>()),
+  );
+
+  sl.registerLazySingleton<GetMessageOpenedAppStreamUseCase>(
+    () => GetMessageOpenedAppStreamUseCase(sl<NotificationRepository>()),
   );
 }
