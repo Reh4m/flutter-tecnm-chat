@@ -89,3 +89,18 @@ class GroupOperationFailedException implements Exception {}
 class MaxGroupMembersExceededException implements Exception {}
 
 class CannotRemoveGroupCreatorException implements Exception {}
+
+// Call Exceptions
+class CallNotFoundException implements Exception {}
+
+class CallAlreadyActiveException implements Exception {}
+
+class CallConnectionFailedException implements Exception {}
+
+class MediaPermissionDeniedException implements Exception {}
+
+class WebRTCNotInitializedException implements Exception {}
+
+class CallOperationFailedException implements Exception {}
+
+class InvalidCallStateException implements Exception {}

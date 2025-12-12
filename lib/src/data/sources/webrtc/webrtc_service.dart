@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:uuid/uuid.dart';
 
 enum CallRole { caller, receiver }
 
-enum CallState { idle, ringing, connecting, inCall, ended, error }
+enum WebRTCCallState { idle, ringing, connecting, inCall, ended, error }
 
 class WebRTCService {
   final FirebaseDatabase firebaseDatabase;
@@ -39,22 +38,22 @@ class WebRTCService {
 
   final _remoteStreamController = StreamController<MediaStream>.broadcast();
   final _localStreamController = StreamController<MediaStream?>.broadcast();
-  final _callStateController = StreamController<CallState>.broadcast();
+  final _callStateController = StreamController<WebRTCCallState>.broadcast();
   final _errorController = StreamController<String>.broadcast();
 
-  String? _callId;
+  String? _callUuid;
   CallRole? _role;
 
   WebRTCService({required this.firebaseDatabase}) {
-    _callStateController.add(CallState.idle);
+    _callStateController.add(WebRTCCallState.idle);
   }
 
   Stream<MediaStream> get remoteStreamStream => _remoteStreamController.stream;
   Stream<MediaStream?> get localStreamStream => _localStreamController.stream;
-  Stream<CallState> get onCallState => _callStateController.stream;
+  Stream<WebRTCCallState> get onCallState => _callStateController.stream;
   Stream<String> get onError => _errorController.stream;
 
-  String? get currentCallId => _callId;
+  String? get currentCallUuid => _callUuid;
   MediaStream? get localStream => _localStream;
   MediaStream? get remoteStream => _remoteStream;
   RTCPeerConnection? get peerConnection => _peerConnection;
@@ -99,15 +98,12 @@ class WebRTCService {
       };
 
       _peerConnection!.onIceConnectionState = (RTCIceConnectionState state) {
-        if (kDebugMode) {
-          print("[webrtc] ICE connection state: $state");
-        }
         if (state == RTCIceConnectionState.RTCIceConnectionStateConnected) {
-          _callStateController.add(CallState.inCall);
+          _callStateController.add(WebRTCCallState.inCall);
         } else if (state ==
                 RTCIceConnectionState.RTCIceConnectionStateDisconnected ||
             state == RTCIceConnectionState.RTCIceConnectionStateFailed) {
-          _callStateController.add(CallState.ended);
+          _callStateController.add(WebRTCCallState.ended);
         }
       };
     } catch (e) {
@@ -116,14 +112,14 @@ class WebRTCService {
   }
 
   Future<MediaStream> getUserMedia({
-    required bool video,
-    required bool audio,
+    required bool isAudioEnable,
+    required bool isVideoEnable,
   }) async {
     try {
       final Map<String, dynamic> mediaConstraints = {
-        'audio': audio,
+        'audio': isAudioEnable,
         'video':
-            video
+            isVideoEnable
                 ? {
                   'facingMode': 'user',
                   'width': {'ideal': 1280},
@@ -151,13 +147,13 @@ class WebRTCService {
   Future<String> createCall({
     required String callerUid,
     required String receiverUid,
-    required bool isVideo,
+    required bool isVideoCall,
   }) async {
     try {
       _role = CallRole.caller;
-      _callId = const Uuid().v4();
+      _callUuid = const Uuid().v4();
 
-      _callRef = firebaseDatabase.ref('calls/$_callId');
+      _callRef = firebaseDatabase.ref('calls/$_callUuid');
       _callerCandidatesRef = _callRef!.child('callerCandidates');
       _receiverCandidatesRef = _callRef!.child('receiverCandidates');
 
@@ -165,7 +161,7 @@ class WebRTCService {
         'type': 'offer',
         'from': callerUid,
         'to': receiverUid,
-        'isVideo': isVideo,
+        'isVideo': isVideoCall,
         'createdAt': ServerValue.timestamp,
         'callState': 'ringing',
       });
@@ -173,7 +169,7 @@ class WebRTCService {
       await initializePeerConnection();
 
       if (_localStream == null) {
-        await getUserMedia(audio: true, video: isVideo);
+        await getUserMedia(isAudioEnable: true, isVideoEnable: isVideoCall);
       } else {
         _localStream!.getTracks().forEach((track) {
           _peerConnection!.addTrack(track, _localStream!);
@@ -189,37 +185,37 @@ class WebRTCService {
 
       _listenForRemoteAnswerAndCandidates();
 
-      _callStateController.add(CallState.connecting);
+      _callStateController.add(WebRTCCallState.connecting);
 
-      return _callId!;
+      return _callUuid!;
     } catch (e) {
       rethrow;
     }
   }
 
   Future<void> createAnswer({
-    required String callId,
+    required String callUuid,
     required String receiverUid,
-    required bool isVideo,
+    required bool isVideoCall,
   }) async {
     try {
       _role = CallRole.receiver;
-      _callId = callId;
+      _callUuid = callUuid;
 
-      _callRef = firebaseDatabase.ref('calls/$_callId');
+      _callRef = firebaseDatabase.ref('calls/$_callUuid');
       _callerCandidatesRef = _callRef!.child('callerCandidates');
       _receiverCandidatesRef = _callRef!.child('receiverCandidates');
 
       final snapshot = await _callRef!.get();
       if (!snapshot.exists) {
-        throw Exception('Call not found for id: $_callId');
+        throw Exception('Call not found for id: $_callUuid');
       }
 
       final data = snapshot.value as Map<dynamic, dynamic>? ?? {};
       final sdpNode = data['sdp'] as Map<dynamic, dynamic>?;
 
       if (sdpNode == null) {
-        throw Exception('Offer SDP not found for callId $_callId');
+        throw Exception('Offer SDP not found for callId $_callUuid');
       }
 
       final offerSdp = sdpNode['sdp'] as String;
@@ -228,7 +224,7 @@ class WebRTCService {
       await initializePeerConnection();
 
       if (_localStream == null) {
-        await getUserMedia(audio: true, video: isVideo);
+        await getUserMedia(isAudioEnable: true, isVideoEnable: isVideoCall);
       } else {
         _localStream!.getTracks().forEach((track) {
           _peerConnection!.addTrack(track, _localStream!);
@@ -248,10 +244,9 @@ class WebRTCService {
         'callState': 'in_call',
       });
 
-      // start listening for remote ICE candidates (caller -> callee)
       _listenForRemoteAnswerAndCandidates();
 
-      _callStateController.add(CallState.inCall);
+      _callStateController.add(WebRTCCallState.inCall);
     } catch (e) {
       rethrow;
     }
@@ -274,7 +269,7 @@ class WebRTCService {
             await _peerConnection?.setRemoteDescription(
               RTCSessionDescription(sdp, type),
             );
-            _callStateController.add(CallState.inCall);
+            _callStateController.add(WebRTCCallState.inCall);
           } catch (e) {
             _errorController.add('Failed to set remote answer: $e');
           }
@@ -283,7 +278,7 @@ class WebRTCService {
 
       final callState = data['callState'] as String?;
       if (callState != null && callState == 'ended') {
-        _callStateController.add(CallState.ended);
+        _callStateController.add(WebRTCCallState.ended);
       }
     });
 
@@ -357,10 +352,10 @@ class WebRTCService {
     _callRef = null;
     _callerCandidatesRef = null;
     _receiverCandidatesRef = null;
-    _callId = null;
+    _callUuid = null;
     _role = null;
 
-    _callStateController.add(CallState.ended);
+    _callStateController.add(WebRTCCallState.ended);
   }
 
   Future<void> switchCamera() async {

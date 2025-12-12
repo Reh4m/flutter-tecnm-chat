@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/call_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/group_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/calls/call_history_screen.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/contacts/index.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/index.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/profile/index.dart';
@@ -24,6 +26,7 @@ class _RootScreenState extends State<RootScreen> {
   late final DirectChatProvider _directChatProvider;
   late final ContactsProvider _contactsProvider;
   late final GroupChatProvider _groupChatProvider;
+  late final CallProvider _callProvider;
 
   VoidCallback? _userListenerCallback;
   String? _currentUserId;
@@ -31,6 +34,7 @@ class _RootScreenState extends State<RootScreen> {
 
   final List<Widget> _screens = [
     const ConversationsListScreen(),
+    const CallHistoryScreen(),
     const ContactsScreen(),
     const ProfileScreen(),
   ];
@@ -46,13 +50,18 @@ class _RootScreenState extends State<RootScreen> {
     _directChatProvider = context.read<DirectChatProvider>();
     _contactsProvider = context.read<ContactsProvider>();
     _groupChatProvider = context.read<GroupChatProvider>();
+    _callProvider = context.read<CallProvider>();
 
-    // Agregar listener para cambios de usuario
-    _userListenerCallback = _onUserChanged;
-    _userProvider.addListener(_userListenerCallback!);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        // Agregar listener para cambios de usuario
+        _userListenerCallback = _onUserChanged;
+        _userProvider.addListener(_userListenerCallback!);
 
-    // Verificar usuario inicial
-    _onUserChanged();
+        // Verificar usuario inicial
+        _onUserChanged();
+      }
+    });
   }
 
   void _onUserChanged() {
@@ -80,6 +89,7 @@ class _RootScreenState extends State<RootScreen> {
     _directChatProvider.startChatsListener(userId);
     _contactsProvider.startContactsListener(userId);
     _groupChatProvider.startGroupsListener(userId);
+    _callProvider.startCallHistoryListener(userId);
     _listenersInitialized = true;
   }
 
@@ -87,6 +97,7 @@ class _RootScreenState extends State<RootScreen> {
     _directChatProvider.stopChatsListener();
     _contactsProvider.stopContactsListener();
     _groupChatProvider.stopGroupsListener();
+    _callProvider.stopCallHistoryListener();
     _listenersInitialized = false;
   }
 

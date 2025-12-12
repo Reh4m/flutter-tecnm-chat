@@ -48,6 +48,11 @@ class ConversationsListScreen extends StatelessWidget {
                       color: theme.colorScheme.error,
                     ),
                     const SizedBox(height: 16),
+                    Text(
+                      'Error al cargar chats',
+                      style: theme.textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
                     if (directChatProvider.directChatState ==
                         DirectChatState.error)
                       Text(

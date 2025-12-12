@@ -237,3 +237,39 @@ class CannotRemoveGroupCreatorFailure extends Failure {
   @override
   List<Object?> get props => [];
 }
+
+// Call Failures
+class CallNotFoundFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class CallAlreadyActiveFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class CallConnectionFailedFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class MediaPermissionDeniedFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class WebRTCNotInitializedFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class CallOperationFailedFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}
+
+class InvalidCallStateFailure extends Failure {
+  @override
+  List<Object?> get props => [];
+}

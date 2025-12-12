@@ -48,4 +48,20 @@ class ErrorMessages {
       'No se encontró ningún usuario con ese número';
   static const String userNotFoundByEmail =
       'No se encontró ningún usuario con ese correo';
+  // Call Errors
+  static const String callNotFound = 'Llamada no encontrada';
+  static const String callAlreadyActive = 'Ya hay una llamada activa';
+  static const String callConnectionFailed = 'Error al conectar la llamada';
+  static const String mediaPermissionDenied =
+      'Permiso de cámara o micrófono denegado';
+  static const String webrtcNotInitialized = 'WebRTC no está inicializado';
+  static const String callOperationFailed =
+      'No se pudo completar la operación de llamada';
+  static const String invalidCallState = 'Estado de llamada inválido';
+  static const String callEnded = 'La llamada ha finalizado';
+  static const String callRejected = 'Llamada rechazada';
+  static const String callMissed = 'Llamada perdida';
+  static const String incomingCall = 'Llamada entrante';
+  static const String callingUser = 'Llamando...';
+  static const String connectingCall = 'Conectando...';
 }

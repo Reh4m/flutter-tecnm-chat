@@ -122,6 +122,23 @@ class UserProvider extends ChangeNotifier {
     );
   }
 
+  Future<UserEntity?> getUserById(String userId) async {
+    _setUserProfileState(UserState.loading);
+
+    final result = await _getUserByIdUseCase(userId);
+
+    return result.fold(
+      (failure) {
+        _setUserProfileError(_mapFailureToMessage(failure));
+        return null;
+      },
+      (user) {
+        _setUserProfileState(UserState.success);
+        return user;
+      },
+    );
+  }
+
   Future<bool> updateCurrentUserWithImage({
     required UserEntity updatedUser,
     File? profileImageFile,

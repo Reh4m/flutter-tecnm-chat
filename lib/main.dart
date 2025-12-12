@@ -5,6 +5,7 @@ import 'package:flutter_whatsapp_clon/firebase_options.dart';
 import 'package:flutter_whatsapp_clon/src/core/di/index.dart' as di;
 import 'package:flutter_whatsapp_clon/src/presentation/config/router/index.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/auth/email_verification_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/call_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/message_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/contacts_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
@@ -44,6 +45,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => GroupChatProvider()),
         ChangeNotifierProvider(create: (_) => MessageProvider()),
         ChangeNotifierProvider(create: (_) => MediaProvider()),
+        ChangeNotifierProvider(create: (_) => CallProvider()),
       ],
       child: const WhatsAppClone(),
     ),

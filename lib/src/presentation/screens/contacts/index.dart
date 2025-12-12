@@ -53,6 +53,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
+                      'Error al cargar contactos',
+                      style: theme.textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
                       contactsProvider.contactsError ?? 'Error desconocido',
                       style: theme.textTheme.bodyMedium,
                       textAlign: TextAlign.center,

@@ -5,6 +5,7 @@ import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/m
 import 'package:flutter_whatsapp_clon/src/presentation/providers/conversations/direct_chat_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/media_provider.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/providers/user/user_provider.dart';
+import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/widgets/call_buttons.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/widgets/direct_message_bubble.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/conversations/widgets/chat_input.dart';
 import 'package:flutter_whatsapp_clon/src/presentation/screens/media/index.dart';
@@ -249,49 +250,59 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        title: Consumer2<DirectChatProvider, MessageProvider>(
-          builder: (context, directChatProvider, messageProvider, _) {
-            final conversation =
-                directChatProvider.chats
-                    .where((c) => c.id == widget.conversationId)
-                    .firstOrNull;
+    return Consumer2<DirectChatProvider, MessageProvider>(
+      builder: (_, directChatProvider, messageProvider, __) {
+        if (messageProvider.messagesState == MessageState.loading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-            if (conversation == null) {
-              return Text(
-                'Chat',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            }
+        final conversation =
+            directChatProvider.chats
+                .where((c) => c.id == widget.conversationId)
+                .firstOrNull;
 
-            final currentUserId = _userProvider.currentUser?.id;
+        if (conversation == null) {
+          return Scaffold(
+            body: Center(
+              child: Text(
+                'No se pudo cargar la conversación',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+          );
+        }
 
-            if (currentUserId == null) {
-              return Text(
-                'Error cargando usuario',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            }
+        final currentUserId = _userProvider.currentUser?.id;
 
-            final otherUserId = directChatProvider.getParticipantId(
-              conversation,
-              currentUserId,
-            );
-            final otherUser =
-                otherUserId != null
-                    ? directChatProvider.getParticipantInfo(otherUserId)
-                    : null;
+        if (currentUserId == null) {
+          return Scaffold(
+            body: Center(
+              child: Text(
+                'Usuario no autenticado',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+          );
+        }
 
-            return Row(
+        final otherUserId = directChatProvider.getParticipantId(
+          conversation,
+          currentUserId,
+        );
+        final otherUser =
+            otherUserId != null
+                ? directChatProvider.getParticipantInfo(otherUserId)
+                : null;
+
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.pop(),
+            ),
+            title: Row(
               children: [
                 CircleAvatar(
                   radius: 18,
@@ -325,104 +336,99 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ],
-            );
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.videocam),
-            onPressed: () {
-              // TODO: Implementar videollamada
-            },
+            ),
+            actions: [
+              CallButtons(
+                receiverId: otherUserId!,
+                conversationId: widget.conversationId,
+                isGroup: false,
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {
-              // TODO: Implementar menú
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Consumer<MessageProvider>(
-              builder: (context, messageProvider, _) {
-                if (messageProvider.messagesState == MessageState.loading &&
-                    messageProvider.messages.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          body: Column(
+            children: [
+              Expanded(
+                child: Builder(
+                  builder: (_) {
+                    if (messageProvider.messagesState == MessageState.loading &&
+                        messageProvider.messages.isEmpty) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                if (messageProvider.messagesState == MessageState.error) {
-                  return Center(
-                    child: Text(
-                      messageProvider.messagesError ??
-                          'Error al cargar mensajes',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                  );
-                }
-
-                final messages = messageProvider.messages;
-
-                if (messages.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline,
-                          size: 64,
-                          color: theme.colorScheme.primary.withAlpha(100),
+                    if (messageProvider.messagesState == MessageState.error) {
+                      return Center(
+                        child: Text(
+                          messageProvider.messagesError ??
+                              'Error al cargar mensajes',
+                          style: theme.textTheme.bodyMedium,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No hay mensajes',
-                          style: theme.textTheme.titleMedium,
+                      );
+                    }
+
+                    final messages = messageProvider.messages;
+
+                    if (messages.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline,
+                              size: 64,
+                              color: theme.colorScheme.primary.withAlpha(100),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No hay mensajes',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              'Envía un mensaje para comenzar',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurface.withAlpha(
+                                  150,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 5),
-                        Text(
-                          'Envía un mensaje para comenzar',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withAlpha(150),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                      );
+                    }
 
-                final currentUserId = _userProvider.currentUser?.id;
+                    final currentUserId = _userProvider.currentUser?.id;
 
-                return ListView.builder(
-                  controller: _scrollController,
-                  reverse: true,
-                  padding: const EdgeInsets.all(16),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isMe = message.senderId == currentUserId;
+                    return ListView.builder(
+                      controller: _scrollController,
+                      reverse: true,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final message = messages[index];
+                        final isMe = message.senderId == currentUserId;
 
-                    return DirectMessageBubble(
-                      message: message,
-                      isMe: isMe,
-                      onRetry:
-                          message.status == MessageStatus.failed
-                              ? () => _retryMessage(message)
-                              : null,
+                        return DirectMessageBubble(
+                          message: message,
+                          isMe: isMe,
+                          onRetry:
+                              message.status == MessageStatus.failed
+                                  ? () => _retryMessage(message)
+                                  : null,
+                        );
+                      },
                     );
                   },
-                );
-              },
-            ),
+                ),
+              ),
+              ChatInput(
+                controller: _messageController,
+                onSend: _sendMessage,
+                onAttachment: _handleAttachmentTap,
+              ),
+            ],
           ),
-          ChatInput(
-            controller: _messageController,
-            onSend: _sendMessage,
-            onAttachment: _handleAttachmentTap,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

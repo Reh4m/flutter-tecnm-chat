@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_whatsapp_clon/src/core/network/network_info.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/auth/authentication_repository_impl.dart';
+import 'package:flutter_whatsapp_clon/src/data/implements/conversations/call_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user/contact_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/conversations/direct_chat_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/auth/email_auth_repository_impl.dart';
@@ -12,6 +14,7 @@ import 'package:flutter_whatsapp_clon/src/data/implements/conversations/message_
 import 'package:flutter_whatsapp_clon/src/data/implements/auth/phone_auth_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/implements/user/user_repository_impl.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/auth/authentication_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/call_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage/chat_media_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user/contact_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/direct_chat_service.dart';
@@ -21,7 +24,9 @@ import 'package:flutter_whatsapp_clon/src/data/sources/firebase/conversations/me
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/auth/phone_authentication_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/storage/storage_service.dart';
 import 'package:flutter_whatsapp_clon/src/data/sources/firebase/user/user_service.dart';
+import 'package:flutter_whatsapp_clon/src/data/sources/webrtc/webrtc_service.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/authentication_repository.dart';
+import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/call_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user/contact_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/direct_chat_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/email_authentication_repository.dart';
@@ -31,6 +36,7 @@ import 'package:flutter_whatsapp_clon/src/domain/repositories/conversations/mess
 import 'package:flutter_whatsapp_clon/src/domain/repositories/auth/phone_authentication_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/repositories/user/user_repository.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/authentication_usecases.dart';
+import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/call_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/user/contact_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/conversations/direct_chat_usecases.dart';
 import 'package:flutter_whatsapp_clon/src/domain/usecases/auth/email_authentication_usecases.dart';
@@ -53,6 +59,7 @@ Future<void> init() async {
   sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   sl.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
+  sl.registerLazySingleton<FirebaseDatabase>(() => FirebaseDatabase.instance);
 
   /* Core */
   // Network
@@ -61,6 +68,11 @@ Future<void> init() async {
   );
 
   /* Data Sources */
+  // WebRTC
+  sl.registerLazySingleton<WebRTCService>(
+    () => WebRTCService(firebaseDatabase: sl<FirebaseDatabase>()),
+  );
+
   // Firebase Authentication
   sl.registerLazySingleton<FirebaseAuthenticationService>(
     () => FirebaseAuthenticationService(firebaseAuth: sl<FirebaseAuth>()),
@@ -116,6 +128,11 @@ Future<void> init() async {
   // Firebase Message Service
   sl.registerLazySingleton<FirebaseMessageService>(
     () => FirebaseMessageService(firestore: sl<FirebaseFirestore>()),
+  );
+
+  // Firebase Call Service
+  sl.registerLazySingleton<FirebaseCallService>(
+    () => FirebaseCallService(firestore: sl<FirebaseFirestore>()),
   );
 
   /* Repositories */
@@ -193,6 +210,15 @@ Future<void> init() async {
   sl.registerLazySingleton<MessageRepository>(
     () => MessageRepositoryImpl(
       messageService: sl<FirebaseMessageService>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Message Repository
+  sl.registerLazySingleton<CallRepository>(
+    () => CallRepositoryImpl(
+      webrtcService: sl<WebRTCService>(),
+      callService: sl<FirebaseCallService>(),
       networkInfo: sl<NetworkInfo>(),
     ),
   );
@@ -440,5 +466,86 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<GetConversationMessagesStreamUseCase>(
     () => GetConversationMessagesStreamUseCase(sl<MessageRepository>()),
+  );
+
+  // Call usecases
+  sl.registerLazySingleton<InitializePeerConnectionUseCase>(
+    () => InitializePeerConnectionUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<GetUserMediaUseCase>(
+    () => GetUserMediaUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<CreateCallUseCase>(
+    () => CreateCallUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<CreateGroupCallUseCase>(
+    () => CreateGroupCallUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<AnswerCallUseCase>(
+    () => AnswerCallUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<RejectCallUseCase>(
+    () => RejectCallUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<EndCallUseCase>(
+    () => EndCallUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<GetRemoteStreamUseCase>(
+    () => GetRemoteStreamUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<GetLocalStreamUseCase>(
+    () => GetLocalStreamUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<GetCallStateStreamUseCase>(
+    () => GetCallStateStreamUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<ListenForIncomingCallsUseCase>(
+    () => ListenForIncomingCallsUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<ListenToCallUseCase>(
+    () => ListenToCallUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<ToggleMuteUseCase>(
+    () => ToggleMuteUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<ToggleVideoUseCase>(
+    () => ToggleVideoUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<SwitchCameraUseCase>(
+    () => SwitchCameraUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<ToggleSpeakerUseCase>(
+    () => ToggleSpeakerUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<GetCallByIdUseCase>(
+    () => GetCallByIdUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<GetCallHistoryUseCase>(
+    () => GetCallHistoryUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<GetCallHistoryStreamUseCase>(
+    () => GetCallHistoryStreamUseCase(sl<CallRepository>()),
+  );
+
+  sl.registerLazySingleton<DisposeWebRTCUseCase>(
+    () => DisposeWebRTCUseCase(sl<CallRepository>()),
   );
 }
