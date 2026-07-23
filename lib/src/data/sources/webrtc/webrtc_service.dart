@@ -282,29 +282,30 @@ class WebRTCService {
       }
     });
 
-    _callerCandidatesRef?.onChildAdded.listen((event) {
-      final data = event.snapshot.value as Map<dynamic, dynamic>?;
-      if (data == null) return;
-      final candidate = data['candidate'] as String?;
-      final sdpMid = data['sdpMid'] as String?;
-      final sdpMLineIndex = data['sdpMLineIndex'] as int?;
-      if (candidate != null) {
-        final ice = RTCIceCandidate(candidate, sdpMid, sdpMLineIndex);
-        _peerConnection?.addCandidate(ice);
-      }
-    });
+    if (_role == CallRole.caller) {
+      // El caller escucha los candidates del receiver
+      _receiverCandidatesRef?.onChildAdded.listen((event) {
+        _addCandidateFromEvent(event);
+      });
+    } else {
+      // El receiver escucha los candidates del caller
+      _callerCandidatesRef?.onChildAdded.listen((event) {
+        _addCandidateFromEvent(event);
+      });
+    }
+  }
 
-    _receiverCandidatesRef?.onChildAdded.listen((event) {
-      final data = event.snapshot.value as Map<dynamic, dynamic>?;
-      if (data == null) return;
-      final candidate = data['candidate'] as String?;
-      final sdpMid = data['sdpMid'] as String?;
-      final sdpMLineIndex = data['sdpMLineIndex'] as int?;
-      if (candidate != null) {
-        final ice = RTCIceCandidate(candidate, sdpMid, sdpMLineIndex);
-        _peerConnection?.addCandidate(ice);
-      }
-    });
+  // Método auxiliar para evitar duplicación de código
+  void _addCandidateFromEvent(DatabaseEvent event) {
+    final data = event.snapshot.value as Map<dynamic, dynamic>?;
+    if (data == null) return;
+    final candidate = data['candidate'] as String?;
+    final sdpMid = data['sdpMid'] as String?;
+    final sdpMLineIndex = data['sdpMLineIndex'] as int?;
+    if (candidate != null) {
+      final ice = RTCIceCandidate(candidate, sdpMid, sdpMLineIndex);
+      _peerConnection?.addCandidate(ice);
+    }
   }
 
   Future<void> addRemoteIceCandidate(Map<String, dynamic> candidateJson) async {
